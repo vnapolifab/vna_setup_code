@@ -12,6 +12,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 
 
+
 def analysis(user_folder: str, sample_folder: str, measure_folder: str) -> None:
     settings = load_metadata(user_folder, sample_folder, measure_folder)
     freq, fields, amplitudes, phases = load_measurement(user_folder, sample_folder, measure_folder)
