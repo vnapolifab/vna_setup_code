@@ -1,0 +1,24 @@
+{
+    "user_name": "Measurements",
+    "measurement_name": "NiFe Ta stack 3",
+    "dipole_mode": 1,
+    "s_parameter": "S14",
+    "field_sweep": [
+        0.0,
+        30.0,
+        50.0,
+        70.0,
+        90.0,
+        110.0,
+        130.0,
+        150.0,
+        170.0,
+        190.0
+    ],
+    "angle": 0,
+    "start_frequency": 1000000000.0,
+    "stop_frequency": 20000000000.0,
+    "number_of_points": 1001,
+    "bandwith": 300,
+    "power": -10
+}

@@ -1,0 +1,33 @@
+{
+    "user_name": "Test User",
+    "measurement_name": "AA2_test2",
+    "description": "Magnetic characterization of ",
+    "dipole_mode": 1,
+    "s_parameter": "S14",
+    "field_sweep": [
+        10.0,
+        50.0,
+        60.0,
+        70.0,
+        80.0,
+        90.0,
+        100.0,
+        110.0,
+        120.0,
+        130.0,
+        140.0,
+        150.0,
+        160.0,
+        170.0,
+        180.0,
+        190.0
+    ],
+    "angle": 0.0,
+    "start_frequency": 4000000000.0,
+    "stop_frequency": 15000000000.0,
+    "number_of_points": 1501,
+    "bandwidth": 500.0,
+    "power": -10.0,
+    "ref_field": "10",
+    "datetime": "2024-03-04 16:35:56"
+}

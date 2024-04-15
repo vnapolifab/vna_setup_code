@@ -1,0 +1,28 @@
+{
+    "user_name": "YIG-PLD campaign",
+    "sample_name": "YIG PLD - MF6A",
+    "measurement_name": "frequency sweep 2",
+    "description": "Chamber pressure during growth 20 mTorr",
+    "dipole_mode": 1,
+    "s_parameter": "S13",
+    "field_sweep": [
+        0.0,
+        10.0,
+        15.0,
+        20.0,
+        25.0,
+        30.0,
+        35.0,
+        40.0,
+        45.0,
+        50.0
+    ],
+    "angle": 0.0,
+    "start_frequency": 1000000000.0,
+    "stop_frequency": 3000000000.0,
+    "number_of_points": 2001,
+    "bandwidth": 100.0,
+    "power": -10.0,
+    "ref_field": "0",
+    "datetime": "2024-04-05 17:14:20"
+}

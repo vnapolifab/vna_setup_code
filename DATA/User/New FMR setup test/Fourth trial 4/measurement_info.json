@@ -1,0 +1,23 @@
+{
+    "user_name": "New FMR setup test",
+    "measurement_name": "Fourth trial 4",
+    "description": "",
+    "dipole_mode": 1,
+    "s_parameter": "S34",
+    "field_sweep": [
+        0.0,
+        10.0,
+        20.0,
+        30.0,
+        40.0,
+        50.0
+    ],
+    "angle": 0.0,
+    "start_frequency": 1000000000.0,
+    "stop_frequency": 12000000000.0,
+    "number_of_points": 2001,
+    "bandwidth": 300.0,
+    "power": -10.0,
+    "ref_field": "0",
+    "datetime": "2024-03-22 10:34:36"
+}

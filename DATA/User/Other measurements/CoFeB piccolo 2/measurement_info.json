@@ -1,0 +1,26 @@
+{
+    "user": "Test User",
+    "name": "CoFeB piccolo",
+    "dipole mode": 1,
+    "S parameter": "S14",
+    "field sweep": [
+        190.0,
+        10.0,
+        11.0,
+        12.0,
+        13.0,
+        14.0,
+        15.0,
+        16.0,
+        17.0,
+        18.0,
+        19.0,
+        20.0
+    ],
+    "angle": 0,
+    "Start frequency": 4000000000.0,
+    "Stop frequency": 6000000000.0,
+    "Number of points": 1001,
+    "Bandwith": 300,
+    "Power": -10
+}

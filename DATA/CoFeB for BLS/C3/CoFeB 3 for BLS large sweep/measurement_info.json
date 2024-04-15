@@ -1,0 +1,33 @@
+{
+    "user_name": "Measurements",
+    "measurement_name": "CoFeB 3 for BLS large sweep",
+    "description": "CoFeB 3 for BLS: measure taken with a field up to 190mT",
+    "dipole_mode": 1,
+    "s_parameter": "S14",
+    "field_sweep": [
+        20.0,
+        50.0,
+        60.0,
+        70.0,
+        80.0,
+        90.0,
+        100.0,
+        110.0,
+        120.0,
+        130.0,
+        140.0,
+        150.0,
+        160.0,
+        170.0,
+        180.0,
+        190.0
+    ],
+    "angle": 0.0,
+    "start_frequency": 7000000000.0,
+    "stop_frequency": 18000000000.0,
+    "number_of_points": 1001,
+    "bandwidth": 500.0,
+    "power": -10.0,
+    "ref_field": "20",
+    "datetime": "2024-02-29 15:11:01"
+}

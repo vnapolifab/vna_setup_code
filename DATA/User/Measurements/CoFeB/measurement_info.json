@@ -1,0 +1,28 @@
+{
+    "user_name": "Test User",
+    "measurement_name": "CoFeB",
+    "dipole_mode": 1,
+    "s_parameter": "S14",
+    "field_sweep": [
+        0.0,
+        30.0,
+        40.0,
+        50.0,
+        60.0,
+        70.0,
+        80.0,
+        90.0,
+        100.0,
+        110.0,
+        120.0,
+        130.0,
+        140.0,
+        150.0
+    ],
+    "angle": 0,
+    "start_frequency": 1000000000.0,
+    "stop_frequency": 20000000000.0,
+    "number_of_points": 1001,
+    "bandwith": 300,
+    "power": -10
+}

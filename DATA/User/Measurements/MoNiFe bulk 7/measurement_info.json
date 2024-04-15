@@ -1,0 +1,22 @@
+{
+    "user_name": "Measurements",
+    "measurement_name": "MoNiFe bulk",
+    "dipole_mode": 1,
+    "s_parameter": "S14",
+    "field_sweep": [
+        190.0,
+        100.0,
+        110.0,
+        120.0,
+        130.0,
+        140.0,
+        150.0,
+        160.0
+    ],
+    "angle": 0.0,
+    "start_frequency": 7000000000.0,
+    "stop_frequency": 15000000000.0,
+    "number_of_points": 501,
+    "bandwith": 500,
+    "power": -10
+}

@@ -1,0 +1,24 @@
+{
+    "user_name": "Test User",
+    "sample_name": "MF5",
+    "measurement_name": "calibration_test",
+    "description": "",
+    "dipole_mode": 1,
+    "s_parameter": "S13",
+    "field_sweep": [
+        190.0,
+        10.0,
+        20.0,
+        30.0,
+        40.0,
+        50.0
+    ],
+    "angle": 0.0,
+    "start_frequency": 1000000000.0,
+    "stop_frequency": 12000000000.0,
+    "number_of_points": 2001,
+    "bandwidth": 100.0,
+    "power": -10.0,
+    "ref_field": "190",
+    "datetime": "2024-03-25 16:29:10"
+}

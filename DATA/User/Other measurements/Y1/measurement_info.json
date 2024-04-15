@@ -1,0 +1,26 @@
+{
+    "user_name": "Test User",
+    "measurement_name": "Y1",
+    "description": "",
+    "dipole_mode": 1,
+    "s_parameter": "S14",
+    "field_sweep": [
+        60.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+    ],
+    "angle": 0.0,
+    "start_frequency": 800000000.0,
+    "stop_frequency": 1200000000.0,
+    "number_of_points": 401,
+    "bandwidth": 100.0,
+    "power": -10.0,
+    "ref_field": "60",
+    "datetime": "2024-03-05 10:27:31"
+}
