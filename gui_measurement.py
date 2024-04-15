@@ -4,6 +4,8 @@ from library_vna import *
 from library_power_supply import *
 from datetime import datetime
 from CONSTANTS import *
+from logger import logger
+from icecream import ic
 
 # TODO list:
 # - fare una demag_sweep per il quadrupoli che alterna i campi dei due invece di fare prima uno poi l'altro
@@ -14,7 +16,6 @@ print("results and actions are reported here:\n")
 
 
 settings = gui()
-
 
 
 # Adds date time to measurement info

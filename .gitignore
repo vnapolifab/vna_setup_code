@@ -1,1 +1,4 @@
 DATA
+log_file.log
+last_settings.json
+__pycache__
