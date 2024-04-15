@@ -110,6 +110,7 @@ class ParameterInputGUI:
                 self.ref_entry.delete(0, tk.END)
                 self.ref_entry.insert(0, str(settings.get("ref_field", 0)))
                 
+                self.on_user_change_user(None)  # Refresh sample selection
                 messagebox.showinfo("Settings Loaded", "The settings have been loaded successfully.")
         except FileNotFoundError:
             messagebox.showerror("Settings Not Found", "No saved settings found.")
@@ -163,7 +164,7 @@ class ParameterInputGUI:
     def submit(self):
         user_name = self.user_name_var.get() if self.user_name_var.get() != "New User" else self.new_user_entry.get()
         sample_name = self.sample_name_var.get() if self.sample_name_var.get() != "New User" else self.new_sample_entry.get()
-        measurement_name = self.measurement_name_entry.get()
+        measurement_name = self.measurement_name_entry.get().strip()  # TODO capire perchè con lo spazio crasha
 
         if not user_name.strip() or not measurement_name.strip():
             messagebox.showerror("Invalid Input", "User name and measurement name cannot be blank.")

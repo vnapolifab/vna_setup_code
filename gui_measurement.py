@@ -5,7 +5,6 @@ from library_power_supply import *
 from datetime import datetime
 from CONSTANTS import *
 from logger import logger
-from icecream import ic
 
 # TODO list:
 # - fare una demag_sweep per il quadrupoli che alterna i campi dei due invece di fare prima uno poi l'altro
