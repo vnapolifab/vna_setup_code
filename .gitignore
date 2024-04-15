@@ -1,4 +1,4 @@
-DATA
+DATA/
 log_file.log
 last_settings.json
-__pycache__
+__pycache__/
