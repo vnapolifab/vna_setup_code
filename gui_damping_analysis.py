@@ -1,4 +1,7 @@
+from matplotlib import pyplot as plt
+import numpy as np
 import os
+
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox  # Import the messagebox module
@@ -7,9 +10,6 @@ from library_analysis import *
 from library_gui import *
 from library_vna import *
 from library_power_supply import *
-
-from matplotlib import pyplot as plt
-import numpy as np
 
 
 

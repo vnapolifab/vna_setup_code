@@ -1,6 +1,6 @@
-import os
 from matplotlib import pyplot as plt
 import numpy as np
+import os
 
 import tkinter as tk
 from tkinter import ttk

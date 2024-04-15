@@ -1,4 +1,7 @@
+from matplotlib import pyplot as plt
+import numpy as np
 import os
+
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox  # Import the messagebox module
@@ -8,11 +11,9 @@ from library_gui import *
 from library_vna import *
 from library_power_supply import *
 
-from matplotlib import pyplot as plt
-import numpy as np
 
 
-def analysis(user_folder, sample_folder, measure_folder):
+def analysis(user_folder: str, sample_folder: str, measure_folder: str) -> None:
     settings = load_metadata(user_folder, sample_folder, measure_folder)
     freq, fields, amplitudes, phases = load_measurement(user_folder, sample_folder, measure_folder)
 
@@ -24,9 +25,8 @@ def analysis(user_folder, sample_folder, measure_folder):
 
 
 
+if __name__ == "__main__":
+    print("*** LOG SCREEN ***")
+    print("results and actions are reported here:\n")
 
-print("*** LOG SCREEN ***")
-print("results and actions are reported here:\n")
-
-# Call the function
-user_folder, measure_folder = gui_folder_selection(func_on_submit = analysis)
+    user_folder, measure_folder = gui_folder_selection(func_on_submit = analysis)
