@@ -13,7 +13,6 @@ from library_power_supply import *
 
 
 
-
 def analysis(user_folder: str, sample_folder: str, measure_folder: str) -> None:
     freq, fields, amplitudes, phases = load_measurement(user_folder, sample_folder, measure_folder)
 
@@ -22,7 +21,6 @@ def analysis(user_folder: str, sample_folder: str, measure_folder: str) -> None:
     #The conversion factor between current and field was measured to be 53.2, yet its uniformity might play a role (ranges between 51-57)
     
     plt.show()
-
 
 
 
