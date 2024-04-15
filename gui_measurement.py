@@ -8,6 +8,7 @@ from logger import logger
 
 # TODO list:
 # - fare una demag_sweep per il quadrupoli che alterna i campi dei due invece di fare prima uno poi l'altro
+# - Impedire di chiamare un sample o user "new sample" o "new user"
 
 
 print("*** LOG SCREEN ***")
