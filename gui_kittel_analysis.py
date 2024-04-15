@@ -1,4 +1,7 @@
 import os
+from matplotlib import pyplot as plt
+import numpy as np
+
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox  # Import the messagebox module
@@ -8,11 +11,10 @@ from library_gui import *
 from library_vna import *
 from library_power_supply import *
 
-from matplotlib import pyplot as plt
-import numpy as np
 
 
-def analysis(user_folder, sample_folder, measure_folder):
+
+def analysis(user_folder: str, sample_folder: str, measure_folder: str) -> None:
     freq, fields, amplitudes, phases = load_measurement(user_folder, sample_folder, measure_folder)
 
     [traces, Us] = analysisFMR(freq, fields, amplitudes, phases, user_folder, sample_folder, measure_folder, show_plots=True, for_notebook=False)  # Plots imag(U), real(U), trasmission
@@ -24,13 +26,8 @@ def analysis(user_folder, sample_folder, measure_folder):
 
 
 
-print("*** LOG SCREEN ***")
-print("results and actions are reported here:\n")
+if __name__ == "__main__":
+    print("*** LOG SCREEN ***")
+    print("results and actions are reported here:\n")
 
-# Call the function
-user_folder, sample_folder, measure_folder = gui_folder_selection(func_on_submit = analysis)
-# if user_folder and measure_folder:
-#     print(f"User folder: {user_folder}")
-#     print(f"Measure folder: {measure_folder}")
-# else:
-#     print("Submission was incomplete.")
+    user_folder, sample_folder, measure_folder = gui_folder_selection(func_on_submit = analysis)
