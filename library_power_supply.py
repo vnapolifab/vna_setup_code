@@ -12,7 +12,7 @@ class PowerSupply:
         self.ser = serial.Serial(port, baud_rate)
 
 
-    def getID(self):
+    def getID(self) -> None:
         # Prints info about serial connection
 
         print('Port: ' + str(self.ser.name))
@@ -22,14 +22,14 @@ class PowerSupply:
         print("ID: " + str(response))
 
 
-    def getConnectionStatus(self):
+    def getConnectionStatus(self) -> None:
         # Prints info about serial connection
 
         if self.ser.isOpen(): 
             print("Power supply connected on port " + str(self.ser.name))    
     
 
-    def setCurrent(self, i, give_additional_info = False):
+    def setCurrent(self, i: float, give_additional_info = False) -> None:
         # Sets output current to given value
         # Also sets the output states to 0 if current is set to 0, to 1 if current set to any other value
         # i : Output current [A]
@@ -61,7 +61,7 @@ class PowerSupply:
         return
     
 
-    def setOutputState(self, state):
+    def setOutputState(self, state: int) -> None:
         # Sets state to:
         # 1: Output state
         # 0: High impedance state
@@ -77,7 +77,7 @@ class PowerSupply:
         return
     
 
-    def setRampRate(self, rate):
+    def setRampRate(self, rate: float) -> None:
         # Sets ramp rate [A/s]
         # Rate should be in range the range 0.01 A/s < range < 2 A/s
 
@@ -101,7 +101,7 @@ class PowerSupply:
         return
 
     # TODO used above, replace with better method
-    def read_to_r(self):
+    def read_to_r(self) -> str:
         # readline does not work, because termination character is \r instead of default \n
 
         ch = ''
@@ -112,11 +112,11 @@ class PowerSupply:
         return ''.join(line)
     
 
-    def closeConnection(self):
+    def closeConnection(self) -> None:
         self.ser.close()
 
     
-    def demag_sweep(self):
+    def demag_sweep(self) -> None:
         demag_sweep = [3, -1.5, 0.75, -0.375, 0.1875, -0.09375, 0.045, -0.02, 0.01, -0.005, 0.002, -0.001, 0.0005]
         sendLog("Executing demagnetizing sweep...")
         
@@ -128,7 +128,7 @@ class PowerSupply:
         sendLog("Completed demagnetizing sweep.\n")
 
 
-    def setTriggers(self, val, give_additional_info = False):
+    def setTriggers(self, val, give_additional_info = False) -> None:
         command = 'SWTRIG n{val}'
         if give_additional_info:
             print('Query:', command)
@@ -145,7 +145,7 @@ class PowerSupply:
 
 
 # Connection setup function
-def setupConnectionPS(port, baud_rate, give_additional_info = False):
+def setupConnectionPS(port, baud_rate: int, give_additional_info = False) -> PowerSupply | None:
     try:
         ps = PowerSupply(port, baud_rate)
         ps.getConnectionStatus()
