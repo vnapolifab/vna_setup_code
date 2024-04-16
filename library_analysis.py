@@ -14,7 +14,7 @@ In this file functions are modified to be compatible with the gui.
 """
 
 
-def analysisFMR(freq, fields, amplitudes, phases, user_folder, sample_folder, measurement_folder, ref_n = 0, show_plots=True, for_notebook=False):
+def analysisFMR(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, phases: np.ndarray, user_folder: str, sample_folder: str, measurement_folder: str, ref_n = 0, show_plots=True, for_notebook=False) -> tuple[np.ndarray, np.ndarray]:
     """
     This function takes as input the frequencies, fields, amplitudes and phases and plots relevant data for FMR resonance.
     ref_n is the index number for the reference measurement, default is zero.
@@ -125,11 +125,11 @@ def analysisFMR(freq, fields, amplitudes, phases, user_folder, sample_folder, me
         if not(for_notebook):
             plt.savefig(f"DATA\\{user_folder}\\{sample_folder}\\{measurement_folder}\\phase.png")
 
-    return [traces, Us]
+    return traces, Us
 
 
 
-def analysisKittel(freq, traces, fields, user_folder, sample_folder, measurement_folder):
+def analysisKittel(freq: np.ndarray, traces: np.ndarray, fields: np.ndarray, user_folder: str, sample_folder: str, measurement_folder: object) -> tuple[np.ndarray, np.ndarray]:
     """
     This function takes as input traces and fields and estimates Ms from a fit of the Kittel function.
     Returns frequencies of the FMR peaks and the Ms.
@@ -170,7 +170,7 @@ def analysisKittel(freq, traces, fields, user_folder, sample_folder, measurement
     return f_max, M_fit
 
 
-def analysisDamping(freqs, fields, u_freq_sweep, user_folder, sample_folder, measurement_folder, show_plots=True, for_notebook=False):
+def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndarray, user_folder: str, sample_folder: str, measurement_folder: str, show_plots=True, for_notebook=False) -> None:
     fields_no_ref = fields[1:]
     n_freq_points = u_freq_sweep.shape[1] - 1
 
@@ -371,7 +371,7 @@ def analysisDamping(freqs, fields, u_freq_sweep, user_folder, sample_folder, mea
 
 
 
-def analysisSW(freq, fields, amplitudes, phases, user_folder, sample_folder, measurement_folder, s_parameter, ref_n = 0, show_plots=True, for_notebook=False):
+def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, phases: np.ndarray, user_folder: str, sample_folder: str, measurement_folder: str, s_parameter: str, ref_n = 0, show_plots=True, for_notebook=False) -> tuple[np.ndarray, np.ndarray]:
     """
     This function takes as input the frequencies, fields, amplitudes and phases and plots relevant data for FMR resonance.
     ref_n is the index number for the reference measurement, default is zero.
