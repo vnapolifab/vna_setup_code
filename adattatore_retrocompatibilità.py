@@ -1,31 +1,47 @@
-def replace_in_file(file_path):
-    try:
-        # Open the file for reading
-        with open(file_path, 'r') as file:
-            file_data = file.read()
+import os
+import json
+from icecream import ic
 
-        # Perform replacements
-        file_data = file_data.replace("name", "measurement_name")
-        file_data = file_data.replace("user", "user_name")
-        file_data = file_data.replace("dipole mode", "dipole_mode")
-        file_data = file_data.replace("S parameter", "s_parameter")
-        file_data = file_data.replace("field sweep", "field_sweep")
-        file_data = file_data.replace("Angle", "angle")
-        file_data = file_data.replace("Start frequency", "start_frequency")
-        file_data = file_data.replace("Stop frequency", "stop_frequency")
-        file_data = file_data.replace("Number of points", "number_of_points")
-        file_data = file_data.replace("Bandwith", "bandwith")
-        file_data = file_data.replace("Power", "power")
 
-        # Open the file for writing
-        with open(file_path, 'w') as file:
-            file.write(file_data)
+def find_all_measurements(root_dir: str) -> list[str]:
+    final_subdirectories = []
+    for dirpath, dirnames, filenames in os.walk(root_dir):
+        if not dirnames:  # If there are no subdirectories
+            jsonpath = os.path.join(dirpath, "measurement_info.json")
+            final_subdirectories.append((jsonpath, os.path.exists(jsonpath)))
+    return final_subdirectories
 
-        print("Replacements successfully made in the file.")
 
-    except FileNotFoundError:
-        print("File not found. Please provide a valid file path.")
+def correct_format(text: str) -> str:
+    # Perform replacements
+    text = text.replace("name", "measurement_name")
+    text = text.replace("user", "user_name")
+    text = text.replace("dipole mode", "dipole_mode")
+    text = text.replace("S parameter", "s_parameter")
+    text = text.replace("field sweep", "field_sweep")
+    text = text.replace("Angle", "angle")
+    text = text.replace("Start frequency", "start_frequency")
+    text = text.replace("Stop frequency", "stop_frequency")
+    text = text.replace("Number of points", "number_of_points")
+    text = text.replace("Bandwith", "bandwith")
+    text = text.replace("Power", "power")
+    return text
 
-# Example usage:
-file_path = input("Enter the path of the text file: ")
-replace_in_file(file_path)
+
+root_directory = 'DATA'
+json_files = find_all_measurements(root_directory)
+
+for i, file in enumerate(json_files):
+    print(f"{i:3}) {str(file[1]).upper():5} {file[0]}")
+
+for json_file in json_files:
+    if json_file[1]:
+        with open(json_file[0], "r") as f:
+            content = f.read()
+        new_content = correct_format(content)
+
+    else:
+        new_content = "{}"
+
+    with open(json_file[0], "w") as f:
+        f.write(new_content)
