@@ -3,8 +3,9 @@ import matplotlib.pyplot as plt
 from scipy.ndimage import gaussian_filter1d
 from scipy.optimize import curve_fit 
 import json
-from library_misc import *
 from itertools import cycle
+
+from library_misc import *
 from CONSTANTS import *
 
 """
