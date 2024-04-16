@@ -41,7 +41,7 @@ print()
 
 # Add reference field
 #settings["ref_field"] = settings["ref_field"].flip()
-sendLog(f"Adding {settings['ref_field']} mT as reference field...")
+logger.info(f"Adding {settings['ref_field']} mT as reference field...")
 settings["field_sweep"] = list(np.concatenate([[float(settings["ref_field"])], settings["field_sweep"]]))
 
 applySettings(instr, settings)

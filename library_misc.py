@@ -30,7 +30,7 @@ def saveData(x: list[float], y: list[float], p: list[float], user_folder: str, s
         while os.path.exists( f"{root_folder}/{user_folder}/{sample_folder}/{filename} {suffix}" ):
             suffix = suffix+1
         filename = filename + f" {suffix}"
-        sendWarning(f'Folder named "{initialname}" already exists, using "{filename}" instead')
+        logger.warning(f'Folder named "{initialname}" already exists, using "{filename}" instead')
         os.mkdir(f"{root_folder}/{user_folder}/{sample_folder}/{filename}")
 
     print("PATH:", f"{root_folder}/{user_folder}/{sample_folder}/{filename}/{filename} ({index+1}){format}")

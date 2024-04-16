@@ -37,10 +37,10 @@ class PowerSupply:
         maxCurrent = 3.6
 
         if abs(i) > maxCurrent:
-            sendError(f'abs(i) A exceeds max current of ' + str(maxCurrent) + ' A')
+            logger.error(f'abs(i) A exceeds max current of ' + str(maxCurrent) + ' A')
             return
         # elif abs(i) > 2:
-        #     self.sendWarning('Using current greater than 0.5 A, make sure the electromagnet is properly cooled')
+        #     self.logger.warning('Using current greater than 0.5 A, make sure the electromagnet is properly cooled')
 
         command = 'CUR {current:+}\r'.format(current=i)
         if give_additional_info:
@@ -51,7 +51,7 @@ class PowerSupply:
         response = self.read_to_r()
 
         if response != 'CMLT\r':
-            sendWarning("Unexpected response in function setCurrent, " + response)
+            logger.warning("Unexpected response in function setCurrent, " + response)
 
         if i==0:
             self.setOutputState(0)
@@ -70,9 +70,9 @@ class PowerSupply:
 
         response = self.read_to_r()
         if response != 'CMLT\r':
-            sendWarning("Unexpected response in function setOutputState, " + response)
+            logger.warning("Unexpected response in function setOutputState, " + response)
             response = self.read_to_r()
-            sendWarning("Unexpected response in function setOutputState, " + response)
+            logger.warning("Unexpected response in function setOutputState, " + response)
 
         return
     
@@ -83,11 +83,11 @@ class PowerSupply:
 
         if rate < 0.01:
             rate = 0.01
-            sendWarning("Using rate smaller than 0.01 A/s, using 0.01 A/s instead")
+            logger.warning("Using rate smaller than 0.01 A/s, using 0.01 A/s instead")
 
         if rate > 2:
             rate = 2
-            sendWarning('Using rate greater than 2 A/s, using 2 A/s instead')
+            logger.warning('Using rate greater than 2 A/s, using 2 A/s instead')
 
         command = 'RATE {rate}\r'.format(rate=rate)
         print('Query:', command)
@@ -96,7 +96,7 @@ class PowerSupply:
 
         response = self.read_to_r()
         if response != 'CMLT\r':
-            sendWarning("Unexpected response in function setRampRate, " + response)
+            logger.warning("Unexpected response in function setRampRate, " + response)
 
         return
 
@@ -118,14 +118,14 @@ class PowerSupply:
     
     def demag_sweep(self) -> None:
         demag_sweep = [3, -1.5, 0.75, -0.375, 0.1875, -0.09375, 0.045, -0.02, 0.01, -0.005, 0.002, -0.001, 0.0005]
-        sendLog("Executing demagnetizing sweep...")
+        logger.info("Executing demagnetizing sweep...")
         
         for current in demag_sweep:
             self.setCurrent(current)
             sleep(0.5 )     
 
         self.setCurrent(0)
-        sendLog("Completed demagnetizing sweep.\n")
+        logger.info("Completed demagnetizing sweep.\n")
 
 
     def setTriggers(self, val, give_additional_info = False) -> None:

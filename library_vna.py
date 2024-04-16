@@ -177,7 +177,7 @@ def measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument,
             ps = None
             
         if conversion == None or ps == None:
-            sendError("Invalid dipole_mode parameter")
+            logger.error("Invalid dipole_mode parameter")
             return
         
         if demag: ps.demag_sweep()
@@ -190,14 +190,14 @@ def measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument,
             current = current_sweep[i]
 
             ps.setCurrent(current)
-            sendLog(f"Field set to {field_sweep[i]} mT")
+            logger.info(f"Field set to {field_sweep[i]} mT")
             sleep(SETTLING_TIME)
-            sendLog("Measuring... ")
+            logger.info("Measuring... ")
             x,y,p = measure_amp_and_phase(instr, Sparam)
             #x,y,p = measure_dB(instr,Sparam)
             
             filename = saveData(x,y,p, user_folder, sample_folder, filename, index=i)
-            sendLog(f'Saved file "{filename} ({i+1}).csv"')
+            logger.info(f'Saved file "{filename} ({i+1}).csv"')
             print("")
 
         ps.setCurrent(0)
@@ -205,7 +205,7 @@ def measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument,
     # Routine if a quadrupole is used
     elif dipole == 2:
         if ps1 == None or ps2 == None:
-            sendError("One of the power supplies is not properly connected.")
+            logger.error("One of the power supplies is not properly connected.")
             return
         
         if demag: 
@@ -224,13 +224,13 @@ def measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument,
 
             ps1.setCurrent(current1)
             ps2.setCurrent(current2)
-            sendLog(f"Field set to {field_sweep[i]} mT")
+            logger.info(f"Field set to {field_sweep[i]} mT")
             sleep(SETTLING_TIME)
-            sendLog("Measuring... ")
+            logger.info("Measuring... ")
             x,y,p,re,im = measure_amp_and_phase(instr, Sparam)
             
             filename = saveData(x,y,p, user_folder, filename, index=i)
-            sendLog(f'Saved file "{filename} ({i+1}).csv"')
+            logger.info(f'Saved file "{filename} ({i+1}).csv"')
             print("\n")
 
 
