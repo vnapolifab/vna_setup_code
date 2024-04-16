@@ -114,7 +114,7 @@ def sendLog(s):
 
 def update_log(settings):
     with open("log.txt", "r") as f:
-        text = f.readlines()
+        text = f.read()
 
     new_text = f"""
     Date-time: {settings["datetime"]}
@@ -124,4 +124,10 @@ def update_log(settings):
 
 
     """
+
+    file_content = text + new_text
+    with open("log.txt", "w") as f:
+        f.write(file_content)
+
+
     

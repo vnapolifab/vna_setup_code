@@ -6,6 +6,7 @@ from datetime import datetime
 from CONSTANTS import *
 from logger import logger
 
+
 # TODO list:
 # - fare una demag_sweep per il quadrupoli che alterna i campi dei due invece di fare prima uno poi l'altro
 
@@ -25,7 +26,7 @@ settings["datetime"] = str(datetime.now()).rstrip("0123456789").rstrip(".")
 print("Power supply 1 > ", end=""); 
 if "ps1" in locals(): ps1.closeConnection()
 ps1 = setupConnectionPS('COM4', 9600)
-    
+
 print("Power supply 2 > ", end=""); 
 if "ps2" in locals(): ps2.closeConnection()
 ps2 = setupConnectionPS('COM3', 9600)
@@ -47,12 +48,12 @@ settings["measurement_name"] = measurement_routine(
     ps1, 
     ps2, 
     instr, 
-    settings["field_sweep"], 
-    settings["angle"], 
+    settings["field_sweep"],
+    settings["angle"],
     settings["user_name"],
     settings["sample_name"],
-    settings["measurement_name"], 
-    settings["dipole_mode"], 
+    settings["measurement_name"],
+    settings["dipole_mode"],
     settings["s_parameter"]
 )
 
