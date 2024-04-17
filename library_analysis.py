@@ -72,7 +72,7 @@ def analysisFMR(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, ph
         plt.yticks(fontsize=AXIS_FONTSIZE)
         plt.grid()
         if not(for_notebook):
-            plt.savefig(f"DATA\\{user_folder}\\{sample_folder}\\{measurement_folder}\\imag_u.png")
+            plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\imag_u.png")
 
 
 

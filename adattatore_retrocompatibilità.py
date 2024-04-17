@@ -1,6 +1,7 @@
 import os
 import json
 from icecream import ic
+from CONSTANTS import *
 
 
 def find_all_measurements(root_dir: str) -> list[str]:
@@ -28,7 +29,7 @@ def correct_format(text: str) -> str:
     return text
 
 
-root_directory = 'DATA'
+root_directory = DATA_FOLDER_NAME
 json_files = find_all_measurements(root_directory)
 
 for i, file in enumerate(json_files):

@@ -13,7 +13,7 @@ def saveData(x: list[float], y: list[float], p: list[float], user_folder: str, s
 
     rows = list(zip(x,y,p))
 
-    root_folder = "DATA/"
+    root_folder = f"{DATA_FOLDER_NAME}/"
     initialname = filename
     format = ".csv"
 
