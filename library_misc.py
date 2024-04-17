@@ -6,7 +6,11 @@ import json
 This library contains general functions that are used throughout the program and are not related to a specific instrument or procedure.
 """
 
-def saveData(x,y,p, user_folder, sample_folder, filename, index):
+def saveData(x: list[float], y: list[float], p: list[float], user_folder: str, sample_folder: str, filename: str, index: int) -> str:
+    """
+    Saves data in as {root_folder}/{user_folder}/{sample_folder}/{filename} {suffix}", checks if existing measurements exist already and adds a suffix
+    """
+
     rows = list(zip(x,y,p))
 
     root_folder = "DATA/"
@@ -26,7 +30,7 @@ def saveData(x,y,p, user_folder, sample_folder, filename, index):
         while os.path.exists( f"{root_folder}/{user_folder}/{sample_folder}/{filename} {suffix}" ):
             suffix = suffix+1
         filename = filename + f" {suffix}"
-        sendWarning(f'Folder named "{initialname}" already exists, using "{filename}" instead')
+        logger.warning(f'Folder named "{initialname}" already exists, using "{filename}" instead')
         os.mkdir(f"{root_folder}/{user_folder}/{sample_folder}/{filename}")
 
     print("PATH:", f"{root_folder}/{user_folder}/{sample_folder}/{filename}/{filename} ({index+1}){format}")
@@ -35,7 +39,7 @@ def saveData(x,y,p, user_folder, sample_folder, filename, index):
     return filename
 
 
-def load_and_convert(filename):
+def load_and_convert(filename: str) -> tuple[list[float], list[float], list[float]]:
     """
     Reads data from txt file assuming 3 columns: frequency, amplitude, phase.
     Takes filename as input and returns relevant data.
@@ -52,7 +56,7 @@ def load_and_convert(filename):
     return freq, amp, phase
 
 
-def save_metadata(settings):
+def save_metadata(settings: object) -> None:
     user_folder = settings["user_name"]
     sample_name = settings["sample_name"]
     filename = settings["measurement_name"]
@@ -65,7 +69,7 @@ def save_metadata(settings):
         json.dump(settings, f, indent=4)
 
 
-def load_metadata(user_folder, sample_folder, measurement_name):
+def load_metadata(user_folder: str, sample_folder: str, measurement_name: str) -> object:
     """
     Loads the metadata file for a measurement.
     """
@@ -75,7 +79,7 @@ def load_metadata(user_folder, sample_folder, measurement_name):
     return metadata
 
 
-def load_measurement(user_folder, sample_folder, folder_name):
+def load_measurement(user_folder: str, sample_folder: str, folder_name: str) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Reads data from txt file assuming 3 columns: frequency, amplitude, phase.
     Takes filename as input and returns relevant data.
@@ -98,21 +102,21 @@ def load_measurement(user_folder, sample_folder, folder_name):
     return np.array(f), np.array(field_sweep), np.array(amps), np.array(phases)
 
 
-def sendWarning(s):
+def sendWarning(s: str):
     # Function used for user interface
     print("WARNING: " + s)
 
-def sendError(s):
+def sendError(s: str):
     # Function used for user interface
     print("ERROR: " + s)
 
-def sendLog(s):  
+def sendLog(s: str):  
     # Function used for user interface
     print("LOG: " + s)
 
 
 
-def update_log(settings):
+def update_log(settings: object):
     with open("log.txt", "r") as f:
         text = f.read()
 

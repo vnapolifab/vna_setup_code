@@ -1,10 +1,10 @@
-from RsInstrument.RsInstrument import RsInstrument
 from library_analysis import *
 from library_power_supply import *
 from library_misc import *
 import numpy as np
 from time import sleep
 import json
+from RsInstrument.RsInstrument import RsInstrument
 
 """
 This file contains necessary functions to control and operate the VNA.
@@ -15,7 +15,7 @@ Unused queries list:
 """
 
 
-def setupConnectionVNA(give_additional_info = False):
+def setupConnectionVNA(give_additional_info: bool = False) -> RsInstrument:
     """
     Connects to the VNA.
     Returns object that contains methods to control the vna.
@@ -40,7 +40,7 @@ def setupConnectionVNA(give_additional_info = False):
     return instr
 
 
-def applySettings(instr, settings):
+def applySettings(instr: RsInstrument, settings: object) -> None:
     """
     This function takes the instrument object and a settings dict variable, then translates settings from the settings variable in queries for the VNA.
     """
@@ -67,7 +67,7 @@ def applySettings(instr, settings):
     instr.visa_timeout = ( settings['bandwidth']**-1 * settings['number_of_points'] *10 )*1000  + 100  # estimation times an arbitrary coeff 
 
 
-def measure_dB(instr, Sparam):
+def measure_dB(instr: RsInstrument, Sparam: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Queries the VNA for values.
     Takes as input the vna instrument object and the S parameter that should be measured.
@@ -98,7 +98,7 @@ def measure_dB(instr, Sparam):
     return freq, amp_db, phase
 
 
-def measure_amp_and_phase(instr, Sparam):
+def measure_amp_and_phase(instr: RsInstrument, Sparam: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Queries the VNA for values.
     Takes as input the vna instrument object and the S parameter that should be measured.
@@ -147,7 +147,7 @@ def measure_amp_and_phase(instr, Sparam):
     return freq, amp, phase
 
 
-def measurement_routine(ps1, ps2, instr, field_sweep, angle, user_folder, sample_folder, filename, dipole, Sparam, demag=True):
+def measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument, field_sweep: list[float], angle: float, user_folder: str, sample_folder: str, filename: str, dipole: int, Sparam: str, demag: bool = True) -> str:
     """
     Main function that is called by other files. 
     Goes through the whole routine for initializing, measuring and saving.
@@ -177,7 +177,7 @@ def measurement_routine(ps1, ps2, instr, field_sweep, angle, user_folder, sample
             ps = None
             
         if conversion == None or ps == None:
-            sendError("Invalid dipole_mode parameter")
+            logger.error("Invalid dipole_mode parameter")
             return
         
         if demag: ps.demag_sweep()
@@ -190,14 +190,14 @@ def measurement_routine(ps1, ps2, instr, field_sweep, angle, user_folder, sample
             current = current_sweep[i]
 
             ps.setCurrent(current)
-            sendLog(f"Field set to {field_sweep[i]} mT")
+            logger.info(f"Field set to {field_sweep[i]} mT")
             sleep(SETTLING_TIME)
-            sendLog("Measuring... ")
+            logger.info("Measuring... ")
             x,y,p = measure_amp_and_phase(instr, Sparam)
             #x,y,p = measure_dB(instr,Sparam)
             
             filename = saveData(x,y,p, user_folder, sample_folder, filename, index=i)
-            sendLog(f'Saved file "{filename} ({i+1}).csv"')
+            logger.info(f'Saved file "{filename} ({i+1}).csv"')
             print("")
 
         ps.setCurrent(0)
@@ -205,7 +205,7 @@ def measurement_routine(ps1, ps2, instr, field_sweep, angle, user_folder, sample
     # Routine if a quadrupole is used
     elif dipole == 2:
         if ps1 == None or ps2 == None:
-            sendError("One of the power supplies is not properly connected.")
+            logger.error("One of the power supplies is not properly connected.")
             return
         
         if demag: 
@@ -224,13 +224,13 @@ def measurement_routine(ps1, ps2, instr, field_sweep, angle, user_folder, sample
 
             ps1.setCurrent(current1)
             ps2.setCurrent(current2)
-            sendLog(f"Field set to {field_sweep[i]} mT")
+            logger.info(f"Field set to {field_sweep[i]} mT")
             sleep(SETTLING_TIME)
-            sendLog("Measuring... ")
+            logger.info("Measuring... ")
             x,y,p,re,im = measure_amp_and_phase(instr, Sparam)
             
             filename = saveData(x,y,p, user_folder, filename, index=i)
-            sendLog(f'Saved file "{filename} ({i+1}).csv"')
+            logger.info(f'Saved file "{filename} ({i+1}).csv"')
             print("\n")
 
 

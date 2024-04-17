@@ -1,10 +1,11 @@
+from datetime import datetime
+from logger import logger
+
 from library_analysis import *
 from library_gui import *
 from library_vna import *
 from library_power_supply import *
-from datetime import datetime
 from CONSTANTS import *
-from logger import logger
 
 
 # TODO list:
@@ -40,7 +41,7 @@ print()
 
 # Add reference field
 #settings["ref_field"] = settings["ref_field"].flip()
-sendLog(f"Adding {settings['ref_field']} mT as reference field...")
+logger.info(f"Adding {settings['ref_field']} mT as reference field...")
 settings["field_sweep"] = list(np.concatenate([[float(settings["ref_field"])], settings["field_sweep"]]))
 
 applySettings(instr, settings)
