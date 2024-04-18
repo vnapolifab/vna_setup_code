@@ -122,7 +122,7 @@ class ParameterInputGUI:
         """
 
         user_folder, measurement_folder = gui_folder_selection(func_on_submit=lambda x:x)
-        settings_file = os.path.join(os.path.dirname(__file__), "DATA", f"{user_folder}", f"{measurement_folder}", "measurement_info.json")
+        settings_file = os.path.join(os.path.dirname(__file__), "{DATA_FOLDER_NAME}", f"{user_folder}", f"{measurement_folder}", "measurement_info.json")
 
         try:
             with open(settings_file, "r") as f:
@@ -425,7 +425,7 @@ def gui_folder_selection(func_on_submit):
     """
 
     # Get the list of all subfolders in the 'DATA' directory
-    data_dir = os.path.join(os.getcwd(), 'DATA')
+    data_dir = os.path.join(os.getcwd(), '{DATA_FOLDER_NAME}')
     subfolders = [f.name for f in os.scandir(data_dir) if f.is_dir()]
 
     # Create the root window

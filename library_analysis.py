@@ -90,7 +90,7 @@ def analysisFMR(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, ph
         plt.yticks(fontsize=AXIS_FONTSIZE)
         plt.grid()
         if not(for_notebook):
-            plt.savefig(f"DATA\\{user_folder}\\{sample_folder}\\{measurement_folder}\\real_u.png")
+            plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\real_u.png")
 
         if for_notebook:
             plt.subplot(3,1,3)
@@ -106,7 +106,7 @@ def analysisFMR(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, ph
         plt.yticks(fontsize=AXIS_FONTSIZE)
         plt.grid()
         if not(for_notebook):
-            plt.savefig(f"DATA\\{user_folder}\\{sample_folder}\\{measurement_folder}\\t_coeff.png")
+            plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\t_coeff.png")
         
 
         if for_notebook:
@@ -123,7 +123,7 @@ def analysisFMR(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, ph
         plt.yticks(fontsize=AXIS_FONTSIZE)
         plt.grid()
         if not(for_notebook):
-            plt.savefig(f"DATA\\{user_folder}\\{sample_folder}\\{measurement_folder}\\phase.png")
+            plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\phase.png")
 
     return traces, Us
 
@@ -165,7 +165,7 @@ def analysisKittel(freq: np.ndarray, traces: np.ndarray, fields: np.ndarray, use
 
     plt.legend(["Measurement data", f"Fitted Kittel, Ms={M_fit/10**6:.3}e6 A/m"])
     plt.grid()
-    plt.savefig(f"DATA\\{user_folder}\\{sample_folder}\\{measurement_folder}\\Fitted Kittel.png")
+    plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\Fitted Kittel.png")
 
     return f_max, M_fit
 
@@ -219,12 +219,12 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
         plt.xticks(fontsize=AXIS_FONTSIZE)
         plt.yticks(fontsize=AXIS_FONTSIZE)
         plt.grid()
-        plt.savefig(f"DATA\\{user_folder}\\{sample_folder}\\{measurement_folder}\\Raw data.png")
+        plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\Raw data.png")
 
 
 
     # 
-    # ===== CODE TO FIT DATA AND REMOVE BACKGROUND =====
+    # ===== CODE TO FIT {DATA_FOLDER_NAME} AND REMOVE BACKGROUND =====
     # 
 
     plt.figure( figsize=(FULLSCREEN_SIZE) )
@@ -304,7 +304,7 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
             plt.ylabel("Suscettivity (arb. u.)", fontsize=AXIS_FONTSIZE)
             plt.xticks(fontsize=AXIS_FONTSIZE)
             plt.yticks(fontsize=AXIS_FONTSIZE)
-            plt.savefig(f"DATA\\{user_folder}\\{sample_folder}\\{measurement_folder}\\Fitted data (with background).png")
+            plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\Fitted data (with background).png")
     plt.grid()
 
 
@@ -344,7 +344,7 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
         plt.ylabel("Suscettivity (arb. u.)", fontsize=AXIS_FONTSIZE)
         plt.xticks(fontsize=AXIS_FONTSIZE)
         plt.yticks(fontsize=AXIS_FONTSIZE)
-        plt.savefig(f"DATA\\{user_folder}\\{sample_folder}\\{measurement_folder}\\Fitted data (background removed).png")
+        plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\Fitted data (background removed).png")
         plt.grid()
 
 
@@ -358,7 +358,7 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
     plt.xticks(fontsize=AXIS_FONTSIZE)
     plt.yticks(fontsize=AXIS_FONTSIZE)
     plt.grid()
-    plt.savefig(f"DATA\\{user_folder}\\{sample_folder}\\{measurement_folder}\\Delta H vs H.png")
+    plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\Delta H vs H.png")
 
 
     # print("\n*** Averaged data: ***")
@@ -426,7 +426,7 @@ def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, pha
         plt.yticks(fontsize=AXIS_FONTSIZE)
         plt.grid()
         if not(for_notebook):
-            plt.savefig(f"DATA\\{user_folder}\\{sample_folder}\\{measurement_folder}\\imag.png")
+            plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\imag.png")
 
 
 
@@ -444,7 +444,7 @@ def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, pha
         plt.yticks(fontsize=AXIS_FONTSIZE)
         plt.grid()
         if not(for_notebook):
-            plt.savefig(f"DATA\\{user_folder}\\{sample_folder}\\{measurement_folder}\\real.png")
+            plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\real.png")
 
 
         if for_notebook:
@@ -461,7 +461,7 @@ def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, pha
         plt.yticks(fontsize=AXIS_FONTSIZE)
         plt.grid()
         if not(for_notebook):
-            plt.savefig(f"DATA\\{user_folder}\\{sample_folder}\\{measurement_folder}\\t_coeff.png")
+            plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\t_coeff.png")
         
 
         if for_notebook:
@@ -478,7 +478,7 @@ def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, pha
         plt.yticks(fontsize=AXIS_FONTSIZE)
         plt.grid()
         if not(for_notebook):
-            plt.savefig(f"DATA\\{user_folder}\\{sample_folder}\\{measurement_folder}\\phase.png")
+            plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\phase.png")
 
         
         if for_notebook:
@@ -495,7 +495,7 @@ def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, pha
         plt.yticks(fontsize=AXIS_FONTSIZE)
         plt.grid()
         if not(for_notebook):
-            plt.savefig(f"DATA\\{user_folder}\\{sample_folder}\\{measurement_folder}\\trasmission_dB.png")
+            plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\trasmission_dB.png")
 
         if for_notebook:
             plt.subplot(3,1,3)
@@ -511,7 +511,7 @@ def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, pha
         plt.yticks(fontsize=AXIS_FONTSIZE)
         plt.grid()
         if not(for_notebook):
-            plt.savefig(f"DATA\\{user_folder}\\{sample_folder}\\{measurement_folder}\\trasmission_dB_no_background.png")
+            plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\trasmission_dB_no_background.png")
 
     return [traces_no_background_imag, traces_no_background_complex]
 

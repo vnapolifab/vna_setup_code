@@ -65,7 +65,7 @@ def save_metadata(settings: object) -> None:
     # settings["field_sweep"] = list(field_sweep.astype(float))  # updates field sweep with reference measurement, astype converts to float to avoid issues with int32 json formatting
     # settings["number_of_points"] = np.round(settings["number_of_points"])
 
-    with open(f'DATA/{user_folder}/{sample_name}/{filename}/measurement_info.json', 'w') as f:
+    with open(f'{DATA_FOLDER_NAME}/{user_folder}/{sample_name}/{filename}/measurement_info.json', 'w') as f:
         json.dump(settings, f, indent=4)
 
 
@@ -74,7 +74,7 @@ def load_metadata(user_folder: str, sample_folder: str, measurement_name: str) -
     Loads the metadata file for a measurement.
     """
 
-    with open(f"DATA/{user_folder}/{sample_folder}/{measurement_name}/measurement_info.json", "r") as f:
+    with open(f"{DATA_FOLDER_NAME}/{user_folder}/{sample_folder}/{measurement_name}/measurement_info.json", "r") as f:
         metadata = json.load(f)
     return metadata
 
@@ -86,7 +86,7 @@ def load_measurement(user_folder: str, sample_folder: str, folder_name: str) -> 
     Information about the measurement is given by the metadata.
     """
 
-    with open(f"DATA/{user_folder}/{sample_folder}/{folder_name}/measurement_info.json", "r") as f:
+    with open(f"{DATA_FOLDER_NAME}/{user_folder}/{sample_folder}/{folder_name}/measurement_info.json", "r") as f:
         metadata = json.load(f)
     field_sweep = metadata["field_sweep"]
     measurement_name = metadata["measurement_name"]
@@ -94,7 +94,7 @@ def load_measurement(user_folder: str, sample_folder: str, folder_name: str) -> 
     phases = []
 
     for i in range(len(field_sweep)):
-        file = f"DATA/{user_folder}/{sample_folder}/{folder_name}/{measurement_name} ({i+1}).csv"
+        file = f"{DATA_FOLDER_NAME}/{user_folder}/{sample_folder}/{folder_name}/{measurement_name} ({i+1}).csv"
         f,a,p = load_and_convert(file)
         amps.append(a)
         phases.append(p)
