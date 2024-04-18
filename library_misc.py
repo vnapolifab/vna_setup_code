@@ -2,6 +2,8 @@ import os
 import numpy as np
 import json
 
+from CONSTANTS import *
+
 """
 This library contains general functions that are used throughout the program and are not related to a specific instrument or procedure.
 """

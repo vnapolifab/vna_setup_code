@@ -224,7 +224,7 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
 
 
     # 
-    # ===== CODE TO FIT {DATA_FOLDER_NAME} AND REMOVE BACKGROUND =====
+    # ===== CODE TO FIT DATA AND REMOVE BACKGROUND =====
     # 
 
     plt.figure( figsize=(FULLSCREEN_SIZE) )
