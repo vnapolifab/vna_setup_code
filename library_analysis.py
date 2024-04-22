@@ -14,7 +14,7 @@ In this file functions are modified to be compatible with the gui.
 """
 
 
-def analysisFMR(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, phases: np.ndarray, user_folder: str, sample_folder: str, measurement_folder: str, ref_n = 0, show_plots=True, for_notebook=False) -> tuple[np.ndarray, np.ndarray]:
+def analysisFMR(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, phases: np.ndarray, user_folder: str, sample_folder: str, measurement_folder: str, ref_n = 0, show_plots=True) -> tuple[np.ndarray, np.ndarray]:
     """
     This function takes as input the frequencies, fields, amplitudes and phases and plots relevant data for FMR resonance.
     ref_n is the index number for the reference measurement, default is zero.
@@ -57,11 +57,7 @@ def analysisFMR(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, ph
     # Plotting
     if show_plots:
 
-        if for_notebook:
-            plt.figure(figsize=(15,24))
-            plt.subplot(3,1,1)
-        else:
-            plt.figure( figsize=(FULLSCREEN_SIZE) )
+        plt.figure( figsize=(FULLSCREEN_SIZE) )
         plt.title("Imag(U)")
         for i in range(n_traces): 
             plt.plot(freq[0:]/10**9, traces[i,0:],linewidth=1.5)
@@ -71,15 +67,11 @@ def analysisFMR(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, ph
         plt.xticks(fontsize=AXIS_FONTSIZE)
         plt.yticks(fontsize=AXIS_FONTSIZE)
         plt.grid()
-        if not(for_notebook):
-            plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\imag_u.png")
+        plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\imag_u.png")
 
 
 
-        if for_notebook:
-            plt.subplot(3,1,2)
-        else:
-            plt.figure( figsize=(FULLSCREEN_SIZE) ) 
+        plt.figure( figsize=(FULLSCREEN_SIZE) ) 
         plt.title("Real(U)")
         for i in range(len(traces)): 
             plt.plot(freq[0:]/10**9, Ur[i,0:], linewidth=1.5)
@@ -89,13 +81,9 @@ def analysisFMR(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, ph
         plt.xticks(fontsize=AXIS_FONTSIZE)
         plt.yticks(fontsize=AXIS_FONTSIZE)
         plt.grid()
-        if not(for_notebook):
-            plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\real_u.png")
+        plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\real_u.png")
 
-        if for_notebook:
-            plt.subplot(3,1,3)
-        else:
-            plt.figure( figsize=(FULLSCREEN_SIZE) )
+        plt.figure( figsize=(FULLSCREEN_SIZE) )
         plt.title("Transmission coefficient")
         for i in range(n_traces): 
             plt.plot(freq[0:]/10**9, amplitudes[i,0:], linewidth=1.5)
@@ -105,14 +93,10 @@ def analysisFMR(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, ph
         plt.xticks(fontsize=AXIS_FONTSIZE)
         plt.yticks(fontsize=AXIS_FONTSIZE)
         plt.grid()
-        if not(for_notebook):
-            plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\t_coeff.png")
+        plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\t_coeff.png")
         
 
-        if for_notebook:
-            plt.subplot(3,1,3)
-        else:
-            plt.figure( figsize=(FULLSCREEN_SIZE) ) 
+        plt.figure( figsize=(FULLSCREEN_SIZE) ) 
         plt.title("Phase")
         for i in range(n_traces): 
             plt.plot(freq[0:]/10**9, phases[i,0:], linewidth=1.5)
@@ -122,8 +106,7 @@ def analysisFMR(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, ph
         plt.xticks(fontsize=AXIS_FONTSIZE)
         plt.yticks(fontsize=AXIS_FONTSIZE)
         plt.grid()
-        if not(for_notebook):
-            plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\phase.png")
+        plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\phase.png")
 
     return traces, Us
 
@@ -371,7 +354,7 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
 
 
 
-def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, phases: np.ndarray, user_folder: str, sample_folder: str, measurement_folder: str, s_parameter: str, ref_n = 0, show_plots=True, for_notebook=False) -> tuple[np.ndarray, np.ndarray]:
+def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, phases: np.ndarray, user_folder: str, sample_folder: str, measurement_folder: str, s_parameter: str, ref_n = 0, show_plots=True) -> tuple[np.ndarray, np.ndarray]:
     """
     This function takes as input the frequencies, fields, amplitudes and phases and plots relevant data for FMR resonance.
     ref_n is the index number for the reference measurement, default is zero.
@@ -380,12 +363,12 @@ def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, pha
     n_traces = len(amplitudes[:,0])
     n_points = len(freq)
 
+    # init
     traces_no_background_real = np.zeros((n_traces, n_points))
     traces_no_background_imag = np.zeros((n_traces, n_points))
     traces_no_background_complex = np.zeros((n_traces, n_points), dtype = 'complex_')
     amplitudes_no_background = np.zeros((n_traces, n_points))
     
-
     amp_ref, phase_ref = amplitudes[ref_n], phases[ref_n]
     phase_ref = unwrap_phase(phase_ref)
 
@@ -400,9 +383,10 @@ def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, pha
         traces_no_background_imag[i,:] = np.imag(traces_no_background_complex[i,:])
         amplitudes_no_background[i,:] = amplitudes[i,:] - amp_ref
 
-
+    # Init
     amplitudes_dB = np.zeros((n_traces, n_points))
     amplitudes_dB_no_background = np.zeros((n_traces, n_points))
+
     for i in range(n_traces):
         amplitudes_dB[i,:] = 20*np.log10(amplitudes[i,:])
         amplitudes_dB_no_background[i,:] = 20*np.log10(amplitudes_no_background[i,:])
@@ -411,11 +395,7 @@ def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, pha
     # Plotting
     if show_plots:
 
-        if for_notebook:
-            plt.figure(figsize=(15,24))
-            plt.subplot(3,1,1)
-        else:
-            plt.figure( figsize=(FULLSCREEN_SIZE) )
+        plt.figure( figsize=(FULLSCREEN_SIZE) )
         plt.title("Imaginary part (no background)")
         for i in range(n_traces): 
             plt.plot(freq[0:]/10**9, traces_no_background_imag[i,0:], marker=MARKER, markersize=MARKER_SIZE,linewidth=1.5)
@@ -425,15 +405,10 @@ def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, pha
         plt.xticks(fontsize=AXIS_FONTSIZE)
         plt.yticks(fontsize=AXIS_FONTSIZE)
         plt.grid()
-        if not(for_notebook):
-            plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\imag.png")
+        plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\imag.png")
 
 
-
-        if for_notebook:
-            plt.subplot(3,1,2)
-        else:
-            plt.figure( figsize=(FULLSCREEN_SIZE) ) 
+        plt.figure( figsize=(FULLSCREEN_SIZE) ) 
         plt.title("Real part (no background)")
         for i in range(len(traces_no_background_real)): 
             plt.plot(freq[0:]/10**9, traces_no_background_real[i,0:], linewidth=1.5)
@@ -443,14 +418,10 @@ def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, pha
         plt.xticks(fontsize=AXIS_FONTSIZE)
         plt.yticks(fontsize=AXIS_FONTSIZE)
         plt.grid()
-        if not(for_notebook):
-            plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\real.png")
+        plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\real.png")
 
 
-        if for_notebook:
-            plt.subplot(3,1,3)
-        else:
-            plt.figure( figsize=(FULLSCREEN_SIZE) )
+        plt.figure( figsize=(FULLSCREEN_SIZE) )
         plt.title("Transmission coefficient")
         for i in range(n_traces): 
             plt.plot(freq[0:]/10**9, amplitudes[i,0:], linewidth=1.5)
@@ -460,14 +431,10 @@ def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, pha
         plt.xticks(fontsize=AXIS_FONTSIZE)
         plt.yticks(fontsize=AXIS_FONTSIZE)
         plt.grid()
-        if not(for_notebook):
-            plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\t_coeff.png")
+        plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\t_coeff.png")
         
 
-        if for_notebook:
-            plt.subplot(3,1,3)
-        else:
-            plt.figure( figsize=(FULLSCREEN_SIZE) ) 
+        plt.figure( figsize=(FULLSCREEN_SIZE) ) 
         plt.title("Phase")
         for i in range(n_traces): 
             plt.plot(freq[0:]/10**9, phases[i,0:], linewidth=1.5)
@@ -477,14 +444,10 @@ def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, pha
         plt.xticks(fontsize=AXIS_FONTSIZE)
         plt.yticks(fontsize=AXIS_FONTSIZE)
         plt.grid()
-        if not(for_notebook):
-            plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\phase.png")
+        plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\phase.png")
 
         
-        if for_notebook:
-            plt.subplot(3,1,3)
-        else:
-            plt.figure( figsize=(FULLSCREEN_SIZE) ) 
+        plt.figure( figsize=(FULLSCREEN_SIZE) ) 
         plt.title("Transmission coefficient (dB)")
         for i in range(n_traces): 
             plt.plot(freq[0:]/10**9, amplitudes_dB[i,0:], linewidth=1.5)
@@ -494,13 +457,10 @@ def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, pha
         plt.xticks(fontsize=AXIS_FONTSIZE)
         plt.yticks(fontsize=AXIS_FONTSIZE)
         plt.grid()
-        if not(for_notebook):
-            plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\trasmission_dB.png")
+        plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\trasmission_dB.png")
 
-        if for_notebook:
-            plt.subplot(3,1,3)
-        else:
-            plt.figure( figsize=(FULLSCREEN_SIZE) ) 
+
+        plt.figure( figsize=(FULLSCREEN_SIZE) ) 
         plt.title("Transmission coefficient no background (dB)")
         for i in range(n_traces): 
             plt.plot(freq[0:]/10**9, amplitudes_dB_no_background[i,0:], linewidth=1.5)
@@ -510,8 +470,7 @@ def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, pha
         plt.xticks(fontsize=AXIS_FONTSIZE)
         plt.yticks(fontsize=AXIS_FONTSIZE)
         plt.grid()
-        if not(for_notebook):
-            plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\trasmission_dB_no_background.png")
+        plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\trasmission_dB_no_background.png")
 
     return [traces_no_background_imag, traces_no_background_complex]
 
