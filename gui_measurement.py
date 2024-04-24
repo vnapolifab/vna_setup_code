@@ -56,7 +56,8 @@ settings["measurement_name"] = measurement_routine(
     settings["sample_name"],
     settings["measurement_name"],
     settings["dipole_mode"],
-    settings["s_parameter"]
+    settings["s_parameter"],
+    demag=True
 )
 
 # Save metadata:

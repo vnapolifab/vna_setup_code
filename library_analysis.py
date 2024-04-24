@@ -153,7 +153,7 @@ def analysisKittel(freq: np.ndarray, traces: np.ndarray, fields: np.ndarray, use
     return f_max, M_fit
 
 
-def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndarray, user_folder: str, sample_folder: str, measurement_folder: str, show_plots=True, for_notebook=False) -> None:
+def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndarray, user_folder: str, sample_folder: str, measurement_folder: str, show_plots=True) -> None:
     fields_no_ref = fields[1:]
     n_freq_points = u_freq_sweep.shape[1] - 1
 
