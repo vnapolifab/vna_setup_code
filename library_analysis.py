@@ -216,7 +216,22 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
     width = np.zeros(n_freq_points)
     peak = np.zeros(n_freq_points)
 
+
+    #Useful to create the legend of the fitted spectra with the background present
+    j = 0
+    i = 0
+    frequencies_tri = [0]*3*len(freqs)
+
     for i in range(n_freq_points):
+        frequencies_tri[j] = freqs[i]
+        frequencies_tri[j+1] = freqs[i]
+        frequencies_tri[j+2] = freqs[i]
+        j = j+3
+
+
+
+    for i in range(n_freq_points):
+
 
         if DEBUG_MODE:
                
@@ -270,7 +285,6 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
 
             # # PLOTS
             c = next(colors)
-            plt.legend([ f"{f/10**9:.2f} GHz" for f in freqs ])
             plt.plot(fields_no_ref, u_field_sweep[i,:], marker=MARKER, markersize=MARKER_SIZE, color=c)
             plt.plot(fields_no_ref, lorentzian_curve(fields_no_ref, center[i], width[i], peak[i], a, b, x1, x2, m), "-.", color=c)
             plt.plot(fields_no_ref, background, "--", color=c)
@@ -282,12 +296,13 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
            
             # da aggiungere la legenda
             plt.title("Fitted data (with background)")
-            plt.legend([ f"{f/10**9:.2f} GHz" for f in freqs ])
+            plt.legend([ f"{f/10**9:.2f} GHz" for f in frequencies_tri ])
             plt.xlabel("External Field (mT)", fontsize=AXIS_FONTSIZE)
             plt.ylabel("Suscettivity (arb. u.)", fontsize=AXIS_FONTSIZE)
             plt.xticks(fontsize=AXIS_FONTSIZE)
             plt.yticks(fontsize=AXIS_FONTSIZE)
             plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\Fitted data (with background).png")
+
     plt.grid()
 
 

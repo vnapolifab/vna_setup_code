@@ -4,3 +4,4 @@
 /local/
 last_settings.json
 log_file.log
+controller.py
