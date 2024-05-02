@@ -76,3 +76,31 @@
 
 
     
+    Date-time: 2024-05-02 09:48:11
+    User: YIG-PLD campaign
+    File name: frequency sweep
+    Description: 20mTorr annealed in RTP in oxygen atmosphere close to the thermocouple
+
+
+    
+    Date-time: 2024-05-02 09:58:33
+    User: YIG-PLD campaign
+    File name: test
+    Description: 
+
+
+    
+    Date-time: 2024-05-02 10:02:31
+    User: YIG-PLD campaign
+    File name: frequency sweep
+    Description: 
+
+
+    
+    Date-time: 2024-05-02 10:12:32
+    User: YIG-PLD campaign
+    File name: field sweep
+    Description: 
+
+
+    
