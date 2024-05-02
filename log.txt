@@ -104,3 +104,31 @@
 
 
     
+    Date-time: 2024-05-02 11:58:40
+    User: YIG LPE
+    File name: test
+    Description: 
+
+
+    
+    Date-time: 2024-05-02 12:02:21
+    User: YIG LPE
+    File name: frequency sweep
+    Description: Reference measurement
+
+
+    
+    Date-time: 2024-05-02 12:12:27
+    User: YIG LPE
+    File name: field sweep
+    Description: Reference measurement
+
+
+    
+    Date-time: 2024-05-02 13:04:22
+    User: YIG LPE
+    File name: field sweep 2
+    Description: 
+
+
+    
