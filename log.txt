@@ -132,3 +132,87 @@
 
 
     
+    Date-time: 2024-05-02 16:37:56
+    User: YIG LPE
+    File name: frequency sweep new setup
+    Description: 
+
+
+    
+    Date-time: 2024-05-02 16:51:02
+    User: YIG LPE
+    File name: frequency sweep new setup
+    Description: 
+
+
+    
+    Date-time: 2024-05-02 17:04:21
+    User: YIG LPE
+    File name: frequency sweep new setup 2
+    Description: 
+
+
+    
+    Date-time: 2024-05-02 17:12:54
+    User: YIG LPE
+    File name: frequency sweep new setup 3
+    Description: 
+
+
+    
+    Date-time: 2024-05-02 17:21:26
+    User: YIG LPE
+    File name: frequency sweep new setup 4
+    Description: 
+
+
+    
+    Date-time: 2024-05-02 17:28:49
+    User: YIG LPE
+    File name: frequency sweep new setup 5
+    Description: 
+
+
+    
+    Date-time: 2024-05-02 17:40:04
+    User: YIG LPE
+    File name: frequency sweep new setup 6
+    Description: 
+
+
+    
+    Date-time: 2024-05-02 17:47:51
+    User: YIG LPE
+    File name: frequency sweep new setup 6 2
+    Description: 
+
+
+    
+    Date-time: 2024-05-02 17:53:43
+    User: YIG LPE
+    File name: frequency sweep new setup 7
+    Description: 
+
+
+    
+    Date-time: 2024-05-02 18:04:18
+    User: YIG LPE
+    File name: frequency sweep new setup 8
+    Description: 
+
+
+    
+    Date-time: 2024-05-03 10:46:29
+    User: YIG LPE
+    File name: Frequency sweep (coils) 1
+    Description: Frequency sweep using coils instead on electromagnets
+
+
+    
+    Date-time: 2024-05-03 11:08:18
+    User: YIG LPE
+    File name: Field sweep (coils) 1 2
+    Description: Field sweep using coils instead on electromagnets
+
+
+    
