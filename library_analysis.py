@@ -169,7 +169,7 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
 
 
     # U must be used or the fit won't work ----> la Lorentziana usata per fittare ha fondo nullo, se non normalizzi riportando il fondo a zero (come si fa nel calcolo di U) la curva non fitta
-    g, mu0  = 1.7e11, 4e-7*np.pi
+    g, mu0  = 1.76e11, 4e-7*np.pi
     conversion = 795.7747  # the field needs to be transformed in A/m before being used
 
     alpha, alpha_raw, FWHMs = np.zeros([n_freq_points,]), np.zeros([n_freq_points,]), np.zeros([n_freq_points,])
@@ -350,6 +350,17 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
 
     plt.figure( figsize=(FULLSCREEN_SIZE) )
     plt.plot(field_peaks, FWHMs, marker=MARKER, markersize=MARKER_SIZE)
+    plt.title("$\\Delta$H vs H")
+    plt.xlabel("External Field (mT)", fontsize=AXIS_FONTSIZE)
+    plt.ylabel("FWHM (mT)", fontsize=AXIS_FONTSIZE)
+    plt.xticks(fontsize=AXIS_FONTSIZE)
+    plt.yticks(fontsize=AXIS_FONTSIZE)
+    plt.grid()
+    plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\Delta H vs H.png")
+
+
+    plt.figure( figsize=(FULLSCREEN_SIZE) )
+    plt.plot(freqs[:-1], FWHMs, marker=MARKER, markersize=MARKER_SIZE)
     plt.title("$\\Delta$H vs H")
     plt.xlabel("External Field (mT)", fontsize=AXIS_FONTSIZE)
     plt.ylabel("FWHM (mT)", fontsize=AXIS_FONTSIZE)
