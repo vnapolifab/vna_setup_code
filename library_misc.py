@@ -55,6 +55,11 @@ def load_and_convert(filename: str) -> tuple[list[float], list[float], list[floa
     amp = matrix[:, 1]
     #phase = matrix[:, 2] * np.pi / 180
     phase = matrix[:, 2]
+    # freq = matrix[0]
+    # # amp = 10 ** (matrix[1] / 10)
+    # amp = matrix[1]
+    # #phase = matrix[2] * np.pi / 180
+    # phase = matrix[2]
 
     return freq, amp, phase
 
