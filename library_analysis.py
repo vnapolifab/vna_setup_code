@@ -359,15 +359,15 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
     plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\Delta H vs H.png")
 
 
-    plt.figure( figsize=(FULLSCREEN_SIZE) )
-    plt.plot(freqs[:-1], FWHMs, marker=MARKER, markersize=MARKER_SIZE)
-    plt.title("$\\Delta$H vs H")
-    plt.xlabel("External Field (mT)", fontsize=AXIS_FONTSIZE)
-    plt.ylabel("FWHM (mT)", fontsize=AXIS_FONTSIZE)
-    plt.xticks(fontsize=AXIS_FONTSIZE)
-    plt.yticks(fontsize=AXIS_FONTSIZE)
-    plt.grid()
-    plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\Delta H vs H.png")
+    #plt.figure( figsize=(FULLSCREEN_SIZE) )
+    #plt.plot(freqs[:-1], FWHMs, marker=MARKER, markersize=MARKER_SIZE)
+    #plt.title("$\\Delta$H vs H")
+    #plt.xlabel("External Field (mT)", fontsize=AXIS_FONTSIZE)
+    #plt.ylabel("FWHM (mT)", fontsize=AXIS_FONTSIZE)
+    #plt.xticks(fontsize=AXIS_FONTSIZE)
+    #plt.yticks(fontsize=AXIS_FONTSIZE)
+    #plt.grid()
+    #plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\Delta H vs H.png")
 
 
     # print("\n*** Averaged data: ***")
