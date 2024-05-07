@@ -13,12 +13,11 @@ from CONSTANTS import *
 
 
 class GUI:
-    def __init__(self, root, entries):
+    inputs = {}
+
+    def __init__(self, root):
         self.root = root
         self.set_style()
-        self.setup_gui(entries)
-        self.root.mainloop()
-        self.root.quit()
 
 
     def set_style(self):
@@ -33,23 +32,59 @@ class GUI:
         self.root.configure(bg='light grey')
 
 
-    def setup_gui(self, entries):
+    def run_gui(self, entries, buttons):
         self.root.title("Parameter Input GUI")
-        self.root.geometry("750x800")
+        self.root.geometry("500x700")
+        self.entries = entries
+        self.buttons = buttons
 
-        for i, entry in enumerate(entries.values()):
+        for i, entry in enumerate(self.entries.values()):
             entry.setup(self, i)
 
+        for j, button in enumerate(self.buttons.values()):
+            button.setup(self, i+j+1)
+        
+        self.root.mainloop()
+        self.root.quit()
+        
+
+    def clear_all(self):
+        for name, entry in zip(self.entries.keys(), self.entries.values()):
+            entry.clear()
+    
+
+    def get_values(self):
+        self.inputs = {}
+        for name, entry in zip(self.entries.keys(), self.entries.values()):
+            if entry.entry_type == GUI_input.BUTTON: 
+                continue
+
+            if not(entry.is_valid()):
+                tk.messagebox.showerror(title=None, message=f'Input for "{entry.param_desc.lower()}" is not valid!')
+                return
+            
+            self.inputs[entry.param_name] = entry.get()
+
+        self.root.quit()
+
+
+    def load(self, filename):
+        with open(filename, "r") as f:
+            json_obj = json.load(f)
+        for param, val  in zip(json_obj.keys(), json_obj.values()):
+            if param in self.entries.keys():
+                self.entries[param].write(val)
 
 
 
-class GUI_entry(ABC):
+
+class GUI_input(ABC):
     TEXT = 1
     COMBOBOX = 2
     BUTTON = 3
-    # value = tk.StringVar()
 
-    def __init__(self, param_name, param_desc, is_valid_func=lambda x:True):
+    def __init__(self, gui, param_name, param_desc):
+        self.gui = gui
         self.param_name = param_name
         self.param_desc = param_desc
 
@@ -69,157 +104,177 @@ class GUI_entry(ABC):
     def write():
         pass
 
+    @abstractmethod
+    def get():
+        pass
 
 
-class GUI_entry_standard_text(GUI_entry):
-    entry_type = GUI_entry.TEXT
 
-    def __init__(self, param_name, param_desc):
-        super().__init__(param_name, param_desc)
+
+class GUI_input_standard_text(GUI_input):
+    entry_type = GUI_input.TEXT
+
+    def __init__(self, gui, param_name, param_desc):
+        super().__init__(gui, param_name, param_desc)
 
     def setup(self, gui, row):
         ttk.Label(gui.root, text=self.param_desc, background='light grey').grid(row=row, column=0, sticky="w", padx=5, pady=5)
-        self.entry = ttk.Entry(gui.root, width=50)
-        self.entry.grid(row=row, column=1, sticky="ew", padx=5, pady=5)
+        self.entry_var = ttk.Entry(gui.root, width=50)
+        self.entry_var.grid(row=row, column=1, sticky="ew", padx=5, pady=5)
     
     def is_valid(self):
-        if self.entry.get() != "":
+        if self.entry_var.get() != "":
             return True
         else:
             return False
 
     def clear(self):
-        self.entry.delete(0, tk.END)
+        self.entry_var.delete(0, tk.END)
 
-    def write(self):
-        pass
+    def write(self, content):
+        self.clear()
+        self.entry_var.insert(0, content)
 
     def print_value(self):
-        print(self.entry.get())
+        print(self.entry_var.get())
+
+    def get(self):
+        return self.entry_var.get()
 
 
+class GUI_input_combobox(GUI_input):
+    entry_type = GUI_input.COMBOBOX
 
-class GUI_entry_combobox(GUI_entry):
-    entry_type = GUI_entry.COMBOBOX
-
-    def __init__(self, param_name, param_desc, values):
+    def __init__(self, gui, param_name, param_desc, values):
         self.values = values
-        super().__init__(param_name, param_desc)
+        super().__init__(gui, param_name, param_desc)
 
     def setup(self, gui, row):
         ttk.Label(gui.root, text=self.param_name, background='light grey').grid(row=row, column=0, sticky="w", padx=5, pady=5)
-        self.entry = ttk.Combobox(gui.root, state="readonly", values=self.values, width=50)
-        self.entry.grid(row=row, column=1, sticky="ew", padx=5, pady=5)
-        self.entry.bind('<<ComboboxSelected>>', self.print_value)
+        self.entry_var = ttk.Combobox(gui.root, state="readonly", values=self.values, width=50)
+        self.entry_var.grid(row=row, column=1, sticky="ew", padx=5, pady=5)
+        self.entry_var.bind('<<ComboboxSelected>>', self.on_change)
 
     def is_valid(self):
-        if self.entry.get() != "":
+        if self.entry_var.get() != "":
             return True
         else:
             return False
 
     def clear(self):
-        pass
+        self.entry_var.set("")
 
-    def write(self):
-        pass
+    def write(self, content):
+        self.entry_var.set(content)
 
-    def print_value(self, event):
-        print(self.entry.get())
+    def on_change(self, event):
+        print("Changed value")
 
-
-
-class GUI_entry_submit_button(GUI_entry):
-    entry_type = GUI_entry.BUTTON
-
-    def __init__(self, param_name, param_desc):
-        super().__init__(param_name, param_desc)
-
-    def setup(self, gui, row):
-        self.entry = ttk.Button(gui.root, text=self.param_desc, command=self.on_press, width=20)
-        self.entry.grid(row=row, column=1, columnspan=1, padx=10, pady=10)
-
-    def on_press(self):
-        print(f"{"Parameter":20} | {"Validity":20}")
-        print("-"*30)
-        for key, val in zip(entries.keys(), entries.values()):
-            print(f"{key:20} | {val.is_valid()}")
-
-    def is_valid(self):
-        return True
-
-    def clear(self):
-        pass
-
-    def write(self):
-        pass
+    def get(self):
+        return self.entry_var.get()
 
 
 
-class GUI_entry_clear_button(GUI_entry):
-    entry_type = GUI_entry.BUTTON
 
-    def __init__(self, param_name, param_desc):
-        super().__init__(param_name, param_desc)
+class GUI_button(ABC):
+    def __init__(self, gui, button_name):
+        self.gui = gui
+        self.button_name = button_name
 
     def setup(self, gui, row):
-        self.entry = ttk.Button(gui.root, text=self.param_desc, command=self.on_press, width=20)
-        self.entry.grid(row=row, column=1, columnspan=1, padx=10, pady=10)
+        self.entry_var = ttk.Button(gui.root, text=self.button_name, command=self.on_press, width=20)
+        self.entry_var.grid(row=row, column=1, columnspan=1, padx=10, pady=10)
+
+    @abstractmethod
+    def on_press(self):
+        pass
+
+
+class GUI_button_submit(GUI_button):
+    def __init__(self, gui, button_name):
+        super().__init__(gui, button_name)
 
     def on_press(self):
-        for name, entry in zip(entries.keys(), entries.values()):
-            if entry.entry_type == GUI_entry.TEXT:
-                entry.clear()
-
-    def is_valid(self):
-        return True
-
-    def clear(self):
-        pass
-
-    def write(self):
-        pass
+        gui.get_values()
 
 
+class GUI_button_clear(GUI_button):
+    entry_type = GUI_input.BUTTON
+
+    def __init__(self, gui, button_name):
+        super().__init__(gui, button_name)
+
+    def on_press(self):
+        gui.clear_all()
+
+
+class GUI_button_load_last_settings(GUI_button):
+    entry_type = GUI_input.BUTTON
+
+    def __init__(self, gui, button_name):
+        super().__init__(gui, button_name)
+
+    def on_press(self):
+        gui.load("last_settings.json")
+
+
+
+
+
+def gui_startup():
+    global gui
+    gui = GUI(root=tk.Tk())
+
+    entries = {
+        
+        "user_name" : GUI_input_combobox(gui=gui, param_name="user_name", param_desc="User", values=[1,2,3]),
+        
+        "sample_name" : GUI_input_combobox(gui=gui, param_name="sample_name", param_desc="Sample", values=[1,2,3]),
+        
+        "measurement_name" : GUI_input_standard_text(gui=gui, param_name="measurement_name", param_desc="Measurement name"),
+
+        "description" : GUI_input_standard_text(gui=gui, param_name="description", param_desc="Description"),
+
+        "dipole_mode" : GUI_input_combobox(gui=gui, param_name="dipole_mode", param_desc="Dipole mode", values=[1,2,3]),
+
+        "s_parameter" : GUI_input_standard_text(gui=gui, param_name="s_parameter", param_desc="Field sweep [mT]"),
+
+        "field_sweep" : GUI_input_standard_text(gui=gui, param_name="field_sweep", param_desc="Field sweep [mT]"),
+
+        "angle" : GUI_input_standard_text(gui=gui, param_name="angle", param_desc="Angle [deg]"),
+
+        "start_frequency" : GUI_input_standard_text(gui=gui, param_name="start_frequency", param_desc="Start frequency [GHz]"),
+
+        "stop_frequency" : GUI_input_standard_text(gui=gui, param_name="stop_frequency", param_desc="Stop frequency [GHz]"),
+        
+        "number_of_points" : GUI_input_standard_text(gui=gui, param_name="number_of_points", param_desc="Number of points"),
+        
+        "bandwith" : GUI_input_standard_text(gui=gui, param_name="bandwidth", param_desc="Bandwidth [Hz]"),
+
+        "power" : GUI_input_standard_text(gui=gui, param_name="power", param_desc="Power [dBm]"),
+        
+        "ref_field" : GUI_input_standard_text(gui=gui, param_name="ref_field", param_desc="Ref field [mT]"),
+
+    }
+
+
+    buttons = {
+        "submit" : GUI_button_submit(gui=gui, button_name="Submit"),
+        "clear" : GUI_button_clear(gui=gui, button_name="Clear"),
+        "load"  : GUI_button_load_last_settings(gui=gui, button_name="Load last settings")
+    }
+
+
+
+    gui.run_gui(entries=entries, buttons=buttons)
+
+    return gui.inputs if gui.inputs else None
 
 
 
 if __name__ == "__main__":
-    root = tk.Tk()
+    ans = gui_startup()    
 
-    entries = {
-        
-        "user_name" : GUI_entry_combobox(param_name="user_name", param_desc="User", values=[1,2,3]),
-        
-        "sample_name" : GUI_entry_combobox(param_name="sample_name", param_desc="Sample", values=[1,2,3]),
-        
-        "measurement_name" : GUI_entry_standard_text(param_name="measurement_name", param_desc="Measurement name"),
+    print(ans)
 
-        "description" : GUI_entry_standard_text(param_name="description", param_desc="Description"),
-
-        "dipole_mode" : GUI_entry_combobox(param_name="dipole_mode", param_desc="Dipole mode", values=[1,2,3]),
-
-        "s_parameter" : GUI_entry_standard_text(param_name="s_parameter", param_desc="Field sweep [mT]"),
-
-        "field_sweep" : GUI_entry_standard_text(param_name="field_sweep", param_desc="Field sweep [mT]"),
-
-        "angle" : GUI_entry_standard_text(param_name="angle", param_desc="Angle [deg]"),
-
-        "start_frequency" : GUI_entry_standard_text(param_name="start_frequency", param_desc="Start frequency [GHz]"),
-
-        "stop_frequency" : GUI_entry_standard_text(param_name="stop_frequency", param_desc="Stop frequency [GHz]"),
-        
-        "number_of_points" : GUI_entry_standard_text(param_name="number_of_points", param_desc="Number of points"),
-        
-        "bandwith" : GUI_entry_standard_text(param_name="bandwidth", param_desc="Bandwidth [Hz]"),
-
-        "power" : GUI_entry_standard_text(param_name="power", param_desc="Power [dBm]"),
-        
-        "ref_field" : GUI_entry_standard_text(param_name="ref_field", param_desc="Ref field [mT]"),
-
-        "submit" : GUI_entry_submit_button(param_name="submit", param_desc="Submit"),
-
-        "clear" : GUI_entry_clear_button(param_name="clear", param_desc="Clear")
-    }
-
-    GUI(root, entries=entries)
+    
