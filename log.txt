@@ -377,3 +377,94 @@
 
 
     
+    Date-time: 2024-05-07 11:43:29
+    User: YIG LPE
+    File name: Field sweep coil radiaus equal coil gap
+    Description: Field sweep at most uniform field confi
+
+
+    
+    Date-time: 2024-05-07 11:59:47
+    User: YIG LPE
+    File name: Field sweep coil radiaus equal coil gap1
+    Description: Field sweep at most uniform field confi
+
+
+    
+    Date-time: 2024-05-07 12:18:23
+    User: YIG LPE
+    File name: Field sweep coil radiaus equal coil gap off centre
+    Description: Field sweep at most uniform field confi
+
+
+    
+    Date-time: 2024-05-07 12:34:32
+    User: YIG-PLD campaign
+    File name: Field sweep coil radiaus equal coil gap
+    Description: Field sweep at most uniform field confi
+
+
+    
+    Date-time: 2024-05-07 13:04:22
+    User: YIG-PLD campaign
+    File name: Field sweep coil radiaus equal coil gap 2
+    Description: Field sweep at most uniform field confi
+
+
+    
+    Date-time: 2024-05-07 13:27:02
+    User: YIG LPE
+    File name: Field sweep coil radiaus equal coil gap diagonal
+    Description: Field sweep at most uniform field confi
+
+
+    
+    Date-time: 2024-05-07 15:28:04
+    User: YIG LPE
+    File name: Freq sweep at fixed field kepco
+    Description: 
+
+
+    
+    Date-time: 2024-05-07 16:00:40
+    User: YIG LPE
+    File name: Freq sweep at fixed field kepco 2
+    Description: 
+
+
+    
+    Date-time: 2024-05-07 16:18:53
+    User: YIG LPE
+    File name: Freq sweep at fixed field kepco 3
+    Description: 
+
+
+    
+    Date-time: 2024-05-07 17:01:23
+    User: YIG LPE
+    File name: Freq sweep at fixed field coil_F2031 2
+    Description: 
+
+
+    
+    Date-time: 2024-05-07 18:14:14
+    User: YIG LPE
+    File name: Freq sweep at fixed field coil_F2031 3
+    Description: 
+
+
+    
+    Date-time: 2024-05-07 18:31:01
+    User: YIG LPE
+    File name: Freq sweep at fixed field coil_F2031 7
+    Description: 
+
+
+    
+    Date-time: 2024-05-07 18:43:30
+    User: YIG LPE
+    File name: Freq sweep at fixed field coil_F2031 7
+    Description: 
+
+
+    
