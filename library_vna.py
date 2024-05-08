@@ -165,9 +165,9 @@ def measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument,
         elif (dipole == 1 and (Sparam == 'S11' or Sparam == 'S13' or Sparam == 'S31' or Sparam == 'S33')):
             ps = ps2
             # conversion = 63.150
-            # conversion = 8.1667  # Coils 
+            conversion = 8.240  #coils gap = coil radius 
             # conversion = 6.886  # Coils 
-            conversion = 9.646 # Coils 
+            #conversion = 9.646 # Coils 
 
         elif (dipole == 3):
             ps = ps1
