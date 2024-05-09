@@ -537,6 +537,18 @@ def printSettings(settings):
                 field_sweep_truncated.append( np.round(field*10**10)/10**10 )
             settings[key] = field_sweep_truncated
 
+            if len(field_sweep)>10:
+                print(f"> {key} : [", end="")
+                for field in field_sweep[0:7]:
+                    print(f"{field}, ", end="")
+                print("...", end="")
+                for field in field_sweep[-4:]:
+                    print(f", {field}", end="")
+                print("]")
+            else:
+                print(f"> {key} : {settings[key]}")
+            continue
+
         print(f"> {key} : {settings[key]}")
     print("\n")
 

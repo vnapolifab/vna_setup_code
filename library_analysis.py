@@ -37,6 +37,7 @@ def analysisFMR(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, ph
         #U = 1j * (np.log((amp * np.exp(1j * phase*0)) / (amp_ref * np.exp(0))) / np.log(amp_ref * np.exp(0)))
         #U = 1j * (np.log((amp * np.exp(1j * phase)) / (amp_ref * np.exp(1j * phase_ref))) / np.log(amp_ref * np.exp(1j * phase_ref)))
         U = -1j * (((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) / (amp_ref * np.exp(1j * phase_ref)))
+        #U = (((amp) - (amp_ref)) / (amp_ref ))
         # U[0] = 0  # First value explodes due to discontinuity
  
         Ur[i,:] = np.real(U)
@@ -155,7 +156,7 @@ def analysisKittel(freq: np.ndarray, traces: np.ndarray, fields: np.ndarray, use
 
 def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndarray, user_folder: str, sample_folder: str, measurement_folder: str, show_plots=True) -> None:
     fields_no_ref = fields[1:]
-    n_freq_points = u_freq_sweep.shape[1] - 1
+    n_freq_points = u_freq_sweep.shape[1] 
 
     # Defines u_field_sweep: rows are field dependent, columns frequency dependent
     u_field_sweep = np.transpose(u_freq_sweep[1:, :])  # [1:, :] to exclude first freq sweep (reference)
@@ -280,7 +281,7 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
             FWHMs[i] = width[i]
             alpha[i] = conversion*(width[i]*g*mu0)/(4*np.pi*freqs[i])
             
-            print(f"{freqs[i]/10**9:.2f}) Alpha: {alpha[i]:.5f}\n") 
+            print(f"Frequency: {freqs[i]/10**9:.2f}) Alpha: {alpha[i]:.5f}\n") 
 
 
             # # PLOTS
@@ -348,6 +349,30 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
 
     # Other plots
 
+    #Get alpha from linear fit of FWHMs vs f
+    #TODO understand if it was implemented properely or not: differs in excess by a factor 2 with respect to the alpha obtained by Lorentzian fit
+    [alpha_slope,inhomog] = linear_fit(freqs,FWHMs,[0,0])
+    alpha_slope_array = np.zeros(len(freqs))
+    print(f"Inhomogeneous broadening: {inhomog:.5f}\n") 
+
+    for i in range(len(freqs)):
+        alpha_slope_array[i] = line_curve(freqs[i],alpha_slope,inhomog)*g/(2*np.pi*freqs[i]*conversion)
+        print(f"Frequency: {freqs[i]/10**9:.2f}) Alpha from slope: {alpha_slope_array[i]:.5f}\n") 
+
+
+
+    plt.figure( figsize=(FULLSCREEN_SIZE) )
+    plt.plot(freqs/1e9, FWHMs, marker=MARKER, markersize=MARKER_SIZE)
+    plt.plot(freqs/1e9, line_curve(freqs,alpha_slope,inhomog), marker=MARKER, markersize=MARKER_SIZE)
+    plt.title("$\\Delta$H vs f")
+    plt.xlabel("f (GHz)", fontsize=AXIS_FONTSIZE)
+    plt.ylabel("$\\Delta$H (mT)", fontsize=AXIS_FONTSIZE)
+    plt.xticks(fontsize=AXIS_FONTSIZE)
+    plt.yticks(fontsize=AXIS_FONTSIZE)
+    plt.grid()
+    plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\Delta H vs f.png")
+
+
     plt.figure( figsize=(FULLSCREEN_SIZE) )
     plt.plot(field_peaks, FWHMs, marker=MARKER, markersize=MARKER_SIZE)
     plt.title("$\\Delta$H vs H")
@@ -359,15 +384,15 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
     plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\Delta H vs H.png")
 
 
-    #plt.figure( figsize=(FULLSCREEN_SIZE) )
-    #plt.plot(freqs[:-1], FWHMs, marker=MARKER, markersize=MARKER_SIZE)
-    #plt.title("$\\Delta$H vs H")
-    #plt.xlabel("External Field (mT)", fontsize=AXIS_FONTSIZE)
-    #plt.ylabel("FWHM (mT)", fontsize=AXIS_FONTSIZE)
-    #plt.xticks(fontsize=AXIS_FONTSIZE)
-    #plt.yticks(fontsize=AXIS_FONTSIZE)
-    #plt.grid()
-    #plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\Delta H vs H.png")
+    plt.figure( figsize=(FULLSCREEN_SIZE) )
+    plt.plot(freqs/1e9, field_peaks, marker=MARKER, markersize=MARKER_SIZE)
+    plt.title("Hr vs f")
+    plt.xlabel("f (Hz)", fontsize=AXIS_FONTSIZE)
+    plt.ylabel("Hr (mT)", fontsize=AXIS_FONTSIZE)
+    plt.xticks(fontsize=AXIS_FONTSIZE)
+    plt.yticks(fontsize=AXIS_FONTSIZE)
+    plt.grid()
+    plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\Hr vs f.png")
 
 
     # print("\n*** Averaged data: ***")
@@ -546,7 +571,6 @@ def FMR_tang(H0, M):
     Takes as input the external field and the saturation magnetization.
     """
 
-    g = 1.7e11
     mu0 = 4e-7 * np.pi
     H = H0 * 1e-3 / mu0
     FMR =  ((g * mu0)/(2*np.pi)) * np.sqrt(H * (H + M))
@@ -603,7 +627,7 @@ def lorentzian_fit(x,y,initial_guess):
         
     except:  # TODO specificare l'eccezione giusta, questo deve venire riportato se non trova la giusta interpolazione
         return float("nan"), float("nan"), float("nan"), float("nan"), float("nan"), float("nan"), float("nan"), float("nan")
-    
+       
 
 def multi_lorentzian_fit(x,y,initial_guess):
     """
@@ -695,3 +719,26 @@ def double_lorentzian_curve(x, center_1, fwhm_1, peak_height_1, center_2, fwhm_2
     lorentzian = lorentzian1 + lorentzian2 + background
 
     return lorentzian
+
+
+def linear_fit(x,y,initial_guess):
+    """
+    Fits data with a linear curve.
+    """
+    
+    try:
+        popt, pcov = curve_fit(line_curve, x, y, initial_guess, bounds = ([0,0], [np.inf,np.inf]))
+        [a,b] = popt
+        return a, b
+        
+    except:  # TODO specificare l'eccezione giusta, questo deve venire riportato se non trova la giusta interpolazione
+        return float("nan"), float("nan")
+    
+
+def line_curve(x, a=0, b=0):
+    """
+    Generates a line curve.
+    """
+    line =  a*x+b
+
+    return line

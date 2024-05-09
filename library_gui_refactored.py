@@ -153,6 +153,41 @@ class GUI_input_text(GUI_input):
 
 
 
+class GUI_input_text_field_sweep(GUI_input_text):
+
+    def is_valid(self):
+        if self.entry_var.get() != "" or self.mandatory == False:
+            return True
+        else:
+            return False
+
+    def get(self):
+        field_sweep_str = self.entry_var.get()
+        try:
+            # Check if the input string uses range notation (e.g., "1:1:5")
+            if ':' in field_sweep_str:
+                # Split the string by ':' to get start, step, stop values
+                start, step, stop = map(float, field_sweep_str.split(':'))
+                # Use range to generate the list of numbers
+                field_sweep_list = list(np.arange(start, stop + 0.00001, step))  # +0.00001 fa includere il numero finale, TODO trovare un modo migliore per includerlo
+            else:
+                # For comma-separated values, convert string to list of integers
+                # Handle both with and without brackets
+                if not field_sweep_str.startswith('['):
+                    field_sweep_str = f'[{field_sweep_str}]'
+                field_sweep_list = ast.literal_eval(field_sweep_str)
+                # Ensure the result is a list of floats
+                field_sweep_list = list(np.array(field_sweep_list).astype(float))
+            
+            for i in range(len(field_sweep_list)):
+                field_sweep_list[i] = ( np.round(field_sweep_list[i] *10**10)/10**10 )
+            
+            return field_sweep_list
+        except (ValueError, SyntaxError) as e:
+            return None
+    
+    
+
 # ====================== COMBOBOX ======================
 
 
@@ -282,16 +317,16 @@ def gui_startup():
         GUI_input_combobox_sample_name( gui=gui,    param_name="sample_name",          param_desc="Sample",                values=[]),
         GUI_input_text(                 gui=gui,    param_name="measurement_name",     param_desc="Measurement name"       ),
         GUI_input_text(                 gui=gui,    param_name="description",          param_desc="Description",           mandatory=False),
-        GUI_input_combobox(             gui=gui,    param_name="dipole_mode",          param_desc="Dipole mode",           values=[]),
-        GUI_input_text(                 gui=gui,    param_name="s_parameter",          param_desc="Field sweep [mT]"       ),
-        GUI_input_text(                 gui=gui,    param_name="field_sweep",          param_desc="Field sweep [mT]"       ),
-        GUI_input_text(                 gui=gui,    param_name="angle",                param_desc="Angle [deg]"            ),
+        GUI_input_combobox(             gui=gui,    param_name="dipole_mode",          param_desc="Dipole mode",           values=[1]),
+        GUI_input_text_field_sweep(     gui=gui,    param_name="s_parameter",          param_desc="Field sweep [mT]"       ),
+        GUI_input_text(                 gui=gui,    param_name="angle",                param_desc="Angle [deg]",           mandatory=False), # TODO chagne it so it si not mandatory only in osme dipole mode
         GUI_input_text(                 gui=gui,    param_name="start_frequency",      param_desc="Start frequency [GHz]"  ),
         GUI_input_text(                 gui=gui,    param_name="stop_frequency",       param_desc="Stop frequency [GHz]"   ),
         GUI_input_text(                 gui=gui,    param_name="number_of_points",     param_desc="Number of points"       ),
         GUI_input_text(                 gui=gui,    param_name="bandwidth",            param_desc="Bandwidth [Hz]"         ),
         GUI_input_text(                 gui=gui,    param_name="power",                param_desc="Power [dBm]"            ),
         GUI_input_text(                 gui=gui,    param_name="ref_field",            param_desc="Ref field [mT]"         ),
+        GUI_input_text(                 gui=gui,    param_name="cal_file",             param_desc="Calibration file"       ),
     ]
 
 
@@ -311,7 +346,40 @@ def gui_startup():
 
 if __name__ == "__main__":
     ans = gui_startup()    
-
     print(ans)
 
     
+
+# class Person(ABC):
+
+#     @abstractmethod
+#     def __init__(self, age, height, weight):
+#         self.age = age
+#         self.height = height
+#         self.weight = weight
+
+#     @abstractmethod
+#     def lose_weight(self):
+#         pass
+
+    
+
+
+# class Student(Person):
+
+#     def __init__(self, average_mark, **kwargs):
+#         self.average_mark = average_mark
+#         super().__init__(**kwargs)
+
+#     def lose_weight(self):
+#         print("something")
+
+    
+    
+
+
+
+
+# student1 = Student(average_mark=28, age=18, height=180, weight=75)
+
+# print(student1.average_mark, student1.age)
