@@ -72,7 +72,7 @@ def save_metadata(settings: object) -> None:
     # Save metadata:
     # settings["field_sweep"] = list(field_sweep.astype(float))  # updates field sweep with reference measurement, astype converts to float to avoid issues with int32 json formatting
     # settings["number_of_points"] = np.round(settings["number_of_points"])
-
+    print(filename)
     with open(f'{DATA_FOLDER_NAME}/{user_folder}/{sample_name}/{filename}/measurement_info.json', 'w') as f:
         json.dump(settings, f, indent=4)
 
@@ -108,6 +108,15 @@ def load_measurement(user_folder: str, sample_folder: str, folder_name: str) -> 
         phases.append(p)
     
     return np.array(f), np.array(field_sweep), np.array(amps), np.array(phases)
+
+
+def save_settings(settings):    
+    """
+    Save the current settings to a file.
+    """
+    settings_file = os.path.join(os.path.dirname(__file__), "last_settings.json")
+    with open(settings_file, "w") as f:
+        json.dump(settings, f, indent=4)
 
 
 def sendWarning(s: str):

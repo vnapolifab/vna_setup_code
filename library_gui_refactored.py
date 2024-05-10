@@ -3,7 +3,6 @@ import numpy as np
 import ast
 import json
 from abc import ABC, abstractmethod
-from icecream import ic
 
 import tkinter as tk
 from tkinter import ttk, messagebox
@@ -35,7 +34,7 @@ class GUI:
 
     def run_gui(self, entries, buttons):
         self.root.title("Parameter Input GUI")
-        self.root.geometry("500x700")
+        self.root.geometry("500x800")
         self.entries = entries
         self.buttons = buttons
 
@@ -74,8 +73,6 @@ class GUI:
                 return
             
             self.inputs[entry.param_name] = entry.get()
-
-        self.root.quit()
 
 
     def load(self, filename):
@@ -186,7 +183,28 @@ class GUI_input_text_field_sweep(GUI_input_text):
         except (ValueError, SyntaxError) as e:
             return None
     
+        
+class GUI_input_text_to_freq(GUI_input_text):
+    def __init__(self, func=lambda string : float(string), *args, **kwargs):
+        self.func = func
+        super().__init__(*args, **kwargs)
+
+    def write(self, content):
+        self.clear()
+        self.entry_var.insert(0, content/10**9)
+
+    def get(self):
+        return self.func(self.entry_var.get())
     
+
+class GUI_input_text_to_number(GUI_input_text):
+    def __init__(self, func=lambda string : float(string), *args, **kwargs):
+        self.func = func
+        super().__init__(*args, **kwargs)
+
+    def get(self):
+        return self.func(self.entry_var.get())
+
 
 # ====================== COMBOBOX ======================
 
@@ -263,6 +281,14 @@ class GUI_input_combobox_sample_name(GUI_input_combobox):
             self.entry_var_text.grid_remove()
             
 
+class GUI_input_combobox_dipole_mode(GUI_input_combobox):
+    rows_occupied = 2
+    NEW_SAMPLE = "---New Sample---"
+
+    def get(self):
+        combobox_input = super().get()
+        return int(combobox_input)
+
 
 # ====================== BUTTONS ======================
 
@@ -286,6 +312,7 @@ class GUI_button(ABC):
 class GUI_button_submit(GUI_button):
     def on_press(self):
         self.gui.get_values()
+        self.gui.root.quit()
 
 
 class GUI_button_clear(GUI_button):
@@ -309,7 +336,7 @@ def find_subfolder(folder_path):
 
 
 
-def gui_startup():
+def gui_measurement_startup():
     gui = GUI(root=tk.Tk())
 
     entries = [
@@ -317,16 +344,17 @@ def gui_startup():
         GUI_input_combobox_sample_name( gui=gui,    param_name="sample_name",          param_desc="Sample",                values=[]),
         GUI_input_text(                 gui=gui,    param_name="measurement_name",     param_desc="Measurement name"       ),
         GUI_input_text(                 gui=gui,    param_name="description",          param_desc="Description",           mandatory=False),
-        GUI_input_combobox(             gui=gui,    param_name="dipole_mode",          param_desc="Dipole mode",           values=[1]),
-        GUI_input_text_field_sweep(     gui=gui,    param_name="s_parameter",          param_desc="Field sweep [mT]"       ),
+        GUI_input_combobox_dipole_mode( gui=gui,    param_name="dipole_mode",          param_desc="Dipole mode",           values=[1]),
+        GUI_input_combobox(             gui=gui,    param_name="s_parameter",          param_desc="S Parameter",           values=["S13"]),
+        GUI_input_text_field_sweep(     gui=gui,    param_name="field_sweep",          param_desc="Field sweep [mT]"       ),
         GUI_input_text(                 gui=gui,    param_name="angle",                param_desc="Angle [deg]",           mandatory=False), # TODO chagne it so it si not mandatory only in osme dipole mode
-        GUI_input_text(                 gui=gui,    param_name="start_frequency",      param_desc="Start frequency [GHz]"  ),
-        GUI_input_text(                 gui=gui,    param_name="stop_frequency",       param_desc="Stop frequency [GHz]"   ),
-        GUI_input_text(                 gui=gui,    param_name="number_of_points",     param_desc="Number of points"       ),
-        GUI_input_text(                 gui=gui,    param_name="bandwidth",            param_desc="Bandwidth [Hz]"         ),
-        GUI_input_text(                 gui=gui,    param_name="power",                param_desc="Power [dBm]"            ),
-        GUI_input_text(                 gui=gui,    param_name="ref_field",            param_desc="Ref field [mT]"         ),
-        GUI_input_text(                 gui=gui,    param_name="cal_file",             param_desc="Calibration file"       ),
+        GUI_input_text_to_freq(         gui=gui,    param_name="start_frequency",      param_desc="Start frequency [GHz]", func=lambda x : float(x)*10**9),
+        GUI_input_text_to_freq(         gui=gui,    param_name="stop_frequency",       param_desc="Stop frequency [GHz]",  func=lambda x : float(x)*10**9),
+        GUI_input_text_to_number(       gui=gui,    param_name="number_of_points",     param_desc="Number of points",      func=lambda x : int(x)),
+        GUI_input_text_to_number(       gui=gui,    param_name="bandwidth",            param_desc="Bandwidth [Hz]"         ),
+        GUI_input_text_to_number(       gui=gui,    param_name="power",                param_desc="Power [dBm]"            ),
+        GUI_input_text_to_number(       gui=gui,    param_name="ref_field",            param_desc="Ref field [mT]"         ),
+        GUI_input_text(                 gui=gui,    param_name="cal_file",             param_desc="Calibration file",      mandatory=False),
     ]
 
 
@@ -345,41 +373,5 @@ def gui_startup():
 
 
 if __name__ == "__main__":
-    ans = gui_startup()    
+    ans = gui_measurement_startup()    
     print(ans)
-
-    
-
-# class Person(ABC):
-
-#     @abstractmethod
-#     def __init__(self, age, height, weight):
-#         self.age = age
-#         self.height = height
-#         self.weight = weight
-
-#     @abstractmethod
-#     def lose_weight(self):
-#         pass
-
-    
-
-
-# class Student(Person):
-
-#     def __init__(self, average_mark, **kwargs):
-#         self.average_mark = average_mark
-#         super().__init__(**kwargs)
-
-#     def lose_weight(self):
-#         print("something")
-
-    
-    
-
-
-
-
-# student1 = Student(average_mark=28, age=18, height=180, weight=75)
-
-# print(student1.average_mark, student1.age)

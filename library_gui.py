@@ -64,16 +64,6 @@ class ParameterInputGUI:
             return None
     
 
-    def save_settings(self):    
-        """
-        Save the current settings to a file.
-        """
-        settings_file = os.path.join(os.path.dirname(__file__), "last_settings.json")
-        with open(settings_file, "w") as f:
-            json.dump(self.settings, f, indent=4)
-        # messagebox.showinfo("Settings Saved", "The settings have been saved successfully.")    
-    
-
     def load_last_settings(self):
         """
         Load settings from a file and update the GUI fields accordingly.
@@ -208,7 +198,6 @@ class ParameterInputGUI:
         self.settings["start_frequency"] = self.settings["start_frequency"] * 10**9   # From GHz to Hz conversion
         self.settings["stop_frequency"]  = self.settings["stop_frequency"] * 10**9
 
-        self.save_settings()  # Call save_settings to save the inputs
         self.root.quit()  # Close the GUI
 
     

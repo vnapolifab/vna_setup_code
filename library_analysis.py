@@ -355,22 +355,22 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
     alpha_slope_array = np.zeros(len(freqs))
     print(f"Inhomogeneous broadening: {inhomog:.5f}\n") 
 
-    for i in range(len(freqs)):
-        alpha_slope_array[i] = line_curve(freqs[i],alpha_slope,inhomog)*g/(2*np.pi*freqs[i]*conversion)
-        print(f"Frequency: {freqs[i]/10**9:.2f}) Alpha from slope: {alpha_slope_array[i]:.5f}\n") 
+    # for i in range(len(freqs)):
+    #     alpha_slope_array[i] = line_curve(freqs[i],alpha_slope,inhomog)*g/(2*np.pi*freqs[i]*conversion)
+    #     print(f"Frequency: {freqs[i]/10**9:.2f}) Alpha from slope: {alpha_slope_array[i]:.5f}\n") 
 
 
 
-    plt.figure( figsize=(FULLSCREEN_SIZE) )
-    plt.plot(freqs/1e9, FWHMs, marker=MARKER, markersize=MARKER_SIZE)
-    plt.plot(freqs/1e9, line_curve(freqs,alpha_slope,inhomog), marker=MARKER, markersize=MARKER_SIZE)
-    plt.title("$\\Delta$H vs f")
-    plt.xlabel("f (GHz)", fontsize=AXIS_FONTSIZE)
-    plt.ylabel("$\\Delta$H (mT)", fontsize=AXIS_FONTSIZE)
-    plt.xticks(fontsize=AXIS_FONTSIZE)
-    plt.yticks(fontsize=AXIS_FONTSIZE)
-    plt.grid()
-    plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\Delta H vs f.png")
+    # plt.figure( figsize=(FULLSCREEN_SIZE) )
+    # plt.plot(freqs/1e9, FWHMs, marker=MARKER, markersize=MARKER_SIZE)
+    # plt.plot(freqs/1e9, line_curve(freqs,alpha_slope,inhomog), marker=MARKER, markersize=MARKER_SIZE)
+    # plt.title("$\\Delta$H vs f")
+    # plt.xlabel("f (GHz)", fontsize=AXIS_FONTSIZE)
+    # plt.ylabel("$\\Delta$H (mT)", fontsize=AXIS_FONTSIZE)
+    # plt.xticks(fontsize=AXIS_FONTSIZE)
+    # plt.yticks(fontsize=AXIS_FONTSIZE)
+    # plt.grid()
+    # plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\Delta H vs f.png")
 
 
     plt.figure( figsize=(FULLSCREEN_SIZE) )
@@ -571,7 +571,7 @@ def FMR_tang(H0, M):
     Takes as input the external field and the saturation magnetization.
     """
 
-    mu0 = 4e-7 * np.pi
+    g, mu0  = 1.76e11, 4e-7*np.pi
     H = H0 * 1e-3 / mu0
     FMR =  ((g * mu0)/(2*np.pi)) * np.sqrt(H * (H + M))
     return FMR
