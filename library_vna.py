@@ -40,6 +40,7 @@ def setupConnectionVNA(give_additional_info: bool = False) -> RsInstrument:
     return instr
 
 
+
 def applySettings(instr: RsInstrument, settings: object) -> None:
     """
     This function takes the instrument object and a settings dict variable, then translates settings from the settings variable in queries for the VNA.
@@ -65,6 +66,7 @@ def applySettings(instr: RsInstrument, settings: object) -> None:
     # instr.write_str(":MMEMORY:LOAD:CORRection  1, 'calibration_08_02_2024.cal'")
 
     instr.visa_timeout = ( settings['bandwidth']**-1 * settings['number_of_points'] *10 )*1000  + 100  # estimation times an arbitrary coeff 
+
 
 
 def measure_dB(instr: RsInstrument, Sparam: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -96,6 +98,7 @@ def measure_dB(instr: RsInstrument, Sparam: str) -> tuple[np.ndarray, np.ndarray
     phase = np.zeros(len(amp_db))
 
     return freq, amp_db, phase
+
 
 
 def measure_amp_and_phase(instr: RsInstrument, Sparam: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
