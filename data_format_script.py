@@ -5,17 +5,18 @@ from icecream import ic
 import numpy as np
 import pandas as pd
 
-root_directory = "local\DATA - Test new format"
+
+data_dir = r"local\DATA"
 
 print("\n"*5)
-if input(f"Are you sure tou want to execute this script on the folder '{root_directory}'? [y/n]\n> ") != "y":
+if input(f"Are you sure tou want to execute this script on the folder '{data_dir}'? [y/n]\n> ") != "y":
     raise Exception("Script was not executed")
 
 # ------
 
-def find_final_subdirectories(root_dir: str) -> list[str]:
+def find_final_subdirectories(data_dir: str) -> list[str]:
     final_subdirectories = []
-    for dirpath, dirnames, filenames in os.walk(root_dir):
+    for dirpath, dirnames, filenames in os.walk(data_dir):
         if not dirnames:  # If there are no subdirectories
             # jsonpath = os.path.join(dirpath, "measurement_info.json")
             # final_subdirectories.append((jsonpath, os.path.exists(jsonpath)))
@@ -36,7 +37,7 @@ def correct_format(text: str) -> str:
 # Step 1: commentare il codice sotto questo step e controllare che il codice legge correttamente tutte le misure
 # ==========================
 
-meas_paths = find_final_subdirectories(root_directory)
+meas_paths = find_final_subdirectories(data_dir)
 
 flag = True
 for i, path in enumerate(meas_paths):
@@ -80,44 +81,64 @@ for i, path in enumerate(meas_paths):
             print(f"=== {f_path} does not exist\n")
 
 
-# # ==========================
-# # Step 2: scommentare il codice e rigirare tutto
-# # ==========================
-
-       
-#     csvs = []
-#     for j, file_path in enumerate(files_path):
-
-#         # if i==0:
-#         #     print(file_path)
-
-#         with open(file_path, "r") as f:
-#             csvs.append(pd.read_csv(f))
-       
-#         csvs[j].columns=["Frequency", "Amplitude", "Phase"]
-#         csvs[j].insert(loc=1, column="Field", value=field_sweep[j])
-   
-
-#     final_csv = pd.concat(csvs)
-
-#     final_csv.to_csv(os.path.join(path, f"{meas}.csv"), index=False)
-
-#     for j, file_path in enumerate(files_path):
-#         # ic(file_path)
-#         os.remove(file_path)
 
 
-    # # --- Moves png in plots folder
 
-    # plots = list(filter(lambda x : ".png" in x, os.listdir(path)))
-    # if len(plots) == 0:
-    #     continue
 
-    # os.mkdir(os.path.join(path, "Plots"))
+    if True:
 
-    # plot_paths = [os.path.join(path, plot) for plot in plots]
+    # # ==========================
+    # # Step 2: scommentare il codice e rigirare tutto
+    # # ==========================
 
-    # for plot, plot_path in zip(plots, plot_paths):
-    #     # ic(plot_path, os.path.join(path, "Plots", plot))
-    #     os.rename(plot_path, os.path.join(path, "Plots", plot))
+
+        with open(os.path.join(path, "measurement_info.json"), "r") as f:
+            metadata = json.load(f)
+
+        metadata["start_frequency"] = metadata["start_frequency"] / 10**9
+        metadata["stop_frequency"] = metadata["stop_frequency"] / 10**9
+        field_sweep = metadata.pop("field_sweep")
+        metadata["field_sweep"] = field_sweep
+
+        # with open(os.path.join(path, "measurement_info.json"), "w") as f:
+            # metadata = json.dump(metadata, f, indent=4)
+
+
+        csvs = []
+        for j, file_path in enumerate(files_path):
+
+            # if i==0:
+            #     print(file_path)
+
+            with open(file_path, "r") as f:
+                csvs.append(pd.read_csv(f, header=None))
+        
+            csvs[j].columns=["Frequency", "Amplitude", "Phase"]
+            csvs[j].insert(loc=1, column="Field", value=field_sweep[j])
     
+
+        final_csv = pd.concat(csvs)
+
+        final_csv.to_csv(os.path.join(path, f"{meas}.csv"), index=False)
+
+        for j, file_path in enumerate(files_path):
+            # ic(file_path)
+            os.remove(file_path)
+
+
+        # --- Moves png in plots folder
+
+        plots = list(filter(lambda x : ".png" in x, os.listdir(path)))
+        if len(plots) == 0:
+            continue
+
+        os.mkdir(os.path.join(path, "Plots"))
+
+        plot_paths = [os.path.join(path, plot) for plot in plots]
+
+        for plot, plot_path in zip(plots, plot_paths):
+            # ic(plot_path, os.path.join(path, "Plots", plot))
+            os.rename(plot_path, os.path.join(path, "Plots", plot))
+
+        
+        
