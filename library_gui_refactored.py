@@ -350,7 +350,7 @@ def find_subfolder(folder_path):
 
 
 def gui_measurement_startup():
-    gui = GUI(root=tk.Tk(), size="500x800", "Parameter Input GUI")
+    gui = GUI(root=tk.Tk(), size="500x800", title="Parameter Input GUI")
 
     entries = [
         GUI_input_combobox_user_name(   gui=gui,    param_name="user_name",            param_desc="User",                  values=[GUI_input_combobox_user_name.NEW_USER] + find_subfolder(DATA_FOLDER_NAME)),
