@@ -11,11 +11,13 @@ import tkinter.font as tkFont
 from library_misc import *
 from CONSTANTS import *
 
+class EntryNotFound(Exception):
+    pass
 
 class GUI:
     inputs = {}
 
-    def __init__(self, root):
+    def __init__(self, root, size, title):
         self.root = root
         self.set_style()
 
@@ -33,8 +35,8 @@ class GUI:
 
 
     def run_gui(self, entries, buttons):
-        self.root.title("Parameter Input GUI")
-        self.root.geometry("500x800")
+        self.root.title(self.title)
+        self.root.geometry(self.size)
         self.entries = entries
         self.buttons = buttons
 
@@ -56,7 +58,7 @@ class GUI:
         for entry in self.entries:
             if entry.param_name == param_name:
                 return entry
-        raise Exception(f"Parameter {param_name} is not associated with an GUI_Input object")
+        raise EntryNotFound(f"Parameter {param_name} is not associated with an GUI_Input object")
         
 
     def clear_all(self):
@@ -262,6 +264,7 @@ class GUI_input_combobox_user_name(GUI_input_combobox):
             self.gui.find_entry("sample_name").entry_var["values"] = [GUI_input_combobox_sample_name.NEW_SAMPLE] + find_subfolder( os.path.join(DATA_FOLDER_NAME, self.get()) )
 
 
+
 class GUI_input_combobox_sample_name(GUI_input_combobox):
     rows_occupied = 2
     NEW_SAMPLE = "---New Sample---"
@@ -279,7 +282,8 @@ class GUI_input_combobox_sample_name(GUI_input_combobox):
             self.entry_var_text.grid(row=self.row+1, column=1, sticky="ew", padx=5, pady=5)
         else:
             self.entry_var_text.grid_remove()
-            
+
+
 
 class GUI_input_combobox_dipole_mode(GUI_input_combobox):
     rows_occupied = 2
@@ -288,6 +292,15 @@ class GUI_input_combobox_dipole_mode(GUI_input_combobox):
     def get(self):
         combobox_input = super().get()
         return int(combobox_input)
+
+
+class GUI_input_combobox_user_name_for_analysis(GUI_input_combobox):
+    def on_change(self, event):
+        self.gui.find_entry("sample_name").entry_var["values"] = find_subfolder( os.path.join(DATA_FOLDER_NAME, self.get()) )
+
+class GUI_input_combobox_sample_name_for_analysis(GUI_input_combobox):
+    def on_change(self, event):
+        self.gui.find_entry("measurement_name").entry_var["values"] = find_subfolder( os.path.join(DATA_FOLDER_NAME, self.gui.find_entry("user_name").get(), self.get()) )
 
 
 # ====================== BUTTONS ======================
@@ -337,7 +350,7 @@ def find_subfolder(folder_path):
 
 
 def gui_measurement_startup():
-    gui = GUI(root=tk.Tk())
+    gui = GUI(root=tk.Tk(), size="500x800", "Parameter Input GUI")
 
     entries = [
         GUI_input_combobox_user_name(   gui=gui,    param_name="user_name",            param_desc="User",                  values=[GUI_input_combobox_user_name.NEW_USER] + find_subfolder(DATA_FOLDER_NAME)),
@@ -372,6 +385,27 @@ def gui_measurement_startup():
 
 
 
+
+def gui_select_measurement_startup():
+    gui = GUI(root=tk.Tk())
+
+    entries = [
+        GUI_input_combobox_user_name_for_analysis(  gui=gui, param_name="user_name",                 param_desc="User",             values=find_subfolder(DATA_FOLDER_NAME)),
+        GUI_input_combobox_sample_name_for_analysis(gui=gui, param_name="sample_name",               param_desc="Sample",           values=[]),
+        GUI_input_combobox(                         gui=gui, param_name="measurement_name", param_desc="Measurement name", values=[]),
+    ]
+
+    buttons = [
+        GUI_button_submit(              gui=gui,    button_name="Submit"            ),
+    ]
+
+    gui.run_gui(entries=entries, buttons=buttons)
+
+    return gui.inputs if gui.inputs else None
+
+
+
+
 if __name__ == "__main__":
-    ans = gui_measurement_startup()    
+    ans = gui_select_measurement_startup()    
     print(ans)
