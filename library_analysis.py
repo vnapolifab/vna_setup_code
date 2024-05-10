@@ -156,7 +156,7 @@ def analysisKittel(freq: np.ndarray, traces: np.ndarray, fields: np.ndarray, use
 
 def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndarray, user_folder: str, sample_folder: str, measurement_folder: str, show_plots=True) -> None:
     fields_no_ref = fields[1:]
-    n_freq_points = u_freq_sweep.shape[1] 
+    n_freq_points = u_freq_sweep.shape[1]
 
     # Defines u_field_sweep: rows are field dependent, columns frequency dependent
     u_field_sweep = np.transpose(u_freq_sweep[1:, :])  # [1:, :] to exclude first freq sweep (reference)
@@ -351,19 +351,15 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
 
     #Get alpha from linear fit of FWHMs vs f
     #TODO understand if it was implemented properely or not: differs in excess by a factor 2 with respect to the alpha obtained by Lorentzian fit
-    [alpha_slope,inhomog] = linear_fit(freqs,FWHMs,[0,0])
-    alpha_slope_array = np.zeros(len(freqs))
-    print(f"Inhomogeneous broadening: {inhomog:.5f}\n") 
 
-    # for i in range(len(freqs)):
-    #     alpha_slope_array[i] = line_curve(freqs[i],alpha_slope,inhomog)*g/(2*np.pi*freqs[i]*conversion)
-    #     print(f"Frequency: {freqs[i]/10**9:.2f}) Alpha from slope: {alpha_slope_array[i]:.5f}\n") 
-
+    # [slope,inhomog] = linear_fit(freqs[0:-2],FWHMs[0:-2],[0,0])
+    # alpha_slope = slope*g/(2*np.pi*conversion)
+    # print(f"Inhomogeneous broadening: {inhomog:.5f} Alpha from slope: {alpha_slope:.5f}\n") 
 
 
     # plt.figure( figsize=(FULLSCREEN_SIZE) )
-    # plt.plot(freqs/1e9, FWHMs, marker=MARKER, markersize=MARKER_SIZE)
-    # plt.plot(freqs/1e9, line_curve(freqs,alpha_slope,inhomog), marker=MARKER, markersize=MARKER_SIZE)
+    # plt.plot(freqs[0:-2]/1e9, FWHMs[0:-2], marker=MARKER, markersize=MARKER_SIZE)
+    # plt.plot(freqs[0:-2]/1e9, line_curve(freqs[0:-2],slope,inhomog), marker=MARKER, markersize=MARKER_SIZE)
     # plt.title("$\\Delta$H vs f")
     # plt.xlabel("f (GHz)", fontsize=AXIS_FONTSIZE)
     # plt.ylabel("$\\Delta$H (mT)", fontsize=AXIS_FONTSIZE)
