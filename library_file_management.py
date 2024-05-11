@@ -55,7 +55,7 @@ def load_measurement(measurement_path: str, transpose: bool = False) -> tuple[np
     with open(os.path.join(measurement_path, "measurement_info.json"), "r") as f:
         metadata = json.load(f)
 
-    fields = ic(np.array(metadata["field_sweep"]))
+    fields = np.array(metadata["field_sweep"])
     n_field_points = len(fields)
     n_freq_points = metadata["number_of_points"]
     measurement_name = metadata["measurement_name"]
@@ -65,9 +65,7 @@ def load_measurement(measurement_path: str, transpose: bool = False) -> tuple[np
 
     amps, phases = np.zeros((n_field_points, n_freq_points)), np.zeros((n_field_points, n_freq_points))
     for i, field in enumerate(fields):
-        ic(field)
-        ic(df)
-        amps[i,:] = ic((df.loc[ df["Field"] == field ])["Amplitude"].to_numpy())
+        amps[i,:] = (df.loc[ df["Field"] == field ])["Amplitude"]
         phases[i,:] = (df.loc[ df["Field"] == field ])["Phase"]
 
     if transpose:
