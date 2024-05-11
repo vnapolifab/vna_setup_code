@@ -6,6 +6,7 @@ import json
 from itertools import cycle
 
 from library_misc import *
+from library_file_management import *
 from CONSTANTS import *
 
 """
@@ -14,7 +15,7 @@ In this file functions are modified to be compatible with the gui.
 """
 
 
-def analysisFMR(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, phases: np.ndarray, user_folder: str, sample_folder: str, measurement_folder: str, ref_n = 0, show_plots=True) -> tuple[np.ndarray, np.ndarray]:
+def analysisFMR(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, phases: np.ndarray, measurement_path: str, ref_n = 0, show_plots=True) -> tuple[np.ndarray, np.ndarray]:
     """
     This function takes as input the frequencies, fields, amplitudes and phases and plots relevant data for FMR resonance.
     ref_n is the index number for the reference measurement, default is zero.
@@ -61,59 +62,59 @@ def analysisFMR(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, ph
         plt.figure( figsize=(FULLSCREEN_SIZE) )
         plt.title("Imag(U)")
         for i in range(n_traces): 
-            plt.plot(freq[0:]/10**9, traces[i,0:],linewidth=1.5)
+            plt.plot(freq[0:], traces[i,0:],linewidth=1.5)
         plt.legend([f"{f} mT" for f in fields])
         plt.xlabel("Frequency (GHz)", fontsize=AXIS_FONTSIZE)
         plt.ylabel("Imag(U) [arb. u.]", fontsize=AXIS_FONTSIZE)
         plt.xticks(fontsize=AXIS_FONTSIZE)
         plt.yticks(fontsize=AXIS_FONTSIZE)
         plt.grid()
-        plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\imag_u.png")
+        save_plot(measurement_path, "imag_u.png")
 
 
 
         plt.figure( figsize=(FULLSCREEN_SIZE) ) 
         plt.title("Real(U)")
         for i in range(len(traces)): 
-            plt.plot(freq[0:]/10**9, Ur[i,0:], linewidth=1.5)
+            plt.plot(freq[0:], Ur[i,0:], linewidth=1.5)
         plt.legend([f"{f} mT" for f in fields])
         plt.xlabel("Frequency (GHz)", fontsize=AXIS_FONTSIZE)
         plt.ylabel("Re(U) [arb. u.]", fontsize=AXIS_FONTSIZE)
         plt.xticks(fontsize=AXIS_FONTSIZE)
         plt.yticks(fontsize=AXIS_FONTSIZE)
         plt.grid()
-        plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\real_u.png")
+        save_plot(measurement_path, "real_u.png")
 
         plt.figure( figsize=(FULLSCREEN_SIZE) )
         plt.title("Transmission coefficient")
         for i in range(n_traces): 
-            plt.plot(freq[0:]/10**9, amplitudes[i,0:], linewidth=1.5)
+            plt.plot(freq[0:], amplitudes[i,0:], linewidth=1.5)
         plt.legend([f"{f} mT" for f in fields])
         plt.xlabel("Frequency (GHz)", fontsize=AXIS_FONTSIZE)
         plt.ylabel("T", fontsize=AXIS_FONTSIZE)
         plt.xticks(fontsize=AXIS_FONTSIZE)
         plt.yticks(fontsize=AXIS_FONTSIZE)
         plt.grid()
-        plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\t_coeff.png")
+        save_plot(measurement_path, "t_coeff.png")
         
 
         plt.figure( figsize=(FULLSCREEN_SIZE) ) 
         plt.title("Phase")
         for i in range(n_traces): 
-            plt.plot(freq[0:]/10**9, phases[i,0:], linewidth=1.5)
+            plt.plot(freq[0:], phases[i,0:], linewidth=1.5)
         plt.legend([f"{f} mT" for f in fields])
         plt.xlabel("Frequency (GHz)", fontsize=AXIS_FONTSIZE)
         plt.ylabel("Phase", fontsize=AXIS_FONTSIZE)
         plt.xticks(fontsize=AXIS_FONTSIZE)
         plt.yticks(fontsize=AXIS_FONTSIZE)
         plt.grid()
-        plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\phase.png")
+        save_plot(measurement_path, "phase.png")
 
     return traces, Us
 
 
 
-def analysisKittel(freq: np.ndarray, traces: np.ndarray, fields: np.ndarray, user_folder: str, sample_folder: str, measurement_folder: object) -> tuple[np.ndarray, np.ndarray]:
+def analysisKittel(freq: np.ndarray, traces: np.ndarray, fields: np.ndarray, measurement_path: str) -> tuple[np.ndarray, np.ndarray]:
     """
     This function takes as input traces and fields and estimates Ms from a fit of the Kittel function.
     Returns frequencies of the FMR peaks and the Ms.
@@ -139,8 +140,8 @@ def analysisKittel(freq: np.ndarray, traces: np.ndarray, fields: np.ndarray, use
 
     plt.figure( figsize=(FULLSCREEN_SIZE) )
     
-    plt.plot(fields, np.array(f_max)/10**9)
-    plt.plot(fields, FMR_tang(fields, M_fit)/10**9)
+    plt.plot(fields, np.array(f_max))
+    plt.plot(fields, FMR_tang(fields, M_fit))
 
     plt.xlabel("External Field (mT)", fontsize=AXIS_FONTSIZE);
     plt.ylabel("Frequency (GHz)", fontsize=AXIS_FONTSIZE);
@@ -149,7 +150,7 @@ def analysisKittel(freq: np.ndarray, traces: np.ndarray, fields: np.ndarray, use
 
     plt.legend(["Measurement data", f"Fitted Kittel, Ms={M_fit/10**6:.3}e6 A/m"])
     plt.grid()
-    plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\Fitted Kittel.png")
+    save_plot(measurement_path, "Fitted Kittel.png")
 
     return f_max, M_fit
 

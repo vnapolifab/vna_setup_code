@@ -8,17 +8,17 @@ from tkinter import messagebox  # Import the messagebox module
 
 from library_analysis import *
 from library_gui import *
+from library_gui_refactored import *
 from library_vna import *
 from library_power_supply import *
 
 
 
-def analysis(user_folder: str, sample_folder: str, measure_folder: str) -> None:
-    freq, fields, amplitudes, phases = load_measurement(user_folder, sample_folder, measure_folder)
+def analysis(measurement_path: str) -> None:
+    freq, fields, amplitudes, phases = load_measurement(measurement_path)
 
-    [traces, Us] = analysisFMR(freq, fields, amplitudes, phases, user_folder, sample_folder, measure_folder, show_plots=True)  # Plots imag(U), real(U), trasmission
-    [peak_freq, Ms_fit] = analysisKittel(freq, traces, fields, user_folder, sample_folder, measure_folder)  # Plots Kittel function and fit
-    #The conversion factor between current and field was measured to be 53.2, yet its uniformity might play a role (ranges between 51-57)
+    [traces, Us] = analysisFMR(freq, fields, amplitudes, phases, measurement_path, show_plots=True)  # Plots imag(U), real(U), trasmission
+    [peak_freq, Ms_fit] = analysisKittel(freq, traces, fields, measurement_path)  # Plots Kittel function and fit
     
     plt.show()
 
@@ -26,6 +26,8 @@ def analysis(user_folder: str, sample_folder: str, measure_folder: str) -> None:
 
 if __name__ == "__main__":
     print("*** LOG SCREEN ***")
-    print("results and actions are reported here:\n")
 
-    user_folder, sample_folder, measure_folder = gui_folder_selection(func_on_submit = analysis)
+    measurement_path = gui_analysis_startup()
+    if measurement_path != None:
+        analysis(measurement_path)
+

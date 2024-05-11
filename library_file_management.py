@@ -3,6 +3,7 @@ import numpy as np
 import json
 import pandas as pd
 from icecream import ic
+from matplotlib import pyplot as plt
 
 from logger import logger
 import CONSTANTS as c
@@ -113,6 +114,11 @@ def save_settings(settings):
         json.dump(settings, f, indent=4)
 
 
+def save_plot(path: str, name: str):
+    folder_path = os.path.join(path, "Plots")
+    if not(os.path.exists(folder_path)):
+        os.mkdir(folder_path)
+    plt.savefig(os.path.join(folder_path, name))  # Might raise error if folder does not exist # TODO
 
 
 if __name__ == "__main__":

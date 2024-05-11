@@ -415,8 +415,8 @@ def gui_analysis_startup():
     gui = GUI(root=tk.Tk(), size="500x200", title="Parameter Input GUI")
 
     entries = [
-        GUI_input_combobox_user_name_for_analysis(  gui=gui, param_name="user_name",                 param_desc="User",             values=find_subfolder(DATA_FOLDER_NAME)),
-        GUI_input_combobox_sample_name_for_analysis(gui=gui, param_name="sample_name",               param_desc="Sample",           values=[]),
+        GUI_input_combobox_user_name_for_analysis(  gui=gui, param_name="user_name",        param_desc="User",             values=find_subfolder(DATA_FOLDER_NAME)),
+        GUI_input_combobox_sample_name_for_analysis(gui=gui, param_name="sample_name",      param_desc="Sample",           values=[]),
         GUI_input_combobox(                         gui=gui, param_name="measurement_name", param_desc="Measurement name", values=[]),
     ]
 
@@ -425,12 +425,12 @@ def gui_analysis_startup():
     ]
 
     gui.run_gui(entries=entries, buttons=buttons)
-
-    return gui.inputs if gui.inputs else None
+    
+    return os.path.join(c.DATA_FOLDER_NAME, gui.inputs["user_name"], gui.inputs["sample_name"], gui.inputs["measurement_name"]) if gui.inputs else None
 
 
 
 
 if __name__ == "__main__":
-    ans = gui_measurement_startup()    
+    ans = gui_analysis_startup()    
     print(ans)
