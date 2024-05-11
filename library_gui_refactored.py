@@ -3,13 +3,14 @@ import numpy as np
 import ast
 import json
 from abc import ABC, abstractmethod
+from icecream import ic
 
 import tkinter as tk
 from tkinter import ttk, messagebox
 import tkinter.font as tkFont
 
 from library_misc import *
-from CONSTANTS import *
+import CONSTANTS as c
 
 class EntryNotFound(Exception):
     pass
@@ -19,6 +20,8 @@ class GUI:
 
     def __init__(self, root, size, title):
         self.root = root
+        self.size = size
+        self.title = title
         self.set_style()
 
 
@@ -66,15 +69,22 @@ class GUI:
             entry.clear()
     
 
-    def get_values(self):
+    def get_value(self, param):
+        return self.find_entry(param).get()
+
+
+    def submit_values(self):
         self.inputs = {}
         for entry in self.entries:
 
-            if not(entry.is_valid()):
-                tk.messagebox.showerror(title=None, message=f'Input for "{entry.param_desc}" is not valid!')
+            valid, custom_error = entry.is_valid()
+            if not(valid):
+                message = custom_error if custom_error else f'Input for "{entry.param_desc}" is not valid!'
+                tk.messagebox.showerror(title=None, message=message)
                 return
             
             self.inputs[entry.param_name] = entry.get()
+        self.root.destroy()
 
 
     def load(self, filename):
@@ -132,10 +142,11 @@ class GUI_input_text(GUI_input):
         self.entry_var.grid(row=row, column=1, sticky="ew", padx=5, pady=5)
     
     def is_valid(self):
+        custom_error_message = None
         if self.entry_var.get() != "" or self.mandatory == False:
-            return True
+            return True, custom_error_message
         else:
-            return False
+            return False, custom_error_message
 
     def clear(self):
         self.entry_var.delete(0, tk.END)
@@ -151,14 +162,28 @@ class GUI_input_text(GUI_input):
         return self.entry_var.get()
 
 
+class GUI_input_text_measurement_name(GUI_input_text):
+    def is_valid(self):
+        custom_error_message = None
+        if self.entry_var.get() == "" and self.mandatory == True:
+            return False, custom_error_message
+        
+        path = os.path.join(c.DATA_FOLDER_NAME, self.gui.get_value("user_name"), self.gui.get_value("sample_name"), self.get())
+        print(path)
+        if not(os.path.exists(path)):
+            return True, None
+        else: 
+            return False, "This sample has already a measurement with this name!"
+
 
 class GUI_input_text_field_sweep(GUI_input_text):
 
     def is_valid(self):
+        custom_error_message = None
         if self.entry_var.get() != "" or self.mandatory == False:
-            return True
+            return True, custom_error_message
         else:
-            return False
+            return False, custom_error_message
 
     def get(self):
         field_sweep_str = self.entry_var.get()
@@ -225,10 +250,11 @@ class GUI_input_combobox(GUI_input):
         self.entry_var.bind('<<ComboboxSelected>>', self.on_change)
 
     def is_valid(self):
+        custom_error_message = None
         if self.entry_var.get() != "":
-            return True
+            return True, custom_error_message
         else:
-            return False
+            return False, custom_error_message
 
     def clear(self):
         self.entry_var.set("")
@@ -315,7 +341,7 @@ class GUI_button(ABC):
 
     def setup(self, row):
         self.entry_var = ttk.Button(self.gui.root, text=self.button_name, command=self.on_press, width=20)
-        self.entry_var.grid(row=row, column=1, columnspan=1, padx=10, pady=10)
+        self.entry_var.grid(row=row, column=0, columnspan=2, padx=10, pady=10)
 
     @abstractmethod
     def on_press(self):
@@ -324,8 +350,7 @@ class GUI_button(ABC):
 
 class GUI_button_submit(GUI_button):
     def on_press(self):
-        self.gui.get_values()
-        self.gui.root.quit()
+        self.gui.submit_values()
 
 
 class GUI_button_clear(GUI_button):
@@ -355,7 +380,7 @@ def gui_measurement_startup():
     entries = [
         GUI_input_combobox_user_name(   gui=gui,    param_name="user_name",            param_desc="User",                  values=[GUI_input_combobox_user_name.NEW_USER] + find_subfolder(DATA_FOLDER_NAME)),
         GUI_input_combobox_sample_name( gui=gui,    param_name="sample_name",          param_desc="Sample",                values=[]),
-        GUI_input_text(                 gui=gui,    param_name="measurement_name",     param_desc="Measurement name"       ),
+        GUI_input_text_measurement_name(gui=gui,    param_name="measurement_name",     param_desc="Measurement name"       ),
         GUI_input_text(                 gui=gui,    param_name="description",          param_desc="Description",           mandatory=False),
         GUI_input_combobox_dipole_mode( gui=gui,    param_name="dipole_mode",          param_desc="Dipole mode",           values=[1]),
         GUI_input_combobox(             gui=gui,    param_name="s_parameter",          param_desc="S Parameter",           values=["S13"]),
@@ -386,8 +411,8 @@ def gui_measurement_startup():
 
 
 
-def gui_select_measurement_startup():
-    gui = GUI(root=tk.Tk())
+def gui_analysis_startup():
+    gui = GUI(root=tk.Tk(), size="500x200", title="Parameter Input GUI")
 
     entries = [
         GUI_input_combobox_user_name_for_analysis(  gui=gui, param_name="user_name",                 param_desc="User",             values=find_subfolder(DATA_FOLDER_NAME)),
@@ -407,5 +432,5 @@ def gui_select_measurement_startup():
 
 
 if __name__ == "__main__":
-    ans = gui_select_measurement_startup()    
+    ans = gui_measurement_startup()    
     print(ans)
