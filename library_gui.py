@@ -168,7 +168,7 @@ class GUI_input_text_measurement_name(GUI_input_text):
         if self.entry_var.get() == "" and self.mandatory == True:
             return False, custom_error_message
         
-        path = os.path.join(c.DATA_FOLDER_NAME, self.gui.get_value("user_name"), self.gui.get_value("sample_name"), self.get())
+        path = os.path.join(c.c.DATA_FOLDER_NAME, self.gui.get_value("user_name"), self.gui.get_value("sample_name"), self.get())
         print(path)
         if not(os.path.exists(path)):
             return True, None
@@ -287,7 +287,7 @@ class GUI_input_combobox_user_name(GUI_input_combobox):
             self.gui.find_entry("sample_name").entry_var["values"] = [GUI_input_combobox_sample_name.NEW_SAMPLE]
         else:
             self.entry_var_text.grid_remove()
-            self.gui.find_entry("sample_name").entry_var["values"] = [GUI_input_combobox_sample_name.NEW_SAMPLE] + find_subfolder( os.path.join(DATA_FOLDER_NAME, self.get()) )
+            self.gui.find_entry("sample_name").entry_var["values"] = [GUI_input_combobox_sample_name.NEW_SAMPLE] + find_subfolder( os.path.join(c.DATA_FOLDER_NAME, self.get()) )
 
 
 
@@ -322,11 +322,11 @@ class GUI_input_combobox_dipole_mode(GUI_input_combobox):
 
 class GUI_input_combobox_user_name_for_analysis(GUI_input_combobox):
     def on_change(self, event):
-        self.gui.find_entry("sample_name").entry_var["values"] = find_subfolder( os.path.join(DATA_FOLDER_NAME, self.get()) )
+        self.gui.find_entry("sample_name").entry_var["values"] = find_subfolder( os.path.join(c.DATA_FOLDER_NAME, self.get()) )
 
 class GUI_input_combobox_sample_name_for_analysis(GUI_input_combobox):
     def on_change(self, event):
-        self.gui.find_entry("measurement_name").entry_var["values"] = find_subfolder( os.path.join(DATA_FOLDER_NAME, self.gui.find_entry("user_name").get(), self.get()) )
+        self.gui.find_entry("measurement_name").entry_var["values"] = find_subfolder( os.path.join(c.DATA_FOLDER_NAME, self.gui.find_entry("user_name").get(), self.get()) )
 
 
 # ====================== BUTTONS ======================
@@ -378,7 +378,7 @@ def gui_measurement_startup():
     gui = GUI(root=tk.Tk(), size="500x800", title="Parameter Input GUI")
 
     entries = [
-        GUI_input_combobox_user_name(   gui=gui,    param_name="user_name",            param_desc="User",                  values=[GUI_input_combobox_user_name.NEW_USER] + find_subfolder(DATA_FOLDER_NAME)),
+        GUI_input_combobox_user_name(   gui=gui,    param_name="user_name",            param_desc="User",                  values=[GUI_input_combobox_user_name.NEW_USER] + find_subfolder(c.DATA_FOLDER_NAME)),
         GUI_input_combobox_sample_name( gui=gui,    param_name="sample_name",          param_desc="Sample",                values=[]),
         GUI_input_text_measurement_name(gui=gui,    param_name="measurement_name",     param_desc="Measurement name"       ),
         GUI_input_text(                 gui=gui,    param_name="description",          param_desc="Description",           mandatory=False),
@@ -415,7 +415,7 @@ def gui_analysis_startup():
     gui = GUI(root=tk.Tk(), size="500x200", title="Parameter Input GUI")
 
     entries = [
-        GUI_input_combobox_user_name_for_analysis(  gui=gui, param_name="user_name",        param_desc="User",             values=find_subfolder(DATA_FOLDER_NAME)),
+        GUI_input_combobox_user_name_for_analysis(  gui=gui, param_name="user_name",        param_desc="User",             values=find_subfolder(c.DATA_FOLDER_NAME)),
         GUI_input_combobox_sample_name_for_analysis(gui=gui, param_name="sample_name",      param_desc="Sample",           values=[]),
         GUI_input_combobox(                         gui=gui, param_name="measurement_name", param_desc="Measurement name", values=[]),
     ]

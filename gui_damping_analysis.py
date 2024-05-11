@@ -8,7 +8,6 @@ from tkinter import messagebox  # Import the messagebox module
 
 from library_analysis import *
 from library_gui import *
-from library_gui_refactored import *
 from library_vna import *
 from library_power_supply import *
 
@@ -17,6 +16,7 @@ from library_power_supply import *
 def analysis(measurement_path: str) -> None:
     freq, fields, amplitudes, phases = load_measurement(measurement_path)
     
+    set_default_pyplot_style_settings()
     [traces, Us] = analysisFMR(freq, fields, amplitudes, phases, measurement_path, show_plots=False)
     alpha = analysisDamping(freq, fields, traces, measurement_path)
 

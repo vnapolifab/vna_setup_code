@@ -1,13 +1,24 @@
 import os
 import numpy as np
 import json
+import matplotlib.pyplot as plt
 
 from logger import logger
-from CONSTANTS import *
+import CONSTANTS as c
 
 """
 This library contains general functions that are used throughout the program and are not related to a specific instrument or procedure.
 """
+
+
+def set_default_pyplot_style_settings():
+    plt.rcParams["font.size"] = 16
+    plt.rcParams["figure.figsize"] = c.FULLSCREEN_SIZE
+    plt.rcParams["axes.grid"] = True
+    plt.rcParams["lines.linewidth"] = 2
+    plt.rcParams["lines.marker"] = '.'
+    plt.rcParams["lines.markersize"] = 6
+
 
 
 def sendWarning(s: str):

@@ -58,56 +58,41 @@ def analysisFMR(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, ph
 
     # Plotting
     if show_plots:
-
-        plt.figure( figsize=(FULLSCREEN_SIZE) )
+        
+        plt.figure()
         plt.title("Imag(U)")
         for i in range(n_traces): 
-            plt.plot(freq[0:], traces[i,0:],linewidth=1.5)
+            plt.plot(freq[0:], traces[i,0:])
+        plt.xlabel("Frequency (GHz)")
+        plt.ylabel("Imag(U) [arb. u.]")
         plt.legend([f"{f} mT" for f in fields])
-        plt.xlabel("Frequency (GHz)", fontsize=AXIS_FONTSIZE)
-        plt.ylabel("Imag(U) [arb. u.]", fontsize=AXIS_FONTSIZE)
-        plt.xticks(fontsize=AXIS_FONTSIZE)
-        plt.yticks(fontsize=AXIS_FONTSIZE)
-        plt.grid()
         save_plot(measurement_path, "imag_u.png")
 
-
-
-        plt.figure( figsize=(FULLSCREEN_SIZE) ) 
+        plt.figure() 
         plt.title("Real(U)")
         for i in range(len(traces)): 
-            plt.plot(freq[0:], Ur[i,0:], linewidth=1.5)
+            plt.plot(freq[0:], Ur[i,0:])
         plt.legend([f"{f} mT" for f in fields])
-        plt.xlabel("Frequency (GHz)", fontsize=AXIS_FONTSIZE)
-        plt.ylabel("Re(U) [arb. u.]", fontsize=AXIS_FONTSIZE)
-        plt.xticks(fontsize=AXIS_FONTSIZE)
-        plt.yticks(fontsize=AXIS_FONTSIZE)
-        plt.grid()
+        plt.xlabel("Frequency (GHz)")
+        plt.ylabel("Re(U) [arb. u.]")
         save_plot(measurement_path, "real_u.png")
 
-        plt.figure( figsize=(FULLSCREEN_SIZE) )
+        plt.figure()
         plt.title("Transmission coefficient")
         for i in range(n_traces): 
-            plt.plot(freq[0:], amplitudes[i,0:], linewidth=1.5)
+            plt.plot(freq[0:], amplitudes[i,0:])
         plt.legend([f"{f} mT" for f in fields])
-        plt.xlabel("Frequency (GHz)", fontsize=AXIS_FONTSIZE)
-        plt.ylabel("T", fontsize=AXIS_FONTSIZE)
-        plt.xticks(fontsize=AXIS_FONTSIZE)
-        plt.yticks(fontsize=AXIS_FONTSIZE)
-        plt.grid()
+        plt.xlabel("Frequency (GHz)")
+        plt.ylabel("T")
         save_plot(measurement_path, "t_coeff.png")
         
-
-        plt.figure( figsize=(FULLSCREEN_SIZE) ) 
+        plt.figure() 
         plt.title("Phase")
         for i in range(n_traces): 
-            plt.plot(freq[0:], phases[i,0:], linewidth=1.5)
+            plt.plot(freq[0:], phases[i,0:])
         plt.legend([f"{f} mT" for f in fields])
-        plt.xlabel("Frequency (GHz)", fontsize=AXIS_FONTSIZE)
-        plt.ylabel("Phase", fontsize=AXIS_FONTSIZE)
-        plt.xticks(fontsize=AXIS_FONTSIZE)
-        plt.yticks(fontsize=AXIS_FONTSIZE)
-        plt.grid()
+        plt.xlabel("Frequency (GHz)")
+        plt.ylabel("Phase")
         save_plot(measurement_path, "phase.png")
 
     return traces, Us
@@ -138,18 +123,12 @@ def analysisKittel(freq: np.ndarray, traces: np.ndarray, fields: np.ndarray, mea
 
     print("Fitted value for Ms: " + str(M_fit))
 
-    plt.figure( figsize=(FULLSCREEN_SIZE) )
-    
+    plt.figure()
     plt.plot(fields, np.array(f_max))
     plt.plot(fields, FMR_tang(fields, M_fit))
-
-    plt.xlabel("External Field (mT)", fontsize=AXIS_FONTSIZE);
-    plt.ylabel("Frequency (GHz)", fontsize=AXIS_FONTSIZE);
-    plt.xticks(fontsize=AXIS_FONTSIZE);
-    plt.yticks(fontsize=AXIS_FONTSIZE);
-
+    plt.xlabel("External Field (mT)");
+    plt.ylabel("Frequency (GHz)");
     plt.legend(["Measurement data", f"Fitted Kittel, Ms={M_fit/10**6:.3}e6 A/m"])
-    plt.grid()
     save_plot(measurement_path, "Fitted Kittel.png")
 
     return f_max, M_fit
@@ -192,18 +171,14 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
 
     # Plot U as a function of H for fixed frequencies
     if show_plots:
-        plt.figure( figsize=(FULLSCREEN_SIZE) )
 
-        for n in range(n_freq_points):
-            plt.plot(fields_no_ref, u_field_sweep[n,:], marker=MARKER, markersize=MARKER_SIZE)
-        
-        plt.legend([ f"{f/10**9:.2f} GHz" for f in freqs ])
+        plt.figure()
         plt.title("Raw data")
-        plt.xlabel("External Field (mT)", fontsize=AXIS_FONTSIZE)
-        plt.ylabel("Suscettivity (arb. u.)", fontsize=AXIS_FONTSIZE)
-        plt.xticks(fontsize=AXIS_FONTSIZE)
-        plt.yticks(fontsize=AXIS_FONTSIZE)
-        plt.grid()
+        for n in range(n_freq_points):
+            plt.plot(fields_no_ref, u_field_sweep[n,:])        
+        plt.legend([ f"{f:.2f} GHz" for f in freqs ])
+        plt.xlabel("External Field (mT)")
+        plt.ylabel("Suscettivity (arb. u.)")
         save_plot(measurement_path, "Raw data.png")
 
 
@@ -212,7 +187,7 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
     # ===== CODE TO FIT DATA AND REMOVE BACKGROUND =====
     # 
 
-    plt.figure( figsize=(FULLSCREEN_SIZE) )
+    plt.figure()
     backgrounds = np.zeros([n_freq_points, n_field_points])
     center = np.zeros(n_freq_points)
     width = np.zeros(n_freq_points)
@@ -287,7 +262,7 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
 
             # # PLOTS
             c = next(colors)
-            plt.plot(fields_no_ref, u_field_sweep[i,:], marker=MARKER, markersize=MARKER_SIZE, color=c)
+            plt.plot(fields_no_ref, u_field_sweep[i,:], color=c)
             plt.plot(fields_no_ref, lorentzian_curve(fields_no_ref, center[i], width[i], peak[i], a, b, x1, x2, m), "-.", color=c)
             plt.plot(fields_no_ref, background, "--", color=c)
             
@@ -298,14 +273,10 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
            
             # da aggiungere la legenda
             plt.title("Fitted data (with background)")
-            plt.legend([ f"{f/10**9:.2f} GHz" for f in frequencies_tri ])
-            plt.xlabel("External Field (mT)", fontsize=AXIS_FONTSIZE)
-            plt.ylabel("Suscettivity (arb. u.)", fontsize=AXIS_FONTSIZE)
-            plt.xticks(fontsize=AXIS_FONTSIZE)
-            plt.yticks(fontsize=AXIS_FONTSIZE)
+            plt.legend([ f"{f:.2f} GHz" for f in frequencies_tri ])
+            plt.xlabel("External Field (mT)")
+            plt.ylabel("Suscettivity (arb. u.)")
             save_plot(measurement_path, "Fitted data (with background).png")
-
-    plt.grid()
 
 
 
@@ -323,7 +294,7 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
     ])
 
     # New figure with the background subtracted peaks 
-    plt.figure( figsize=(FULLSCREEN_SIZE) )
+    plt.figure()
 
     for i in range(n_freq_points):
 
@@ -339,13 +310,10 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
         
         # da aggiungere la legenda
         plt.title("Fitted data (background removed)")
-        plt.legend([ f"{f/10**9:.2f} GHz" for f in freqs ])
-        plt.xlabel("External Field (mT)", fontsize=AXIS_FONTSIZE)
-        plt.ylabel("Suscettivity (arb. u.)", fontsize=AXIS_FONTSIZE)
-        plt.xticks(fontsize=AXIS_FONTSIZE)
-        plt.yticks(fontsize=AXIS_FONTSIZE)
+        plt.legend([ f"{f:.2f} GHz" for f in freqs ])
+        plt.xlabel("External Field (mT)")
+        plt.ylabel("Suscettivity (arb. u.)")
         save_plot(measurement_path, "Fitted data (background removed).png")
-        plt.grid()
 
 
     # Other plots
@@ -374,25 +342,19 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
     # plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\Delta H vs f.png")
 
 
-    plt.figure( figsize=(FULLSCREEN_SIZE) )
-    plt.plot(field_peaks, FWHMs, marker=MARKER, markersize=MARKER_SIZE)
+    plt.figure()
     plt.title("$\\Delta$H vs H")
-    plt.xlabel("External Field (mT)", fontsize=AXIS_FONTSIZE)
-    plt.ylabel("FWHM (mT)", fontsize=AXIS_FONTSIZE)
-    plt.xticks(fontsize=AXIS_FONTSIZE)
-    plt.yticks(fontsize=AXIS_FONTSIZE)
-    plt.grid()
+    plt.plot(field_peaks, FWHMs)
+    plt.xlabel("External Field (mT)")
+    plt.ylabel("FWHM (mT)")
     save_plot(measurement_path, "Delta H vs H.png")
 
 
-    plt.figure( figsize=(FULLSCREEN_SIZE) )
-    plt.plot(freqs/1e9, field_peaks, marker=MARKER, markersize=MARKER_SIZE)
+    plt.figure()
     plt.title("Hr vs f")
-    plt.xlabel("f (Hz)", fontsize=AXIS_FONTSIZE)
-    plt.ylabel("Hr (mT)", fontsize=AXIS_FONTSIZE)
-    plt.xticks(fontsize=AXIS_FONTSIZE)
-    plt.yticks(fontsize=AXIS_FONTSIZE)
-    plt.grid()
+    plt.plot(freqs, field_peaks)
+    plt.xlabel("f (Hz)")
+    plt.ylabel("Hr (mT)")
     save_plot(measurement_path, "Hr vs f.png")
 
 
@@ -512,16 +474,13 @@ def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, pha
         save_plot(measurement_path, "trasmission_dB.png")
 
 
-        plt.figure( figsize=(FULLSCREEN_SIZE) ) 
+        plt.figure() 
         plt.title("Transmission coefficient no background (dB)")
         for i in range(n_traces): 
-            plt.plot(freq[0:]/10**9, amplitudes_dB_no_background[i,0:], linewidth=1.5)
+            plt.plot(freq[0:]/10**9, amplitudes_dB_no_background[i,0:])
         plt.legend([f"{f} mT" for f in fields])
-        plt.xlabel("Frequency (GHz)", fontsize=AXIS_FONTSIZE)
-        plt.ylabel("t (dB)", fontsize=AXIS_FONTSIZE)
-        plt.xticks(fontsize=AXIS_FONTSIZE)
-        plt.yticks(fontsize=AXIS_FONTSIZE)
-        plt.grid()
+        plt.xlabel("Frequency (GHz)")
+        plt.ylabel("t (dB)")
         save_plot(measurement_path, "trasmission_dB_no_background.png")
 
     return [traces_no_background_imag, traces_no_background_complex]
