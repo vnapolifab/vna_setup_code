@@ -118,7 +118,7 @@ def save_plot(path: str, name: str):
     folder_path = os.path.join(path, "Plots")
     if not(os.path.exists(folder_path)):
         os.mkdir(folder_path)
-    plt.savefig(os.path.join(folder_path, name))  # Might raise error if folder does not exist # TODO
+    plt.savefig(os.path.join(folder_path, name))
 
 
 if __name__ == "__main__":
