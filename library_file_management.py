@@ -44,7 +44,6 @@ def save_data(freqs: list[float], fields: list[float], amps: list[float], phases
 
 
 
-
 def load_measurement(measurement_path: str, transpose: bool = False) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Reads data from txt file assuming 3 columns: frequency, amplitude, phase.
@@ -73,7 +72,6 @@ def load_measurement(measurement_path: str, transpose: bool = False) -> tuple[np
         phases = np.transpose(phases)
 
     return freqs, fields, amps, phases
-
 
 
 
@@ -112,6 +110,7 @@ def save_settings(settings):
         json.dump(settings, f, indent=4)
 
 
+
 def save_plot(path: str, name: str):
     folder_path = os.path.join(path, "Plots")
     if not(os.path.exists(folder_path)):
@@ -119,7 +118,22 @@ def save_plot(path: str, name: str):
     plt.savefig(os.path.join(folder_path, name))
 
 
+
+
+
+
+
+
+
+
+
+
 if __name__ == "__main__":
+
+    # =========================
+    # TESTS FOR TESTING THE LIBRARY
+    # =========================
+
 
     # COMMIT OF 11/05/2024 01:25 tested 
 
