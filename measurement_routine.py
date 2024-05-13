@@ -40,7 +40,7 @@ def measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument,
                 conversion = 45.217
 
                 # Routine if a quadrupole is used
-            elif dipole == 2:
+            elif dipole == 2: # TODO the code does not support different coonversions for the two power supplies, fix this
                 if ps1 == None or ps2 == None:
                     raise Exception("Quadrupole selected but one of the power supplies is not properly connected.")
                 ps = TwoPowerSupply(ps1=ps1, ps2=ps2)
@@ -62,6 +62,7 @@ def measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument,
         second_demag = demag and field_sweep[0]!=0  # If ref field != 0 a second demag field is needed 
 
         freqs, fields, amps, phases = [],[],[],[]
+
         for field in field_sweep:  # MAIN FOR LOOP
             if i == 1 and second_demag:
                 ps.demag_sweep()

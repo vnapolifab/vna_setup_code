@@ -83,7 +83,7 @@ def save_metadata(settings: object) -> None:
     temp = settings.pop("field_sweep")    
     settings["field_sweep"] = temp  # puts the field sweep at the end of the json for readability
 
-    measurement_path = os.path.join(c.DATA_FOLDER_NAME, user_folder, sample_name, filename)
+    measurement_path = create_measurement_path(settings)
     with open(os.path.join(measurement_path, "measurement_info.json"), 'w') as f:
         json.dump(settings, f, indent=4)
 
