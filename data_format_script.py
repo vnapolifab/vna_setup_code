@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 
-data_dir = r"local\DATA_test"
+data_dir = r"local\DATA"
 
 print("\n"*5)
 if input(f"Are you sure tou want to execute this script on the folder '{data_dir}'? [y/n]\n> ") != "y":
@@ -78,14 +78,15 @@ for i, path in enumerate(meas_paths):
 
     for f_path in files_path:
         if not(os.path.exists(f_path)):
-            print(f"=== {f_path} does not exist\n")
+            # print(f"=== {f_path} does not exist\n")
+            pass
 
 
 
 
 
 
-    if False:
+    if True:
 
     # # ==========================
     # # Step 2: scommentare il codice e rigirare tutto
