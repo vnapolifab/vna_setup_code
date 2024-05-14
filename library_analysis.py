@@ -174,6 +174,8 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
     conversion = 795.7747  # the field needs to be transformed in A/m before being used
 
     alpha, alpha_raw, FWHMs = np.zeros([n_freq_points,]), np.zeros([n_freq_points,]), np.zeros([n_freq_points,])
+    Meff = np.zeros([n_freq_points])
+    f = np.zeros([n_freq_points])
 
     colors = cycle([
         '#1f77b4',  # blue
@@ -237,6 +239,9 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
         if DEBUG_MODE:
                
             center[i], width[i], peak[i], a, b, x1, x2, m = lorentzian_fit(fields_no_ref, u_field_sweep[i,:], [field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:])])
+
+            f[i], alpha[i], Meff[i] = mixed_fit(fields_no_ref, u_field_sweep[i,:], [freqs[i],0.001,1e5], freqs[i])
+
             x = fields_no_ref
             background = a*(x < x1) + b*(x > x2) + ((x >= x1) & (x < x2)) * (a +(b-a)* (x-(x1))/(x2-x1)) + m*x
 
@@ -279,16 +284,17 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
 
 
             FWHMs[i] = width[i]
-            alpha[i] = conversion*(width[i]*g*mu0)/(4*np.pi*freqs[i])
+            #alpha[i] = conversion*(width[i]*g*mu0)/(4*np.pi*freqs[i])
             
             print(f"Frequency: {freqs[i]/10**9:.2f}) Alpha: {alpha[i]:.5f}\n") 
 
 
             # # PLOTS
             c = next(colors)
-            plt.plot(fields_no_ref, u_field_sweep[i,:], marker=MARKER, markersize=MARKER_SIZE, color=c)
-            plt.plot(fields_no_ref, lorentzian_curve(fields_no_ref, center[i], width[i], peak[i], a, b, x1, x2, m), "-.", color=c)
-            plt.plot(fields_no_ref, background, "--", color=c)
+            #plt.plot(fields_no_ref, u_field_sweep[i,:], marker=MARKER, markersize=MARKER_SIZE, color=c)
+            #plt.plot(fields_no_ref, lorentzian_curve(fields_no_ref, center[i], width[i], peak[i], a, b, x1, x2, m), "-.", color=c)
+            plt.plot(fields_no_ref, mixed_curve(fields_no_ref, freqs[i], alpha[i], Meff[i]), "-.", color=c)
+            #plt.plot(fields_no_ref, background, "--", color=c)
             
 
             #plt.plot(fields_no_ref, multi_lorentzian_curve(fields_no_ref, center, center2, width, width2, peak, peak2, a, b, x1, x2), "-.", color=c)
@@ -717,13 +723,13 @@ def double_lorentzian_curve(x, center_1, fwhm_1, peak_height_1, center_2, fwhm_2
     return lorentzian
 
 
-def linear_fit(x,y,initial_guess):
+def linear_fit(x,y,initial_guess, bounds):
     """
     Fits data with a linear curve.
     """
     
     try:
-        popt, pcov = curve_fit(line_curve, x, y, initial_guess, bounds = ([0,0], [np.inf,np.inf]))
+        popt, pcov = curve_fit(line_curve, x, y, initial_guess, bounds)
         [a,b] = popt
         return a, b
         
@@ -738,3 +744,26 @@ def line_curve(x, a=0, b=0):
     line =  a*x+b
 
     return line
+
+
+def mixed_curve(fields: np.ndarray, f = 1e9, alpha = 0, Meff = 0):
+    pi = np.pi
+    g, mu0  = 1.76e11, 4e-7*pi
+    conversion = 795.7747  # the field needs to be transformed in A/m before being used
+    mixed = -(g*mu0*2*pi*f*alpha*Meff)/((g*mu0*fields+2*pi*f)+(4*(pi**2)*(f**2)*(alpha**2)))
+
+    return mixed
+
+
+def mixed_fit(x,y,initial_guess, f):
+    """
+    Fits data with a lorentian ,used for more accurate FWHM calculations.
+    """
+
+    try:
+        popt, pcov = curve_fit(mixed_curve, x,y, initial_guess, bounds = ([f,0,0], [f+0.0001, np.inf, np.inf]))
+        [f, alpha, Meff] = popt
+        return f, Meff, alpha
+        
+    except:  # TODO specificare l'eccezione giusta, questo deve venire riportato se non trova la giusta interpolazione
+        return float("nan"), float("nan"), float("nan")

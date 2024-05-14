@@ -140,7 +140,7 @@ class GUI_input_text(GUI_input):
 
     def write(self, content):
         self.clear()
-        self.entry_var.insert(0, content)
+        self.entry_var.insert(0, str(content))
 
     def print_value(self):
         print(self.entry_var.get())
