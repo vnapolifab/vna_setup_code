@@ -368,7 +368,7 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
 
 
 
-def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, phases: np.ndarray, user_folder: str, sample_folder: str, measurement_folder: str, s_parameter: str, ref_n = 0, show_plots=True) -> tuple[np.ndarray, np.ndarray]:
+def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, phases: np.ndarray, measurement_path: str, s_parameter: str, ref_n = 0, show_plots=True) -> tuple[np.ndarray, np.ndarray]:
     """
     This function takes as input the frequencies, fields, amplitudes and phases and plots relevant data for FMR resonance.
     ref_n is the index number for the reference measurement, default is zero.
