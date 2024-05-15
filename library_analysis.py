@@ -37,6 +37,7 @@ def analysisFMR(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, ph
         #U = 1j * (np.log((amp * np.exp(1j * phase*0)) / (amp_ref * np.exp(0))) / np.log(amp_ref * np.exp(0)))
         #U = 1j * (np.log((amp * np.exp(1j * phase)) / (amp_ref * np.exp(1j * phase_ref))) / np.log(amp_ref * np.exp(1j * phase_ref)))
         U = -1j * (((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) / (amp_ref * np.exp(1j * phase_ref)))
+        #U = np.abs(1j * (((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) / (amp_ref * np.exp(1j * phase_ref))))
         #U = (((amp) - (amp_ref)) / (amp_ref ))
         # U[0] = 0  # First value explodes due to discontinuity
  
@@ -174,8 +175,11 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
     conversion = 795.7747  # the field needs to be transformed in A/m before being used
 
     alpha, alpha_raw, FWHMs = np.zeros([n_freq_points,]), np.zeros([n_freq_points,]), np.zeros([n_freq_points,])
-    Meff = np.zeros([n_freq_points])
+    A = np.zeros([n_freq_points])
     f = np.zeros([n_freq_points])
+    H_fmr = np.zeros([n_freq_points])
+    phi = np.zeros([n_freq_points])
+
 
     colors = cycle([
         '#1f77b4',  # blue
@@ -232,6 +236,8 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
         j = j+3
 
 
+    slope = 0
+    inhomog = 0
 
     for i in range(n_freq_points):
 
@@ -240,7 +246,7 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
                
             center[i], width[i], peak[i], a, b, x1, x2, m = lorentzian_fit(fields_no_ref, u_field_sweep[i,:], [field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:])])
 
-            f[i], alpha[i], Meff[i] = mixed_fit(fields_no_ref, u_field_sweep[i,:], [freqs[i],0.001,1e5], freqs[i])
+            [A[i],f[i],FWHMs[i],H_fmr[i],phi[i]] = suscettivity_fit(fields_no_ref, u_field_sweep[i,:], [0.1, freqs[i], 0.1, field_peaks[i], 0.5])
 
             x = fields_no_ref
             background = a*(x < x1) + b*(x > x2) + ((x >= x1) & (x < x2)) * (a +(b-a)* (x-(x1))/(x2-x1)) + m*x
@@ -254,8 +260,8 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
 
 
 
-            # alpha_raw[i] = conversion*(width*g*mu0)/(4*np.pi*freqs[i])
-            # print(f"{freqs[i]/10**9:.2f}) Alpha from raw data: {alpha_raw[i]:.5f}")
+            #alpha_raw[i] = conversion*(width*g*mu0)/(4*np.pi*freqs[i])
+            #print(f"{freqs[i]/10**9:.2f}) Alpha from raw data: {alpha_raw[i]:.5f}")
         
             # center, width, peak, a, b, x1, x2 = lorentzian_fit(fields_no_ref, u_field_sweep[i,:], [field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:])], remove_background=True)
             # trace_no_background = u_field_sweep[i,:] - getLinearBackground(fields_no_ref, a, b, x1, x2)
@@ -283,17 +289,18 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
 
 
 
-            FWHMs[i] = width[i]
-            #alpha[i] = conversion*(width[i]*g*mu0)/(4*np.pi*freqs[i])
             
-            print(f"Frequency: {freqs[i]/10**9:.2f}) Alpha: {alpha[i]:.5f}\n") 
+            alpha[i] = conversion*(FWHMs[i]*g*mu0)/(4*np.pi*freqs[i])
+            print(f"{freqs[i]/10**9:.2f}) Alpha: {alpha[i]:.5f}")
 
 
             # # PLOTS
             c = next(colors)
-            #plt.plot(fields_no_ref, u_field_sweep[i,:], marker=MARKER, markersize=MARKER_SIZE, color=c)
+            plt.plot(fields_no_ref, u_field_sweep[i,:], marker=MARKER, markersize=MARKER_SIZE, color=c)
             #plt.plot(fields_no_ref, lorentzian_curve(fields_no_ref, center[i], width[i], peak[i], a, b, x1, x2, m), "-.", color=c)
-            plt.plot(fields_no_ref, mixed_curve(fields_no_ref, freqs[i], alpha[i], Meff[i]), "-.", color=c)
+
+            plt.plot(fields_no_ref, Mixed_suscettivity(fields_no_ref,A[i],f[i],FWHMs[i],H_fmr[i],phi[i]), marker=MARKER, markersize=MARKER_SIZE, color = 'black')
+
             #plt.plot(fields_no_ref, background, "--", color=c)
             
 
@@ -357,22 +364,22 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
 
     #Get alpha from linear fit of FWHMs vs f
     #TODO understand if it was implemented properely or not: differs in excess by a factor 2 with respect to the alpha obtained by Lorentzian fit
+    [slope,inhomog] = linear_fit(freqs,FWHMs/2,[0.001,0])
+    alpha_from_slope = slope*g/(2*np.pi*1000)
+    print(f"Alpha from slope: {alpha_from_slope:.5f}) Inhomogeneous broadening (HWHM): {inhomog:.5f}")
 
-    # [slope,inhomog] = linear_fit(freqs[0:-2],FWHMs[0:-2],[0,0])
-    # alpha_slope = slope*g/(2*np.pi*conversion)
-    # print(f"Inhomogeneous broadening: {inhomog:.5f} Alpha from slope: {alpha_slope:.5f}\n") 
 
 
-    # plt.figure( figsize=(FULLSCREEN_SIZE) )
-    # plt.plot(freqs[0:-2]/1e9, FWHMs[0:-2], marker=MARKER, markersize=MARKER_SIZE)
-    # plt.plot(freqs[0:-2]/1e9, line_curve(freqs[0:-2],slope,inhomog), marker=MARKER, markersize=MARKER_SIZE)
-    # plt.title("$\\Delta$H vs f")
-    # plt.xlabel("f (GHz)", fontsize=AXIS_FONTSIZE)
-    # plt.ylabel("$\\Delta$H (mT)", fontsize=AXIS_FONTSIZE)
-    # plt.xticks(fontsize=AXIS_FONTSIZE)
-    # plt.yticks(fontsize=AXIS_FONTSIZE)
-    # plt.grid()
-    # plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\Delta H vs f.png")
+    plt.figure( figsize=(FULLSCREEN_SIZE) )
+    plt.plot(freqs/1e9, FWHMs/2, marker=MARKER, markersize=MARKER_SIZE)
+    plt.plot(freqs/1e9, line_curve(freqs,slope,inhomog), marker=MARKER, markersize=MARKER_SIZE)
+    plt.title("HWHM vs f")
+    plt.xlabel("f (GHz)", fontsize=AXIS_FONTSIZE)
+    plt.ylabel("HWHM (mT)", fontsize=AXIS_FONTSIZE)
+    plt.xticks(fontsize=AXIS_FONTSIZE)
+    plt.yticks(fontsize=AXIS_FONTSIZE)
+    plt.grid()
+    plt.savefig(f"{DATA_FOLDER_NAME}\\{user_folder}\\{sample_folder}\\{measurement_folder}\\HWHM vs f.png")
 
 
     plt.figure( figsize=(FULLSCREEN_SIZE) )
@@ -723,13 +730,13 @@ def double_lorentzian_curve(x, center_1, fwhm_1, peak_height_1, center_2, fwhm_2
     return lorentzian
 
 
-def linear_fit(x,y,initial_guess, bounds):
+def linear_fit(x,y,initial_guess):
     """
     Fits data with a linear curve.
     """
     
     try:
-        popt, pcov = curve_fit(line_curve, x, y, initial_guess, bounds)
+        popt, pcov = curve_fit(line_curve, x, y, initial_guess, bounds = ([0,0], [np.inf,np.inf]))
         [a,b] = popt
         return a, b
         
@@ -745,25 +752,37 @@ def line_curve(x, a=0, b=0):
 
     return line
 
+def Re_suscettivity(fields,A,f,FWHM,H_fmr):
 
-def mixed_curve(fields: np.ndarray, f = 1e9, alpha = 0, Meff = 0):
-    pi = np.pi
-    g, mu0  = 1.76e11, 4e-7*pi
-    conversion = 795.7747  # the field needs to be transformed in A/m before being used
-    mixed = -(g*mu0*2*pi*f*alpha*Meff)/((g*mu0*fields+2*pi*f)+(4*(pi**2)*(f**2)*(alpha**2)))
+    y = A*((fields-H_fmr)/((FWHM/2)**2 + (fields-H_fmr)**2))
 
-    return mixed
+    return(y)
 
 
-def mixed_fit(x,y,initial_guess, f):
+def Im_suscettivity(fields,A,f,FWHM,H_fmr):
+
+    y = A*((FWHM/2)/((FWHM/2)**2 + (fields-H_fmr)**2))
+
+    return(y)
+
+
+def Mixed_suscettivity(fields,A,f,FWHM,H_fmr,phi):
+
+    y = -np.sin(phi)*Re_suscettivity(fields,A,f,FWHM,H_fmr) + np.cos(phi)*Im_suscettivity(fields,A,f,FWHM,H_fmr)
+
+    return(y)
+
+
+def suscettivity_fit(x,y,initial_guess):
     """
-    Fits data with a lorentian ,used for more accurate FWHM calculations.
+    Fits data with a mixture of the real and imaginary part of the expected suscettivity functional form, weighted by a phase term
+    #TODO da commentare meglio
     """
 
     try:
-        popt, pcov = curve_fit(mixed_curve, x,y, initial_guess, bounds = ([f,0,0], [f+0.0001, np.inf, np.inf]))
-        [f, alpha, Meff] = popt
-        return f, Meff, alpha
+        popt, pcov = curve_fit(Mixed_suscettivity, x,y, initial_guess, bounds = ([0,0,0,0,0], [np.inf,np.inf,np.inf, np.inf, 2*np.pi]))
+        [A,f,FWHM,H_fmr,phi] = popt
+        return A,f,FWHM,H_fmr,phi
         
-    except:  # TODO specificare l'eccezione giusta, questo deve venire riportato se non trova la giusta interpolazione
-        return float("nan"), float("nan"), float("nan")
+    except:  
+        return float("nan"), float("nan"), float("nan"), float("nan"), float("nan")

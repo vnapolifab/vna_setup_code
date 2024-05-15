@@ -345,7 +345,7 @@ def gui_measurement_startup():
         GUI_input_text(                 gui=gui,    param_name="measurement_name",     param_desc="Measurement name"       ),
         GUI_input_text(                 gui=gui,    param_name="description",          param_desc="Description",           mandatory=False),
         GUI_input_combobox_dipole_mode( gui=gui,    param_name="dipole_mode",          param_desc="Dipole mode",           values=[1]),
-        GUI_input_combobox(             gui=gui,    param_name="s_parameter",          param_desc="S Parameter",           values=["S13"]),
+        GUI_input_combobox(             gui=gui,    param_name="s_parameter",          param_desc="S Parameter",           values=["S11", "S12", "S21", "S22", "S13", "S31", "S33", "S23", "S32", "S41", "S14", "S44"]),
         GUI_input_text_field_sweep(     gui=gui,    param_name="field_sweep",          param_desc="Field sweep [mT]"       ),
         GUI_input_text(                 gui=gui,    param_name="angle",                param_desc="Angle [deg]",           mandatory=False), # TODO chagne it so it si not mandatory only in osme dipole mode
         GUI_input_text_to_freq(         gui=gui,    param_name="start_frequency",      param_desc="Start frequency [GHz]", func=lambda x : float(x)*10**9),
