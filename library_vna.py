@@ -107,8 +107,8 @@ def measure_amp_and_phase(instr: RsInstrument, Sparam: str) -> tuple[np.ndarray,
         
     # Create a trace on channel 1 with the specified S-parameter
     #instr.write(f'SENS:SWE:TYPE LIN')  # Set sweep type to linear 
-    instr.write(f'CALC:PAR:DEF:EXT "Trc2", {Sparam}')  # Create trace with specified S-parameter
-    # instr.write(f'DISP:WIND:TRAC:FEED "Trc1"')  # Display the trace
+    instr.write(f'CALC:PAR:DEF:EXT "Trc1", {Sparam}')  # Create trace with specified S-parameter
+    instr.write(f'DISP:WIND:TRAC:FEED "Trc1"')  # Display the trace
 
     # Trigger single sweep
     instr.write(":INITiate1:CONTinuous 0")
