@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 
-data_dir = r"local\DATA - 2"
+data_dir = r"local\DATA_test"
 
 print("\n"*5)
 if input(f"Are you sure tou want to execute this script on the folder '{data_dir}'? [y/n]\n> ") != "y":
@@ -72,7 +72,13 @@ for i, path in enumerate(meas_paths):
         files_alphabetical.remove(f"{meas}.csv")
     except:
         pass
-    files = [files_alphabetical[0].replace("(1)", f"({k+1})") for k in range(n_fields)]
+    if "(1)" in files_alphabetical[0]:
+        files = [files_alphabetical[0].replace("(1)", f"({k+1})") for k in range(n_fields)]
+    elif "_0" in files_alphabetical[0]:
+        files = [files_alphabetical[0].replace("_0", f"_{k}") for k in range(n_fields)]
+    else:
+        raise Exception(f"Unexpected file name: {files_alphabetical[0]}")
+    
 
     files_path = [os.path.join(path, file) for file in files]
 
@@ -97,8 +103,8 @@ for i, path in enumerate(meas_paths):
         with open(os.path.join(path, "measurement_info.json"), "r") as f:
             metadata = json.load(f)
 
-        metadata["start_frequency"] = metadata.get("start_frequency", None) / 10**9 | metadata["start frequency"] / 10**9
-        metadata["stop_frequency"] = metadata.get("stop_frequency", None) / 10**9 | metadata["stop frequency"] / 10**9
+        metadata["start_frequency"] = metadata.get("start_frequency", None) / 10**9
+        metadata["stop_frequency"] = metadata.get("stop_frequency", None) / 10**9
         field_sweep = metadata.pop("field_sweep")
         metadata["field_sweep"] = field_sweep
 
