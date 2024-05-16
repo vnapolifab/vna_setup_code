@@ -24,9 +24,9 @@ def analysis(user_folder: str, sample_folder: str, measure_folder: str) -> None:
     plt.show()
 
 
-
 if __name__ == "__main__":
     print("*** LOG SCREEN ***")
-    print("results and actions are reported here:\n")
 
-    user_folder, measure_folder = gui_folder_selection(func_on_submit = analysis)
+    measurement_path = gui_analysis_startup()
+    if measurement_path != None:
+        analysis(measurement_path)

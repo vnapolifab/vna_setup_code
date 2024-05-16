@@ -1,6 +1,7 @@
 from library_misc import *
 from time import sleep
 import serial
+from dataclasses import dataclass
 
 """
 This library contains the PowerSupply object and other functions required to control the power supplies.
@@ -142,6 +143,19 @@ class PowerSupply:
         self.ser.write(bytes(command, 'utf-8'))  # query to set current
 
 
+
+@dataclass
+class TwoPowerSupply():
+    ps1: PowerSupply
+    ps2: PowerSupply
+
+    def setCurrent(self, current):
+        ps1.setCurrent(current)
+        ps2.setCurrent(current)
+
+    def demag_sweep(self):
+        ps1.demag_sweep()
+        ps2.demag_sweep()
 
 
 # Connection setup function
