@@ -17,7 +17,7 @@ def set_default_pyplot_style_settings():
     plt.rcParams["axes.grid"] = True
     plt.rcParams["lines.linewidth"] = 2
     plt.rcParams["lines.marker"] = '.'
-    plt.rcParams["lines.markersize"] = 6
+    plt.rcParams["lines.markersize"] = 4
 
 
 

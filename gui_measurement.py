@@ -15,10 +15,11 @@ from measurement_routine import measurement_routine
 
 print("*** LOG SCREEN ***")
 settings = gui_measurement_startup()
+if settings == None:
+    raise Exception("The GUI was closed manually")
 
 # Adds date time to measurement info
 settings["datetime"] = str(datetime.now()).rstrip("0123456789").rstrip(".")
-
 
 
 print("Power supply 1 > ", end=""); 

@@ -216,16 +216,22 @@ class GUI_input_text_field_sweep(GUI_input_text):
     
         
 class GUI_input_text_to_freq(GUI_input_text):
-    def __init__(self, func=lambda string : float(string), *args, **kwargs):
-        self.func = func
-        super().__init__(*args, **kwargs)
 
     def write(self, content):
         self.clear()
         self.entry_var.insert(0, content/10**9)
 
+    def is_valid(self):
+        try:
+            float(self.entry_var.get())
+            return True, None
+        except:
+            return False, None
+
     def get(self):
-        return self.func(self.entry_var.get())
+            self.func(float(self.entry_var.get())*10**9)
+        
+
     
 
 class GUI_input_text_to_number(GUI_input_text):
@@ -390,8 +396,8 @@ def gui_measurement_startup():
         GUI_input_combobox(             gui=gui,    param_name="s_parameter",          param_desc="S Parameter",           values=["S13"]),
         GUI_input_text_field_sweep(     gui=gui,    param_name="field_sweep",          param_desc="Field sweep [mT]"       ),
         GUI_input_text(                 gui=gui,    param_name="angle",                param_desc="Angle [deg]",           mandatory=False), # TODO chagne it so it si not mandatory only in osme dipole mode
-        GUI_input_text_to_freq(         gui=gui,    param_name="start_frequency",      param_desc="Start frequency [GHz]", func=lambda x : float(x)*10**9),
-        GUI_input_text_to_freq(         gui=gui,    param_name="stop_frequency",       param_desc="Stop frequency [GHz]",  func=lambda x : float(x)*10**9),
+        GUI_input_text_to_freq(         gui=gui,    param_name="start_frequency",      param_desc="Start frequency [GHz]"  ),
+        GUI_input_text_to_freq(         gui=gui,    param_name="stop_frequency",       param_desc="Stop frequency [GHz]"   ),
         GUI_input_text_to_number(       gui=gui,    param_name="number_of_points",     param_desc="Number of points",      func=lambda x : int(x)),
         GUI_input_text_to_number(       gui=gui,    param_name="bandwidth",            param_desc="Bandwidth [Hz]"         ),
         GUI_input_text_to_number(       gui=gui,    param_name="power",                param_desc="Power [dBm]"            ),
@@ -436,5 +442,6 @@ def gui_analysis_startup():
 
 
 if __name__ == "__main__":
-    ans = gui_analysis_startup()    
+    # ans = gui_analysis_startup()  
+    ans = gui_measurement_startup()
     print(ans)

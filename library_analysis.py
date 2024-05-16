@@ -182,7 +182,7 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
         plt.title("Raw data")
         for n in range(n_freq_points):
             plt.plot(fields_no_ref, u_field_sweep[n,:])        
-        plt.legend([ f"{f:.2f} GHz" for f in freqs ])
+        plt.legend([ f"{f/10**9:.2f} GHz" for f in freqs ])
         plt.xlabel("External Field (mT)")
         plt.ylabel("Suscettivity (arb. u.)")
         save_plot(measurement_path, "Raw data.png")
@@ -286,7 +286,7 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
            
             # da aggiungere la legenda
             plt.title("Fitted data (with background)")
-            plt.legend([ f"{f:.2f} GHz" for f in frequencies_tri ])
+            plt.legend([ f"{f/10**9:.2f} GHz" for f in frequencies_tri ])
             plt.xlabel("External Field (mT)")
             plt.ylabel("Suscettivity (arb. u.)")
             save_plot(measurement_path, "Fitted data (with background).png")
@@ -323,7 +323,7 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
         
         # da aggiungere la legenda
         plt.title("Fitted data (background removed)")
-        plt.legend([ f"{f:.2f} GHz" for f in freqs ])
+        plt.legend([ f"{f/10**9:.2f} GHz" for f in freqs ])
         plt.xlabel("External Field (mT)")
         plt.ylabel("Suscettivity (arb. u.)")
         save_plot(measurement_path, "Fitted data (background removed).png")
