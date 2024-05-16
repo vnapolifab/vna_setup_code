@@ -119,42 +119,15 @@ def save_plot(path: str, name: str):
 
 
 
-
-
-
-
-
-
-
-
-
 if __name__ == "__main__":
 
     # =========================
     # TESTS FOR TESTING THE LIBRARY
     # =========================
 
-
-    # COMMIT OF 11/05/2024 01:25 tested 
-
-    print("\n\n\n\n*******************************")
-    print("****Save data test:****")
-    print("*******************************")
-
-    save_data(
-        [1.0,2.0,4.0],
-        [1.0,2.0,5.0],
-        [1.0,2.0,6.0],
-        [1.0,2.0,7.0],
-        "newtestuser",
-        "testsample",
-        "testmeasure"
-    )
-
-
-    print("\n\n\n\n*******************************")
-    print("****Save metadata test:****")
-    print("*******************************")
+    # =========================
+    # Save metadata tests:
+    # =========================
 
     test_path = r"local\DATA_test\newtestuser\testsample\testmeasure"
 
@@ -166,27 +139,13 @@ if __name__ == "__main__":
         "number_of_points" : 3
     })
 
-
-
-    print("\n\n\n\n*******************************")
-    print("****Load measurement tests:****")
-    print("*******************************")
+    # =========================
+    # Load measurement tests:
+    # =========================
 
     test_path = r"local\DATA_test\newtestuser\testsample\testmeasure"
 
     freqs, fields, amps, phases = load_measurement(test_path, transpose=True)
-    ic(freqs)
-    ic(fields)
-    ic(amps)
-    ic(phases)
-
-
-    print("\n\n\n\n*******************************")
-    print("****Load metadata test:****")
-    print("*******************************")
-
-    ic(load_metadata(test_path))
-
 
 
 
