@@ -2,14 +2,14 @@ import os
 import numpy as np
 import json
 import pandas as pd
-from icecream import ic
+# from icecream import ic
 from matplotlib import pyplot as plt
 
 from logger import logger
 import CONSTANTS as c
 
 def create_measurement_path(settings):
-    return os.path.join(c.DATA_FOLDER_NAME, settings["user_folder"], settings["sample_name"], settings["measurement_name"])
+    return os.path.join(c.DATA_FOLDER_NAME, settings["user_name"], settings["sample_name"], settings["measurement_name"])
 
     
 

@@ -62,9 +62,9 @@ def measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument,
 
         second_demag = demag and field_sweep[0]!=0  # If ref field != 0 a second demag field is needed 
 
-        freqs, fields, amps, phases = [],[],[],[]
+        freqs, fields, amps, phases = np.array([]), np.array([]), np.array([]), np.array([])
 
-        for field in field_sweep:  # MAIN FOR LOOP
+        for i, field in enumerate(field_sweep):  # MAIN FOR LOOP
             if i == 1 and second_demag:
                 ps.demag_sweep()
 
@@ -84,20 +84,20 @@ def measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument,
             logger.info("Finished measuring")
 
 
-            freqs = freqs + freq    # Concatenation of new data with the already acquired data
-            fields = fields + [field]*len(freq)
-            amps = amps + a
-            phases = phases + p
+            freqs  = np.concatenate( (freqs, freq) )    # Concatenation of new data with the already acquired data
+            fields = np.concatenate( (fields, [field]*len(freq)) )
+            amps   = np.concatenate( (amps, a) )
+            phases = np.concatenate( (phases, p) )
 
 
         logger.info(f'Saving data...')
-        saveData(freqs, fields, amps, phases, user_folder, sample_folder, measurement_name)
+        save_data(freqs, fields, amps, phases, user_folder, sample_folder, measurement_name)
         logger.info(f'Saved file "{measurement_name}.csv"')
 
 
         ps.setCurrent(0)  # Set current back to 0 at the end of the routine
         
-        return filename
+        return
 
 
 

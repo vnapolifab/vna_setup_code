@@ -3,7 +3,7 @@ import numpy as np
 import ast
 import json
 from abc import ABC, abstractmethod
-from icecream import ic
+# from icecream import ic
 
 import tkinter as tk
 from tkinter import ttk, messagebox
@@ -168,7 +168,7 @@ class GUI_input_text_measurement_name(GUI_input_text):
         if self.entry_var.get() == "" and self.mandatory == True:
             return False, custom_error_message
         
-        path = os.path.join(c.c.DATA_FOLDER_NAME, self.gui.get_value("user_name"), self.gui.get_value("sample_name"), self.get())
+        path = os.path.join(c.DATA_FOLDER_NAME, self.gui.get_value("user_name"), self.gui.get_value("sample_name"), self.get())
         print(path)
         if not(os.path.exists(path)):
             return True, None
@@ -209,6 +209,10 @@ class GUI_input_text_field_sweep(GUI_input_text):
             return field_sweep_list
         except (ValueError, SyntaxError) as e:
             return None
+        
+    def write(self, content):
+        self.clear()
+        self.entry_var.insert(0, str(list(np.array(content)[1:])))
     
         
 class GUI_input_text_to_freq(GUI_input_text):

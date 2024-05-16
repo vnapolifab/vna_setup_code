@@ -36,7 +36,7 @@ settings["field_sweep"] = list(np.concatenate([[float(settings["ref_field"])], s
 applySettings(instr, settings)
 save_settings(settings)
 
-settings["measurement_name"] = measurement_routine(
+measurement_routine(
     ps1, 
     ps2, 
     instr, 
