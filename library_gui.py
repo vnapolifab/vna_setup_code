@@ -229,7 +229,7 @@ class GUI_input_text_to_freq(GUI_input_text):
             return False, None
 
     def get(self):
-            self.func(float(self.entry_var.get())*10**9)
+            return float(self.entry_var.get())*10**9
         
 
     
