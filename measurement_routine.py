@@ -81,7 +81,7 @@ def measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument,
             logger.info("Measuring...") 
             freq,a,p = measure_amp_and_phase(instr, Sparam)
             #x,y,p = measure_dB(instr,Sparam)
-            logger.info("Finished measuring")
+            logger.info("Finished measuring\n")
 
 
             freqs  = np.concatenate( (freqs, freq) )    # Concatenation of new data with the already acquired data
