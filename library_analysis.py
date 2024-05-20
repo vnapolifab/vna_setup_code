@@ -203,13 +203,13 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
     #Useful to create the legend of the fitted spectra with the background present
     j = 0
     i = 0
-    frequencies_tri = [0]*3*len(freqs)
+    frequencies_bi = [0]*2*len(freqs)
 
     for i in range(n_freq_points):
-        frequencies_tri[j] = freqs[i]
-        frequencies_tri[j+1] = freqs[i]
-        frequencies_tri[j+2] = freqs[i]
-        j = j+3
+        frequencies_bi[j] = freqs[i]
+        frequencies_bi[j+1] = freqs[i]
+        #frequencies_bi[j+2] = freqs[i]
+        j = j+2
 
 
     slope = 0
@@ -286,7 +286,7 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
            
             # da aggiungere la legenda
             plt.title("Fitted data (with background)")
-            plt.legend([ f"{f/10**9:.2f} GHz" for f in frequencies_tri ])
+            plt.legend([ f"{f/10**9:.2f} GHz" for f in frequencies_bi ])
             plt.xlabel("External Field (mT)")
             plt.ylabel("Suscettivity (arb. u.)")
             save_plot(measurement_path, "Fitted data (with background).png")
@@ -337,6 +337,15 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
     alpha_from_slope = slope*g/(2*np.pi*1000)
     print(f"Alpha from slope: {alpha_from_slope:.5f}) Inhomogeneous broadening (HWHM): {inhomog:.5f}")
 
+
+    plt.figure()
+    plt.title("HWHM vs f")
+    plt.plot(freqs, FWHMs/2)
+    plt.plot(freqs, line_curve(freqs, slope,inhomog))
+    plt.legend(['Experimental data', 'Linear fit'])
+    plt.xlabel("frequency (GHz)")
+    plt.ylabel("HWHM (mT)")
+    save_plot(measurement_path, "HWHM vs f.png")
 
 
     plt.figure()
