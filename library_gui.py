@@ -156,10 +156,10 @@ class GUI_input_text(GUI_input):
         self.entry_var.insert(0, content)
 
     def print_value(self):
-        print(self.entry_var.get())
+        print(self.entry_var.get().strip())
 
     def get(self):
-        return self.entry_var.get()
+        return self.entry_var.get().strip()
 
 
 class GUI_input_text_measurement_name(GUI_input_text):
