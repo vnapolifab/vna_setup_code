@@ -80,7 +80,7 @@ def measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument,
 
             logger.info("Measuring...") 
             freq,a,p = measure_amp_and_phase(instr, Sparam)
-            #x,y,p = measure_dB(instr,Sparam)
+            # x,y,p = measure_dB(instr,Sparam)
             logger.info("Finished measuring\n")
 
 
