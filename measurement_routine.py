@@ -62,7 +62,10 @@ def measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument,
 
         second_demag = demag and field_sweep[0]!=0  # If ref field != 0 a second demag field is needed 
 
-        freqs, fields, amps, phases = np.array([]), np.array([]), np.array([]), np.array([])
+        freqs_S22, fields_S22, amps_S22, phases_S22 = np.array([]), np.array([]), np.array([]), np.array([])
+        freqs_S24, fields_S24, amps_S24, phases_S24 = np.array([]), np.array([]), np.array([]), np.array([])
+        freqs_S44, fields_S44, amps_S44, phases_S44 = np.array([]), np.array([]), np.array([]), np.array([])
+        freqs_S42, fields_S42, amps_S42, phases_S42 = np.array([]), np.array([]), np.array([]), np.array([])
 
         for i, field in enumerate(field_sweep):  # MAIN FOR LOOP
             if i == 1 and second_demag:
@@ -70,29 +73,58 @@ def measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument,
 
             current = field/conversion
 
-            logger.info(f"Setting field...")
-            ps.setCurrent(current)
-            logger.info(f"Field set to {field_sweep[i]} mT")
 
-            logger.info(f"Waiting {c.SETTLING_TIME}s...")
-            sleep(SETTLING_TIME)
-            logger.info("Settling time over")
+            for Sparam in ["S22", "S42", "S44", "S24"]:
+                logger.info(f"Setting field...")
+                ps.setCurrent(current)
+                logger.info(f"Field set to {field_sweep[i]} mT")
 
-            logger.info("Measuring...") 
-            freq,a,p = measure_amp_and_phase(instr, Sparam)
-            # x,y,p = measure_dB(instr,Sparam)
-            logger.info("Finished measuring\n")
+                logger.info(f"Waiting {c.SETTLING_TIME}s...")
+                sleep(SETTLING_TIME)
+                logger.info("Settling time over")
 
+                logger.info("Measuring...") 
+                freq,a,p = measure_amp_and_phase(instr, Sparam)
+                # x,y,p = measure_dB(instr,Sparam)
+                logger.info("Finished measuring\n")
 
-            freqs  = np.concatenate( (freqs, freq) )    # Concatenation of new data with the already acquired data
-            fields = np.concatenate( (fields, [field]*len(freq)) )
-            amps   = np.concatenate( (amps, a) )
-            phases = np.concatenate( (phases, p) )
+                if Sparam == "S22":
+                    freqs_S22  = np.concatenate( (freqs_S22, freq) )    # Concatenation of new data with the already acquired data
+                    fields_S22 = np.concatenate( (fields_S22, [field]*len(freq)) )
+                    amps_S22   = np.concatenate( (amps_S22, a) )
+                    phases_S22 = np.concatenate( (phases_S22, p) )
+                elif Sparam == "S44":
+                    freqs_S44  = np.concatenate( (freqs_S44, freq) )    # Concatenation of new data with the already acquired data
+                    fields_S44 = np.concatenate( (fields_S44, [field]*len(freq)) )
+                    amps_S44   = np.concatenate( (amps_S44, a) )
+                    phases_S44 = np.concatenate( (phases_S44, p) )
+                elif Sparam == "S24":
+                    freqs_S24  = np.concatenate( (freqs_S24, freq) )    # Concatenation of new data with the already acquired data
+                    fields_S24 = np.concatenate( (fields_S24, [field]*len(freq)) )
+                    amps_S24   = np.concatenate( (amps_S24, a) )
+                    phases_S24 = np.concatenate( (phases_S24, p) )
+                elif Sparam == "S42":
+                    freqs_S42  = np.concatenate( (freqs_S42, freq) )    # Concatenation of new data with the already acquired data
+                    fields_S42 = np.concatenate( (fields_S42, [field]*len(freq)) )
+                    amps_S42   = np.concatenate( (amps_S42, a) )
+                    phases_S42 = np.concatenate( (phases_S42, p) )
 
 
         logger.info(f'Saving data...')
-        save_data(freqs, fields, amps, phases, user_folder, sample_folder, measurement_name)
-        logger.info(f'Saved file "{measurement_name}.csv"')
+        save_data(freqs_S22, fields_S22, amps_S22, phases_S22, user_folder, sample_folder, measurement_name = f"{measurement_name}_S22")
+        logger.info(f'Saved file "{measurement_name}_S22.csv"')
+
+        logger.info(f'Saving data...')
+        save_data(freqs_S44, fields_S44, amps_S44, phases_S44, user_folder, sample_folder, measurement_name = f"{measurement_name}_S44")
+        logger.info(f'Saved file "{measurement_name}_S44.csv"')
+
+        logger.info(f'Saving data...')
+        save_data(freqs_S42, fields_S42, amps_S42, phases_S42, user_folder, sample_folder, measurement_name = f"{measurement_name}_S42")
+        logger.info(f'Saved file "{measurement_name}_S42.csv"')
+
+        logger.info(f'Saving data...')
+        save_data(freqs_S24, fields_S24, amps_S24, phases_S24, user_folder, sample_folder, measurement_name = f"{measurement_name}_S24")
+        logger.info(f'Saved file "{measurement_name}_S24.csv"')
 
 
         ps.setCurrent(0)  # Set current back to 0 at the end of the routine
