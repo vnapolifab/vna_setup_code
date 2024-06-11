@@ -62,7 +62,7 @@ def applySettings(instr: RsInstrument, settings: object) -> None:
     instr.write("SENS1:SWE:POIN " + f"{settings['number_of_points']}")  # Replace with your desired number of points
 
     # Reload calibration
-    instr.write_str(":MMEMORY:LOAD:CORRection 1, 'SW.cal'") #TODO rendere la calibration accessibile allo user anche lato codice
+    instr.write_str(":MMEMORY:LOAD:CORRection 1, 'Maria devices cal.cal'") #TODO rendere la calibration accessibile allo user anche lato codice
     # instr.write_str(":MMEMORY:LOAD:CORRection  1, 'calibration_08_02_2024.cal'")
 
     instr.visa_timeout = ( settings['bandwidth']**-1 * settings['number_of_points'] *10 )*1000  + 100  # estimation times an arbitrary coeff 
@@ -107,23 +107,23 @@ def measure_amp_and_phase(instr: RsInstrument, Sparam: str) -> tuple[np.ndarray,
     Takes as input the vna instrument object and the S parameter that should be measured.
     Returns frequencies, amplitude (linear) and phase.
     """
+    # Trigger single sweep
+    instr.write(":INITiate1:CONTinuous 0")
+    instr.query_with_opc(":INITiate1:IMMediate; *OPC?", 2000000)  # TODO mettere un numero più sensato
         
     # Create a trace on channel 1 with the specified S-parameter
     #instr.write(f'SENS:SWE:TYPE LIN')  # Set sweep type to linear 
     instr.write(f'CALC:PAR:DEF:EXT "Trc1", {Sparam}')  # Create trace with specified S-parameter
     instr.write(f'DISP:WIND:TRAC:FEED "Trc1"')  # Display the trace
 
-    # Trigger single sweep
-    instr.write(":INITiate1:CONTinuous 0")
-    instr.query_with_opc(":INITiate1:IMMediate; *OPC?", 2000000)  # TODO mettere un numero più sensato
 
     # Wait for measurement to complete
     # instr.query_opc(999999999)
     # instr.query()
-
+    instr.query_with_opc(":INITiate1:IMMediate; *OPC?", 2000000)  # TODO mettere un numero più sensato
     tracedata = instr.query_str('CALCulate1:DATA? SDAT')  # Get measurement values for complete trace
     #print("TRACEDATA\n", tracedata)
-    tracelist = list(map(str, tracedata.split(',')))  # Convert the received string into a list
+    tracelist = list(map(str, tracedata.split(',')))  # Convert the received string into a list 
     tracelist = np.array(tracelist, dtype='float32')
     re = []
     im = []
