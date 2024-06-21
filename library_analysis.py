@@ -37,7 +37,9 @@ def analysisFMR(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, ph
 
         #U = 1j * (np.log((amp * np.exp(1j * phase*0)) / (amp_ref * np.exp(0))) / np.log(amp_ref * np.exp(0)))
         #U = 1j * (np.log((amp * np.exp(1j * phase)) / (amp_ref * np.exp(1j * phase_ref))) / np.log(amp_ref * np.exp(1j * phase_ref)))
-        U = -1j * (((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) / (amp_ref * np.exp(1j * phase_ref)))
+        #U = -1j * (((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) / (amp_ref * np.exp(1j * phase_ref)))
+        U = (amp * np.exp(1j * phase)-(amp_ref * np.exp(1j * phase_ref)))/(amp_ref * np.exp(1j * phase_ref))
+        #U = ((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) 
         #U = np.abs(1j * (((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) / (amp_ref * np.exp(1j * phase_ref))))
         #U = (((amp) - (amp_ref)) / (amp_ref ))
         # U[0] = 0  # First value explodes due to discontinuity
@@ -743,3 +745,199 @@ def suscettivity_fit(x,y,initial_guess):
         
     except:  
         return float("nan"), float("nan"), float("nan"), float("nan"), float("nan")
+    
+
+
+
+
+def analysisFMR_derivative(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, phases: np.ndarray, measurement_path: str, ref_n = 0, show_plots=True) -> tuple[np.ndarray, np.ndarray]:
+    """
+    This function takes as input the frequencies, fields, amplitudes and phases and plots relevant data for FMR resonance.
+    ref_n is the index number for the reference measurement, default is zero.
+    """
+
+    n_traces = len(amplitudes[:,0])
+    n_points = len(freq)
+    
+    amp_ref, phase_ref = amplitudes[ref_n], phases[ref_n]
+    phase_ref = unwrap_phase(phase_ref)
+
+    traces = np.zeros((n_traces, n_points))
+    Ur = np.zeros((n_traces, n_points))
+
+    # Calculate U
+    for i in range(n_traces):
+        amp, phase = amplitudes[i], phases[i]
+        phase = unwrap_phase(phase)
+
+        U = (amp * np.exp(1j * phase))
+
+ 
+        Ur[i,:] = np.real(U)
+        # amplitudes[i, :] = amp
+        traces[i, :] = np.imag(U)
+        phases[i, :] = phase
+
+    Us = Ur+1j*traces
+
+
+    return traces, Us
+
+
+
+
+def analysis_field_derivative(freq: np.ndarray, traces: np.ndarray, fields: np.ndarray, measurement_path: str) -> tuple[np.ndarray, np.ndarray]:
+    """
+    This function takes as input traces and fields and estimates Ms from a fit of the Kittel function.
+    Returns frequencies of the FMR peaks and the Ms.
+    """
+    dS = traces[3]-traces[2]#-traces[4]
+    dH = (traces[2]+traces[3]+traces[4])/3
+    q = dS#/dH
+
+    plt.figure()
+    plt.xlabel('f')
+    plt.ylabel('d2S/d2H')
+    plt.plot(freq,q)
+    plt.show()
+
+    return q
+
+
+
+def analysisFMR_subtraction(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, phases: np.ndarray, measurement_path: str, ref_n = 0, show_plots=True) -> tuple[np.ndarray, np.ndarray]:
+    """
+    This function takes as input the frequencies, fields, amplitudes and phases and plots relevant data for FMR resonance.
+    ref_n is the index number for the reference measurement, default is zero.
+    """
+
+    n_traces = len(amplitudes[:,0])
+    n_points = len(freq)
+    
+    amp_ref, phase_ref = amplitudes[ref_n], phases[ref_n]
+    phase_ref = unwrap_phase(phase_ref)
+
+    traces = np.zeros((n_traces, n_points))
+    Ur = np.zeros((n_traces, n_points))
+
+    # Calculate U
+    for i in range(n_traces):
+        amp, phase = amplitudes[i], phases[i]
+        phase = unwrap_phase(phase)
+
+        #U = 1j * (np.log((amp * np.exp(1j * phase*0)) / (amp_ref * np.exp(0))) / np.log(amp_ref * np.exp(0)))
+        #U = 1j * (np.log((amp * np.exp(1j * phase)) / (amp_ref * np.exp(1j * phase_ref))) / np.log(amp_ref * np.exp(1j * phase_ref)))
+        #U = -1j * (((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) / (amp_ref * np.exp(1j * phase_ref)))
+        U = (amp * np.exp(1j * phase))#-(amp_ref * np.exp(1j * phase_ref)))/(amp_ref * np.exp(1j * phase_ref))
+        #U = ((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) 
+        #U = np.abs(1j * (((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) / (amp_ref * np.exp(1j * phase_ref))))
+        #U = (((amp) - (amp_ref)) / (amp_ref ))
+        # U[0] = 0  # First value explodes due to discontinuity
+ 
+        Ur[i,:] = np.real(U)
+        # amplitudes[i, :] = amp
+        traces[i, :] = np.imag(U)
+        phases[i, :] = phase
+
+    Us = Ur+1j*traces
+
+    # # post-processing   ( removed )
+    # for i in range(n_traces):
+    #     traces_postprocessing[i,:] = gaussian_filter1d(traces[i, :], 6)
+
+
+    # Plottavamo [3:] per esclusdere i primi tre punti. Perchè? ora invece con [0:] funziona
+
+    return traces, Us
+
+
+
+
+def analysisFMR_Maria(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, phases: np.ndarray, measurement_path: str, ref_n = 0, show_plots=True) -> tuple[np.ndarray, np.ndarray]:
+    """
+    This function takes as input the frequencies, fields, amplitudes and phases and plots relevant data for FMR resonance.
+    ref_n is the index number for the reference measurement, default is zero.
+    """
+
+    n_traces = len(amplitudes[:,0])
+    n_points = len(freq)
+    
+    amp_ref, phase_ref = amplitudes[ref_n], phases[ref_n]
+    phase_ref = unwrap_phase(phase_ref)
+
+    traces = np.zeros((n_traces, n_points))
+    Ur = np.zeros((n_traces, n_points))
+
+    # Calculate U
+    for i in range(n_traces):
+        amp, phase = amplitudes[i], phases[i]
+        phase = unwrap_phase(phase)
+
+        #U = 1j * (np.log((amp * np.exp(1j * phase*0)) / (amp_ref * np.exp(0))) / np.log(amp_ref * np.exp(0)))
+        #U = 1j * (np.log((amp * np.exp(1j * phase)) / (amp_ref * np.exp(1j * phase_ref))) / np.log(amp_ref * np.exp(1j * phase_ref)))
+        #U = -1j * (((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) / (amp_ref * np.exp(1j * phase_ref)))
+        U = (amp * np.exp(1j * phase)-(amp_ref * np.exp(1j * phase_ref)))/(amp_ref * np.exp(1j * phase_ref))
+        #U = ((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) 
+        #U = np.abs(1j * (((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) / (amp_ref * np.exp(1j * phase_ref))))
+        #U = (((amp) - (amp_ref)) / (amp_ref ))
+        # U[0] = 0  # First value explodes due to discontinuity
+ 
+        Ur[i,:] = np.real(U)
+        # amplitudes[i, :] = amp
+        traces[i, :] = np.imag(U)
+        phases[i, :] = phase
+
+    Us = Ur+1j*traces
+
+    # # post-processing   ( removed )
+    # for i in range(n_traces):
+    #     traces_postprocessing[i,:] = gaussian_filter1d(traces[i, :], 6)
+
+
+    # Plottavamo [3:] per esclusdere i primi tre punti. Perchè? ora invece con [0:] funziona
+
+
+    return traces, Us
+
+
+def analysisFMR_MariaPhase(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, phases: np.ndarray, measurement_path: str, ref_n = 0, show_plots=True) -> tuple[np.ndarray, np.ndarray]:
+    """
+    This function takes as input the frequencies, fields, amplitudes and phases and plots relevant data for FMR resonance.
+    ref_n is the index number for the reference measurement, default is zero.
+    """
+    n_traces = len(amplitudes[:,0])
+    n_points = len(freq)
+    
+    amp_ref, phase_ref = amplitudes[ref_n], phases[ref_n]
+    phase_ref = unwrap_phase(phase_ref)
+
+    re_trace = np.zeros((n_traces, n_points))
+    im_trace = np.zeros((n_traces, n_points))
+    re_ref = np.zeros((n_traces, n_points))
+    im_ref = np.zeros((n_traces, n_points))
+
+    # Calculate U
+    for i in range(n_traces):
+        amp, phase = amplitudes[i], phases[i]
+        phase = unwrap_phase(phase)
+        U = amp * np.exp(1j * phase)
+        U_ref = amp_ref * np.exp(1j * phase_ref)
+ 
+        # amplitudes[i, :] = amp
+        re_ref[i, :] = np.real(U_ref)
+        im_ref[i, :] = np.imag(U_ref)
+        re_trace[i, :] = np.real(U)
+        im_trace[i, :] = np.imag(U)
+
+    return re_trace, im_trace, re_ref, im_ref
+
+
+
+
+
+
+
+
+
+
+

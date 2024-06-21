@@ -5,7 +5,7 @@ from library_vna import *
 from library_file_management import *
 import CONSTANTS as c
 
-def measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument, field_sweep: list[float], angle: float, user_folder: str, sample_folder: str, measurement_name: str, dipole: int, Sparam: str, demag: bool = True) -> str:
+def measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument, field_sweep: list[float], angle: float, user_folder: str, sample_folder: str, measurement_name: str, dipole: int, Sparam: str, demag: bool = False) -> str:
     """
     Main function that is called by other files. 
     Goes through the whole routine for initializing, measuring and saving.
@@ -20,17 +20,21 @@ def measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument,
 
         if dipole == 1 or dipole == 3 or dipole == 4:
             
-            if (dipole == 1 and (Sparam == 'S22' or Sparam == 'S24' or Sparam == 'S42' or Sparam == 'S44')):
+            if (dipole == 1 and (Sparam == 'S33' or Sparam == 'S34' or Sparam == 'S43' or Sparam == 'S44')):
                 ps = ps1
-                conversion = 55.494  
+                #conversion = 55.494 
+                offset = 1.7452
+                conversion = 49.901
+
             
             elif (dipole == 1 and (Sparam == 'S11' or Sparam == 'S13' or Sparam == 'S31' or Sparam == 'S33')):
-                ps = ps2
+                #ps = ps2
                 # conversion = 63.150
-                conversion = 8.240  #coils gap = 29mm
+                #conversion = 8.240  #coils gap = 29mm
                 #conversion = 5.620   # coils gap = 55mm
                 # conversion = 6.886  # Coils 
                 # conversion = 9.646 # Coils 
+                print("Debug please")
 
             elif (dipole == 3):
                 ps = ps1
@@ -57,24 +61,24 @@ def measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument,
         # Now the actual measurement routine starts
         # ============================
 
-        if demag:  # First demagnetization sweep 
-            ps.demag_sweep()
+        #if demag:  # First demagnetization sweep 
+            #ps.demag_sweep()
 
         second_demag = demag and field_sweep[0]!=0  # If ref field != 0 a second demag field is needed 
 
-        freqs_S22, fields_S22, amps_S22, phases_S22 = np.array([]), np.array([]), np.array([]), np.array([])
-        freqs_S24, fields_S24, amps_S24, phases_S24 = np.array([]), np.array([]), np.array([]), np.array([])
+        freqs_S33, fields_S33, amps_S33, phases_S33 = np.array([]), np.array([]), np.array([]), np.array([])
+        freqs_S34, fields_S34, amps_S34, phases_S34 = np.array([]), np.array([]), np.array([]), np.array([])
+        freqs_S43, fields_S43, amps_S43, phases_S43 = np.array([]), np.array([]), np.array([]), np.array([])
         freqs_S44, fields_S44, amps_S44, phases_S44 = np.array([]), np.array([]), np.array([]), np.array([])
-        freqs_S42, fields_S42, amps_S42, phases_S42 = np.array([]), np.array([]), np.array([]), np.array([])
 
         for i, field in enumerate(field_sweep):  # MAIN FOR LOOP
-            if i == 1 and second_demag:
-                ps.demag_sweep()
+            #if i == 1 and second_demag:
+                #ps.demag_sweep()
 
-            current = field/conversion
+            current = (field-offset)/conversion
 
 
-            for Sparam in ["S22", "S42", "S44", "S24"]:
+            for Sparam in ["S33", "S43", "S34", "S44"]: #TODO scommenta
                 logger.info(f"Setting field...")
                 ps.setCurrent(current)
                 logger.info(f"Field set to {field_sweep[i]} mT")
@@ -88,43 +92,43 @@ def measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument,
                 # x,y,p = measure_dB(instr,Sparam)
                 logger.info("Finished measuring\n")
 
-                if Sparam == "S22":
-                    freqs_S22  = np.concatenate( (freqs_S22, freq) )    # Concatenation of new data with the already acquired data
-                    fields_S22 = np.concatenate( (fields_S22, [field]*len(freq)) )
-                    amps_S22   = np.concatenate( (amps_S22, a) )
-                    phases_S22 = np.concatenate( (phases_S22, p) )
+                if Sparam == "S33":
+                    freqs_S33  = np.concatenate( (freqs_S33, freq) )    # Concatenation of new data with the already acquired data
+                    fields_S33 = np.concatenate( (fields_S33, [field]*len(freq)) )
+                    amps_S33   = np.concatenate( (amps_S33, a) )
+                    phases_S33 = np.concatenate( (phases_S33, p) )
+                elif Sparam == "S43":
+                    freqs_S43  = np.concatenate( (freqs_S43, freq) )    # Concatenation of new data with the already acquired data
+                    fields_S43 = np.concatenate( (fields_S43, [field]*len(freq)) )
+                    amps_S43   = np.concatenate( (amps_S43, a) )
+                    phases_S43 = np.concatenate( (phases_S43, p) )
+                elif Sparam == "S34":
+                    freqs_S34  = np.concatenate( (freqs_S34, freq) )    # Concatenation of new data with the already acquired data
+                    fields_S34 = np.concatenate( (fields_S34, [field]*len(freq)) )
+                    amps_S34   = np.concatenate( (amps_S34, a) )
+                    phases_S34 = np.concatenate( (phases_S34, p) )
                 elif Sparam == "S44":
                     freqs_S44  = np.concatenate( (freqs_S44, freq) )    # Concatenation of new data with the already acquired data
                     fields_S44 = np.concatenate( (fields_S44, [field]*len(freq)) )
                     amps_S44   = np.concatenate( (amps_S44, a) )
                     phases_S44 = np.concatenate( (phases_S44, p) )
-                elif Sparam == "S24":
-                    freqs_S24  = np.concatenate( (freqs_S24, freq) )    # Concatenation of new data with the already acquired data
-                    fields_S24 = np.concatenate( (fields_S24, [field]*len(freq)) )
-                    amps_S24   = np.concatenate( (amps_S24, a) )
-                    phases_S24 = np.concatenate( (phases_S24, p) )
-                elif Sparam == "S42":
-                    freqs_S42  = np.concatenate( (freqs_S42, freq) )    # Concatenation of new data with the already acquired data
-                    fields_S42 = np.concatenate( (fields_S42, [field]*len(freq)) )
-                    amps_S42   = np.concatenate( (amps_S42, a) )
-                    phases_S42 = np.concatenate( (phases_S42, p) )
 
 
         logger.info(f'Saving data...')
-        save_data(freqs_S22, fields_S22, amps_S22, phases_S22, user_folder, sample_folder, measurement_name = f"{measurement_name}_S22")
-        logger.info(f'Saved file "{measurement_name}_S22.csv"')
+        save_data(freqs_S33, fields_S33, amps_S33, phases_S33, user_folder, sample_folder, measurement_name = f"{measurement_name}_S33")
+        logger.info(f'Saved file "{measurement_name}_S33.csv"')
+
+        logger.info(f'Saving data...')
+        save_data(freqs_S43, fields_S43, amps_S43, phases_S43, user_folder, sample_folder, measurement_name = f"{measurement_name}_S43")
+        logger.info(f'Saved file "{measurement_name}_S43.csv"')
+
+        logger.info(f'Saving data...')
+        save_data(freqs_S34, fields_S34, amps_S34, phases_S34, user_folder, sample_folder, measurement_name = f"{measurement_name}_S34")
+        logger.info(f'Saved file "{measurement_name}_S34.csv"')
 
         logger.info(f'Saving data...')
         save_data(freqs_S44, fields_S44, amps_S44, phases_S44, user_folder, sample_folder, measurement_name = f"{measurement_name}_S44")
         logger.info(f'Saved file "{measurement_name}_S44.csv"')
-
-        logger.info(f'Saving data...')
-        save_data(freqs_S42, fields_S42, amps_S42, phases_S42, user_folder, sample_folder, measurement_name = f"{measurement_name}_S42")
-        logger.info(f'Saved file "{measurement_name}_S42.csv"')
-
-        logger.info(f'Saving data...')
-        save_data(freqs_S24, fields_S24, amps_S24, phases_S24, user_folder, sample_folder, measurement_name = f"{measurement_name}_S24")
-        logger.info(f'Saved file "{measurement_name}_S24.csv"')
 
 
         ps.setCurrent(0)  # Set current back to 0 at the end of the routine
