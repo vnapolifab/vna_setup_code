@@ -12,8 +12,10 @@ import tkinter.font as tkFont
 from library_misc import *
 import CONSTANTS as c
 
+
 class EntryNotFound(Exception):
     pass
+
 
 class GUI:
     inputs = {}
@@ -24,7 +26,6 @@ class GUI:
         self.title = title
         self.set_style()
 
-
     def set_style(self):
         style = ttk.Style()
         style.theme_use('clam')
@@ -32,10 +33,10 @@ class GUI:
         style.configure('TEntry', font=('Helvetica', 12), padding=5, highlightthickness=0)
         style.configure('TButton', font=('Helvetica', 12), padding=5)
         style.configure('TCombobox', font=('Helvetica', 12), padding=5)
-        style.map('TCombobox', fieldbackground=[('readonly', 'lightgrey')], selectbackground=[('readonly', 'lightgrey')], selectforeground=[('readonly', 'black')])
+        style.map('TCombobox', fieldbackground=[('readonly', 'lightgrey')],
+                  selectbackground=[('readonly', 'lightgrey')], selectforeground=[('readonly', 'black')])
         style.map('TEntry', fieldbackground=[('!disabled', 'white'), ('disabled', 'grey')])
         self.root.configure(bg='light grey')
-
 
     def run_gui(self, entries, buttons):
         self.root.title(self.title)
@@ -52,40 +53,35 @@ class GUI:
         for button in self.buttons:
             button.setup(row)
             row += entry.rows_occupied
-        
+
         self.root.mainloop()
         self.root.quit()
-
 
     def find_entry(self, param_name):
         for entry in self.entries:
             if entry.param_name == param_name:
                 return entry
         raise EntryNotFound(f"Parameter {param_name} is not associated with an GUI_Input object")
-        
 
     def clear_all(self):
         for entry in self.entries:
             entry.clear()
-    
 
     def get_value(self, param):
         return self.find_entry(param).get()
-
 
     def submit_values(self):
         self.inputs = {}
         for entry in self.entries:
 
             valid, custom_error = entry.is_valid()
-            if not(valid):
+            if not (valid):
                 message = custom_error if custom_error else f'Input for "{entry.param_desc}" is not valid!'
                 tk.messagebox.showerror(title=None, message=message)
                 return
-            
+
             self.inputs[entry.param_name] = entry.get()
         self.root.destroy()
-
 
     def load(self, filename):
         with open(filename, "r") as f:
@@ -94,14 +90,12 @@ class GUI:
             entry.write(json_obj.get(entry.param_name, ""))
 
 
-
-
 class GUI_input(ABC):
     rows_occupied = 1
     TEXT = 1
     COMBOBOX = 2
 
-    def __init__(self, gui, param_name, param_desc, mandatory = True, hidden = False):
+    def __init__(self, gui, param_name, param_desc, mandatory=True, hidden=False):
         self.gui = gui
         self.param_name = param_name
         self.param_desc = param_desc
@@ -129,7 +123,6 @@ class GUI_input(ABC):
         pass
 
 
-
 # ====================== TEXT ======================
 
 
@@ -137,10 +130,11 @@ class GUI_input_text(GUI_input):
     entry_type = GUI_input.TEXT
 
     def setup(self, row):
-        ttk.Label(self.gui.root, text=self.param_desc, background='light grey').grid(row=row, column=0, sticky="w", padx=5, pady=5)
+        ttk.Label(self.gui.root, text=self.param_desc, background='light grey').grid(row=row, column=0, sticky="w",
+                                                                                     padx=5, pady=5)
         self.entry_var = ttk.Entry(self.gui.root, width=50)
         self.entry_var.grid(row=row, column=1, sticky="ew", padx=5, pady=5)
-    
+
     def is_valid(self):
         custom_error_message = None
         if self.entry_var.get() != "" or self.mandatory == False:
@@ -167,12 +161,13 @@ class GUI_input_text_measurement_name(GUI_input_text):
         custom_error_message = None
         if self.entry_var.get() == "" and self.mandatory == True:
             return False, custom_error_message
-        
-        path = os.path.join(c.DATA_FOLDER_NAME, self.gui.get_value("user_name"), self.gui.get_value("sample_name"), self.get())
+
+        path = os.path.join(c.DATA_FOLDER_NAME, self.gui.get_value("user_name"), self.gui.get_value("sample_name"),
+                            self.get())
         print(path)
-        if not(os.path.exists(path)):
+        if not (os.path.exists(path)):
             return True, None
-        else: 
+        else:
             return False, "This sample has already a measurement with this name!"
 
 
@@ -193,7 +188,8 @@ class GUI_input_text_field_sweep(GUI_input_text):
                 # Split the string by ':' to get start, step, stop values
                 start, step, stop = map(float, field_sweep_str.split(':'))
                 # Use range to generate the list of numbers
-                field_sweep_list = list(np.arange(start, stop + 0.00001, step))  # +0.00001 fa includere il numero finale, TODO trovare un modo migliore per includerlo
+                field_sweep_list = list(np.arange(start, stop + 0.00001,
+                                                  step))  # +0.00001 fa includere il numero finale, TODO trovare un modo migliore per includerlo
             else:
                 # For comma-separated values, convert string to list of integers
                 # Handle both with and without brackets
@@ -202,24 +198,24 @@ class GUI_input_text_field_sweep(GUI_input_text):
                 field_sweep_list = ast.literal_eval(field_sweep_str)
                 # Ensure the result is a list of floats
                 field_sweep_list = list(np.array(field_sweep_list).astype(float))
-            
+
             for i in range(len(field_sweep_list)):
-                field_sweep_list[i] = ( np.round(field_sweep_list[i] *10**10)/10**10 )
-            
+                field_sweep_list[i] = (np.round(field_sweep_list[i] * 10 ** 10) / 10 ** 10)
+
             return field_sweep_list
         except (ValueError, SyntaxError) as e:
             return None
-        
+
     def write(self, content):
         self.clear()
         self.entry_var.insert(0, str(list(np.array(content)[1:])))
-    
-        
+
+
 class GUI_input_text_to_freq(GUI_input_text):
 
     def write(self, content):
         self.clear()
-        self.entry_var.insert(0, content/10**9)
+        self.entry_var.insert(0, content / 10 ** 9)
 
     def is_valid(self):
         try:
@@ -229,13 +225,11 @@ class GUI_input_text_to_freq(GUI_input_text):
             return False, None
 
     def get(self):
-            return float(self.entry_var.get())*10**9
-        
+        return float(self.entry_var.get()) * 10 ** 9
 
-    
 
 class GUI_input_text_to_number(GUI_input_text):
-    def __init__(self, func=lambda string : float(string), *args, **kwargs):
+    def __init__(self, func=lambda string: float(string), *args, **kwargs):
         self.func = func
         super().__init__(*args, **kwargs)
 
@@ -254,7 +248,8 @@ class GUI_input_combobox(GUI_input):
         super().__init__(**kwargs)
 
     def setup(self, row):
-        ttk.Label(self.gui.root, text=self.param_desc, background='light grey').grid(row=row, column=0, sticky="w", padx=5, pady=5)
+        ttk.Label(self.gui.root, text=self.param_desc, background='light grey').grid(row=row, column=0, sticky="w",
+                                                                                     padx=5, pady=5)
         self.entry_var = ttk.Combobox(self.gui.root, state="readonly", values=self.values, width=50)
         self.entry_var.grid(row=row, column=1, sticky="ew", padx=5, pady=5)
         self.entry_var.bind('<<ComboboxSelected>>', self.on_change)
@@ -293,12 +288,13 @@ class GUI_input_combobox_user_name(GUI_input_combobox):
 
     def on_change(self, event):
         if self.entry_var.get() == self.NEW_USER:
-            self.entry_var_text.grid(row=self.row+1, column=1, sticky="ew", padx=5, pady=5)
+            self.entry_var_text.grid(row=self.row + 1, column=1, sticky="ew", padx=5, pady=5)
             self.gui.find_entry("sample_name").entry_var["values"] = [GUI_input_combobox_sample_name.NEW_SAMPLE]
         else:
             self.entry_var_text.grid_remove()
-            self.gui.find_entry("sample_name").entry_var["values"] = [GUI_input_combobox_sample_name.NEW_SAMPLE] + find_subfolder( os.path.join(c.DATA_FOLDER_NAME, self.get()) )
-
+            self.gui.find_entry("sample_name").entry_var["values"] = [
+                                                                         GUI_input_combobox_sample_name.NEW_SAMPLE] + find_subfolder(
+                os.path.join(c.DATA_FOLDER_NAME, self.get()))
 
 
 class GUI_input_combobox_sample_name(GUI_input_combobox):
@@ -315,10 +311,9 @@ class GUI_input_combobox_sample_name(GUI_input_combobox):
 
     def on_change(self, event):
         if self.entry_var.get() == self.NEW_SAMPLE:
-            self.entry_var_text.grid(row=self.row+1, column=1, sticky="ew", padx=5, pady=5)
+            self.entry_var_text.grid(row=self.row + 1, column=1, sticky="ew", padx=5, pady=5)
         else:
             self.entry_var_text.grid_remove()
-
 
 
 class GUI_input_combobox_dipole_mode(GUI_input_combobox):
@@ -332,11 +327,14 @@ class GUI_input_combobox_dipole_mode(GUI_input_combobox):
 
 class GUI_input_combobox_user_name_for_analysis(GUI_input_combobox):
     def on_change(self, event):
-        self.gui.find_entry("sample_name").entry_var["values"] = find_subfolder( os.path.join(c.DATA_FOLDER_NAME, self.get()) )
+        self.gui.find_entry("sample_name").entry_var["values"] = find_subfolder(
+            os.path.join(c.DATA_FOLDER_NAME, self.get()))
+
 
 class GUI_input_combobox_sample_name_for_analysis(GUI_input_combobox):
     def on_change(self, event):
-        self.gui.find_entry("measurement_name").entry_var["values"] = find_subfolder( os.path.join(c.DATA_FOLDER_NAME, self.gui.find_entry("user_name").get(), self.get()) )
+        self.gui.find_entry("measurement_name").entry_var["values"] = find_subfolder(
+            os.path.join(c.DATA_FOLDER_NAME, self.gui.find_entry("user_name").get(), self.get()))
 
 
 # ====================== BUTTONS ======================
@@ -373,7 +371,6 @@ class GUI_button_load_last_settings(GUI_button):
         self.gui.load("last_settings.json")
 
 
-
 def find_subfolder(folder_path):
     try:
         subfolders = next(os.walk(folder_path))[1]
@@ -383,62 +380,87 @@ def find_subfolder(folder_path):
     return subfolders
 
 
+# class GUI_input_combobox_user_name(GUI_input_combobox):
+#     rows_occupied = 2
+#     NEW_USER = "---ELABFTW Username---"
+#
+#     def setup(self, *args, **kwargs):
+#         self.entry_var_text = ttk.Entry(self.gui.root, width=50)
+#         super().setup(*args, **kwargs)
+#
+#     def get(self):
+#         combobox_input = super().get()
+#         return combobox_input if combobox_input != self.NEW_USER else self.entry_var_text.get()
+#
+#     def on_change(self, event):
+#         if self.entry_var.get() == self.NEW_USER:
+#             self.entry_var_text.grid(row=self.row+1, column=1, sticky="ew", padx=5, pady=5)
+#             self.gui.find_entry("sample_name").entry_var["values"] = [GUI_input_combobox_sample_name.NEW_SAMPLE]
+#         else:
+#             self.entry_var_text.grid_remove()
+#             self.gui.find_entry("sample_name").entry_var["values"] = [GUI_input_combobox_sample_name.NEW_SAMPLE] + find_subfolder( os.path.join(c.DATA_FOLDER_NAME, self.get()) )
+
+import httpx
+url = "https://test.fair.labdb.eu.org"
 
 def gui_measurement_startup():
     gui = GUI(root=tk.Tk(), size="500x800", title="Parameter Input GUI")
 
     entries = [
-        GUI_input_combobox_user_name(   gui=gui,    param_name="user_name",            param_desc="User",                  values=[GUI_input_combobox_user_name.NEW_USER] + find_subfolder(c.DATA_FOLDER_NAME)),
-        GUI_input_combobox_sample_name( gui=gui,    param_name="sample_name",          param_desc="Sample",                values=[]),
-        GUI_input_text_measurement_name(gui=gui,    param_name="measurement_name",     param_desc="Measurement name"       ),
-        GUI_input_text(                 gui=gui,    param_name="description",          param_desc="Description",           mandatory=False),
-        GUI_input_combobox_dipole_mode( gui=gui,    param_name="dipole_mode",          param_desc="Dipole mode",           values=[1]),
-        GUI_input_combobox(             gui=gui,    param_name="s_parameter",          param_desc="S Parameter",           values=["S11", "S22", "S33", "S44", "S12", "S21", "S13", "S31", "S23", "S32", "S24", "S42", "S34", "S43", "S14", "S41"]),
-        GUI_input_text_field_sweep(     gui=gui,    param_name="field_sweep",          param_desc="Field sweep [mT]"       ),
-        GUI_input_text(                 gui=gui,    param_name="angle",                param_desc="Angle [deg]",           mandatory=False), # TODO chagne it so it si not mandatory only in osme dipole mode
-        GUI_input_text_to_freq(         gui=gui,    param_name="start_frequency",      param_desc="Start frequency [GHz]"  ),
-        GUI_input_text_to_freq(         gui=gui,    param_name="stop_frequency",       param_desc="Stop frequency [GHz]"   ),
-        GUI_input_text_to_number(       gui=gui,    param_name="number_of_points",     param_desc="Number of points",      func=lambda x : int(x)),
-        GUI_input_text_to_number(       gui=gui,    param_name="bandwidth",            param_desc="Bandwidth [Hz]"         ),
-        GUI_input_text_to_number(       gui=gui,    param_name="power",                param_desc="Power [dBm]"            ),
-        GUI_input_text_to_number(       gui=gui,    param_name="ref_field",            param_desc="Ref field [mT]"         ),
-        GUI_input_text(                 gui=gui,    param_name="cal_file",             param_desc="Calibration file",      mandatory=False),
+        GUI_input_combobox_user_name(gui=gui, param_name="user_name", param_desc="User",
+                                     values=[GUI_input_combobox_user_name.NEW_USER] + find_subfolder(
+                                         c.DATA_FOLDER_NAME)),
+        GUI_input_combobox_user_name(gui=gui, param_name="ELABFTW_user_name", param_desc="ELABFTW_user_name",
+                                     values=httpx.get(f"{url}/users", verify=False)),
+        GUI_input_combobox_sample_name(gui=gui, param_name="sample_name", param_desc="Sample", values=[]),
+        GUI_input_text_measurement_name(gui=gui, param_name="measurement_name", param_desc="Measurement name"),
+        GUI_input_text(gui=gui, param_name="description", param_desc="Description", mandatory=False),
+        GUI_input_combobox_dipole_mode(gui=gui, param_name="dipole_mode", param_desc="Dipole mode", values=[1]),
+        GUI_input_combobox(gui=gui, param_name="s_parameter", param_desc="S Parameter",
+                           values=["S11", "S22", "S33", "S44", "S12", "S21", "S13", "S31", "S23", "S32", "S24", "S42",
+                                   "S34", "S43", "S14", "S41"]),
+        GUI_input_text_field_sweep(gui=gui, param_name="field_sweep", param_desc="Field sweep [mT]"),
+        GUI_input_text(gui=gui, param_name="angle", param_desc="Angle [deg]", mandatory=False),
+        # TODO chagne it so it si not mandatory only in osme dipole mode
+        GUI_input_text_to_freq(gui=gui, param_name="start_frequency", param_desc="Start frequency [GHz]"),
+        GUI_input_text_to_freq(gui=gui, param_name="stop_frequency", param_desc="Stop frequency [GHz]"),
+        GUI_input_text_to_number(gui=gui, param_name="number_of_points", param_desc="Number of points",
+                                 func=lambda x: int(x)),
+        GUI_input_text_to_number(gui=gui, param_name="bandwidth", param_desc="Bandwidth [Hz]"),
+        GUI_input_text_to_number(gui=gui, param_name="power", param_desc="Power [dBm]"),
+        GUI_input_text_to_number(gui=gui, param_name="ref_field", param_desc="Ref field [mT]"),
+        GUI_input_text(gui=gui, param_name="cal_file", param_desc="Calibration file", mandatory=False),
     ]
-
-
 
     buttons = [
-        GUI_button_submit(              gui=gui,    button_name="Submit"            ),
-        GUI_button_clear(               gui=gui,    button_name="Clear"             ),
-        GUI_button_load_last_settings(  gui=gui,    button_name="Load last settings")
+        GUI_button_submit(gui=gui, button_name="Submit"),
+        GUI_button_clear(gui=gui, button_name="Clear"),
+        GUI_button_load_last_settings(gui=gui, button_name="Load last settings")
     ]
-
 
     gui.run_gui(entries=entries, buttons=buttons)
 
     return gui.inputs if gui.inputs else None
 
 
-
-
 def gui_analysis_startup():
     gui = GUI(root=tk.Tk(), size="500x200", title="Parameter Input GUI")
 
     entries = [
-        GUI_input_combobox_user_name_for_analysis(  gui=gui, param_name="user_name",        param_desc="User",             values=find_subfolder(c.DATA_FOLDER_NAME)),
-        GUI_input_combobox_sample_name_for_analysis(gui=gui, param_name="sample_name",      param_desc="Sample",           values=[]),
-        GUI_input_combobox(                         gui=gui, param_name="measurement_name", param_desc="Measurement name", values=[]),
+        GUI_input_combobox_user_name_for_analysis(gui=gui, param_name="user_name", param_desc="User",
+                                                  values=find_subfolder(c.DATA_FOLDER_NAME)),
+        GUI_input_combobox_sample_name_for_analysis(gui=gui, param_name="sample_name", param_desc="Sample", values=[]),
+        GUI_input_combobox(gui=gui, param_name="measurement_name", param_desc="Measurement name", values=[]),
     ]
 
     buttons = [
-        GUI_button_submit(              gui=gui,    button_name="Submit"            ),
+        GUI_button_submit(gui=gui, button_name="Submit"),
     ]
 
     gui.run_gui(entries=entries, buttons=buttons)
-    
-    return os.path.join(c.DATA_FOLDER_NAME, gui.inputs["user_name"], gui.inputs["sample_name"], gui.inputs["measurement_name"]) if gui.inputs else None
 
-
+    return os.path.join(c.DATA_FOLDER_NAME, gui.inputs["user_name"], gui.inputs["sample_name"],
+                        gui.inputs["measurement_name"]) if gui.inputs else None
 
 
 if __name__ == "__main__":
