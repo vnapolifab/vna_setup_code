@@ -12,6 +12,24 @@ import tkinter.font as tkFont
 from library_misc import *
 import CONSTANTS as c
 
+import httpx
+
+url = "https://test.fair.labdb.eu.org"
+import dataclasses
+from typing import Optional, Any
+import copy
+
+@dataclasses.dataclass
+class User:
+    email: str
+    userid: int
+
+
+@dataclasses.dataclass
+class UserTeams:
+    name: str
+    id: int
+
 
 class EntryNotFound(Exception):
     pass
@@ -73,15 +91,15 @@ class GUI:
     def submit_values(self):
         self.inputs = {}
         for entry in self.entries:
+            if entry.to_be_submitted:
+                valid, custom_error = entry.is_valid()
+                if not (valid):
+                    message = custom_error if custom_error else f'Input for "{entry.param_desc}" is not valid!'
+                    tk.messagebox.showerror(title=None, message=message)
+                    return
 
-            valid, custom_error = entry.is_valid()
-            if not (valid):
-                message = custom_error if custom_error else f'Input for "{entry.param_desc}" is not valid!'
-                tk.messagebox.showerror(title=None, message=message)
-                return
-
-            self.inputs[entry.param_name] = entry.get()
-        self.root.destroy()
+                self.inputs[entry.param_name] = entry.get()
+        # self.root.destroy()
 
     def load(self, filename):
         with open(filename, "r") as f:
@@ -92,6 +110,7 @@ class GUI:
 
 class GUI_input(ABC):
     rows_occupied = 1
+    to_be_submitted: bool = True
     TEXT = 1
     COMBOBOX = 2
 
@@ -243,7 +262,7 @@ class GUI_input_text_to_number(GUI_input_text):
 class GUI_input_combobox(GUI_input):
     entry_type = GUI_input.COMBOBOX
 
-    def __init__(self, values, **kwargs):
+    def __init__(self, values: Optional[list[str]], **kwargs):
         self.values = values
         super().__init__(**kwargs)
 
@@ -371,6 +390,37 @@ class GUI_button_load_last_settings(GUI_button):
         self.gui.load("last_settings.json")
 
 
+# ELABFTW
+class GUISaveToElabFTW(GUI_button):
+    def __init__(self, gui, button_name, elab_user, equipment_templates):
+        self.elab_user: GUI_input_combobox_elab_users = elab_user
+        self.equipment_templates: GUIEquipmentTemplates = equipment_templates
+        super().__init__(gui, button_name)
+
+    def on_press(self):
+        
+        mod_template = copy.deepcopy(self.equipment_templates.saved_template)
+        for parameter in self.equipment_templates.saved_template["metadata"]["extra_fields"]:
+            if parameter in self.gui.inputs.keys():
+                mod_template["metadata"]["extra_fields"][parameter]["value"] = str(self.gui.inputs[parameter])
+        experiment = {
+            "title": "jagger",
+            "category_id": self.equipment_templates.saved_experiment_id,
+            "metadata": mod_template,
+            "userid": self.elab_user.saved_user_id,
+            "team_name": self.elab_user.saved_team_id
+        }
+        response = httpx.post(
+            f"{url}/experiments",
+            json=experiment,
+            verify=False
+        )
+
+        if response.status_code == 200:
+            print("Experiment successfully Created!")
+        else:
+            print("Doh!")
+
 def find_subfolder(folder_path):
     try:
         subfolders = next(os.walk(folder_path))[1]
@@ -380,38 +430,83 @@ def find_subfolder(folder_path):
     return subfolders
 
 
-# class GUI_input_combobox_user_name(GUI_input_combobox):
-#     rows_occupied = 2
-#     NEW_USER = "---ELABFTW Username---"
-#
-#     def setup(self, *args, **kwargs):
-#         self.entry_var_text = ttk.Entry(self.gui.root, width=50)
-#         super().setup(*args, **kwargs)
-#
-#     def get(self):
-#         combobox_input = super().get()
-#         return combobox_input if combobox_input != self.NEW_USER else self.entry_var_text.get()
-#
-#     def on_change(self, event):
-#         if self.entry_var.get() == self.NEW_USER:
-#             self.entry_var_text.grid(row=self.row+1, column=1, sticky="ew", padx=5, pady=5)
-#             self.gui.find_entry("sample_name").entry_var["values"] = [GUI_input_combobox_sample_name.NEW_SAMPLE]
-#         else:
-#             self.entry_var_text.grid_remove()
-#             self.gui.find_entry("sample_name").entry_var["values"] = [GUI_input_combobox_sample_name.NEW_SAMPLE] + find_subfolder( os.path.join(c.DATA_FOLDER_NAME, self.get()) )
+def save_users() -> list[User]:
+    user_list: list[User] = [User(email=user["email"], userid=user["userid"]) for user in
+                             httpx.get(f"{url}/users", verify=False).json()]
+    return user_list
 
-import httpx
-url = "https://test.fair.labdb.eu.org"
+
+class GUI_input_combobox_elab_users(GUI_input_combobox):
+    entry_type = GUI_input.COMBOBOX
+    to_be_submitted = False
+
+    def __init__(self, values: list[User], **kwargs):
+        self.user_list: list[User] = values
+        self.values = [user.email for user in values]
+        self.user_teams: Optional[list[UserTeams]] = None
+        self.saved_team_id: Optional[int] = None
+        self.saved_user_id: Optional[int] = None
+        super().__init__(values=self.values, **kwargs)
+
+    def setup(self, row):
+        ttk.Label(self.gui.root, text=self.param_desc, background='light grey').grid(row=row, column=10, sticky="w",
+                                                                                     padx=5, pady=5)
+        self.entry_var = ttk.Combobox(self.gui.root, state="readonly", values=self.values,
+                                      width=50)
+        self.entry_var.grid(row=row, column=1, sticky="ew", padx=5, pady=5)
+        self.entry_var.bind('<<ComboboxSelected>>', self.on_change)
+        self.entry_var.grid(row=row, column=15, sticky="ew", padx=5, pady=5)
+        # userteams
+        ttk.Label(self.gui.root, text="ElabUser_teams", background='light grey').grid(row=row + 1, column=10,
+                                                                                      sticky="w",
+                                                                                      padx=5, pady=5)
+        self.user_teams_combobox = ttk.Combobox(self.gui.root, state="readonly", width=50)
+        self.user_teams_combobox.grid(row=row + 1, column=15, sticky="ew", padx=5, pady=5)
+        self.user_teams_combobox.bind('<<ComboboxSelected>>', self.save_teams_id)
+
+    def on_change(self, event):
+        self.saved_user_id: int = [user.userid for user in self.user_list if user.email == self.entry_var.get()][0]
+        self.user_teams = [UserTeams(id=team["id"], name=team["name"]) for team in
+                           httpx.get(f"{url}/users/{self.saved_user_id}", verify=False).json()]
+        self.user_teams_combobox["values"] = [team.name for team in self.user_teams]
+
+    def save_teams_id(self, event):
+        self.saved_team_id = [team.id for team in self.user_teams if team.name == self.user_teams_combobox.get()][0]
+
+
+class GUIEquipmentTemplates(GUI_input_combobox):
+    entry_type = GUI_input.COMBOBOX
+    to_be_submitted = False
+
+    def __init__(self, **kwargs):
+        self.saved_experiment_id: Optional[int] = None
+        self.experiments_templates = httpx.get(f"{url}/equipment/radio_frequency_station", verify=False).json()
+        self.values = list(self.experiments_templates.keys())
+        self.saved_template: Optional[dict[str, Any]] = None
+        super().__init__(self.values, **kwargs)
+
+    def setup(self, row):
+        # userteams
+        ttk.Label(self.gui.root, text=self.param_desc, background='light grey').grid(row=row + 1, column=10,
+                                                                                     sticky="w",
+                                                                                     padx=5, pady=5)
+        self.entry_var = ttk.Combobox(self.gui.root, state="readonly", width=50, values=self.values)
+        self.entry_var.grid(row=row + 1, column=15, sticky="ew", padx=5, pady=5)
+        self.entry_var.bind('<<ComboboxSelected>>', self.on_change)
+
+    def on_change(self, event):
+        self.saved_experiment_id: int = self.experiments_templates[self.entry_var.get()][
+            "id"]
+        self.saved_template = self.experiments_templates[self.entry_var.get()]
+
 
 def gui_measurement_startup():
-    gui = GUI(root=tk.Tk(), size="500x800", title="Parameter Input GUI")
-
+    gui = GUI(root=tk.Tk(), size="1200x800", title="Parameter Input GUI")
+    user_list: list[User] = save_users()
     entries = [
         GUI_input_combobox_user_name(gui=gui, param_name="user_name", param_desc="User",
                                      values=[GUI_input_combobox_user_name.NEW_USER] + find_subfolder(
                                          c.DATA_FOLDER_NAME)),
-        GUI_input_combobox_user_name(gui=gui, param_name="ELABFTW_user_name", param_desc="ELABFTW_user_name",
-                                     values=httpx.get(f"{url}/users", verify=False)),
         GUI_input_combobox_sample_name(gui=gui, param_name="sample_name", param_desc="Sample", values=[]),
         GUI_input_text_measurement_name(gui=gui, param_name="measurement_name", param_desc="Measurement name"),
         GUI_input_text(gui=gui, param_name="description", param_desc="Description", mandatory=False),
@@ -429,13 +524,21 @@ def gui_measurement_startup():
         GUI_input_text_to_number(gui=gui, param_name="bandwidth", param_desc="Bandwidth [Hz]"),
         GUI_input_text_to_number(gui=gui, param_name="power", param_desc="Power [dBm]"),
         GUI_input_text_to_number(gui=gui, param_name="ref_field", param_desc="Ref field [mT]"),
-        GUI_input_text(gui=gui, param_name="cal_file", param_desc="Calibration file", mandatory=False),
+        GUI_input_text(gui=gui, param_name="cal_file", param_desc="Calibration file", mandatory=False)
     ]
-
+    # ELABFTW
+    elab_user = GUI_input_combobox_elab_users(gui=gui, param_name="ELABFTW_user_name", param_desc="ELABFTW_user_name",
+                                              values=user_list, mandatory=False)
+    equipment_templates = GUIEquipmentTemplates(gui=gui, param_name="Experiments_List", param_desc="Experiments_List",
+                                                mandatory=False)
+    entries.append(elab_user)
+    entries.append(equipment_templates)
     buttons = [
         GUI_button_submit(gui=gui, button_name="Submit"),
         GUI_button_clear(gui=gui, button_name="Clear"),
-        GUI_button_load_last_settings(gui=gui, button_name="Load last settings")
+        GUI_button_load_last_settings(gui=gui, button_name="Load last settings"),
+        GUISaveToElabFTW(gui=gui, elab_user=elab_user,
+                         equipment_templates=equipment_templates, button_name="save_to_elab")
     ]
 
     gui.run_gui(entries=entries, buttons=buttons)
@@ -464,6 +567,6 @@ def gui_analysis_startup():
 
 
 if __name__ == "__main__":
-    # ans = gui_analysis_startup()  
+    # ans = gui_analysis_startup()
     ans = gui_measurement_startup()
     print(ans)
