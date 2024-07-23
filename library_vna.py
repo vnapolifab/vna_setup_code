@@ -62,7 +62,7 @@ def applySettings(instr: RsInstrument, settings: object) -> None:
     instr.write("SENS1:SWE:POIN " + f"{settings['number_of_points']}")  # Replace with your desired number of points
 
     # Reload calibration
-    instr.write_str(":MMEMORY:LOAD:CORRection 1, '2024_06_20.cal'") #TODO rendere la calibration accessibile allo user anche lato codice
+    instr.write_str(":MMEMORY:LOAD:CORRection 1, 'TDR calibration.cal'") #TODO rendere la calibration accessibile allo user anche lato codice
     # instr.write_str(":MMEMORY:LOAD:CORRection  1, 'calibration_08_02_2024.cal'")
 
     instr.visa_timeout = ( settings['bandwidth']**-1 * settings['number_of_points'] *10 )*1000  + 100  # estimation times an arbitrary coeff 
