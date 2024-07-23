@@ -391,7 +391,7 @@ class GUI_button_load_last_settings(GUI_button):
 
 
 # ELABFTW
-class GUISaveToElabFTW(GUI_button):
+class GUIButtonSaveToElabFTW(GUI_button):
     def __init__(self, gui, button_name, elab_user, equipment_templates):
         self.elab_user: GUI_input_combobox_elab_users = elab_user
         self.equipment_templates: GUIEquipmentTemplates = equipment_templates
@@ -404,11 +404,11 @@ class GUISaveToElabFTW(GUI_button):
             if parameter in self.gui.inputs.keys():
                 mod_template["metadata"]["extra_fields"][parameter]["value"] = str(self.gui.inputs[parameter])
         experiment = {
-            "title": "jagger",
+            "title": self.gui.inputs["measurement_name"],
             "category_id": self.equipment_templates.saved_experiment_id,
-            "metadata": mod_template,
+            "metadata": mod_template["metadata"],
             "userid": self.elab_user.saved_user_id,
-            "team_name": self.elab_user.saved_team_id
+            "team_name": self.elab_user.saved_team_name
         }
         response = httpx.post(
             f"{url}/experiments",
@@ -444,7 +444,7 @@ class GUI_input_combobox_elab_users(GUI_input_combobox):
         self.user_list: list[User] = values
         self.values = [user.email for user in values]
         self.user_teams: Optional[list[UserTeams]] = None
-        self.saved_team_id: Optional[int] = None
+        self.saved_team_name: Optional[int] = None
         self.saved_user_id: Optional[int] = None
         super().__init__(values=self.values, **kwargs)
 
@@ -471,7 +471,7 @@ class GUI_input_combobox_elab_users(GUI_input_combobox):
         self.user_teams_combobox["values"] = [team.name for team in self.user_teams]
 
     def save_teams_id(self, event):
-        self.saved_team_id = [team.id for team in self.user_teams if team.name == self.user_teams_combobox.get()][0]
+        self.saved_team_name = [team.name for team in self.user_teams if team.name == self.user_teams_combobox.get()][0]
 
 
 class GUIEquipmentTemplates(GUI_input_combobox):
@@ -498,6 +498,7 @@ class GUIEquipmentTemplates(GUI_input_combobox):
         self.saved_experiment_id: int = self.experiments_templates[self.entry_var.get()][
             "id"]
         self.saved_template = self.experiments_templates[self.entry_var.get()]
+
 
 
 def gui_measurement_startup():
@@ -537,8 +538,8 @@ def gui_measurement_startup():
         GUI_button_submit(gui=gui, button_name="Submit"),
         GUI_button_clear(gui=gui, button_name="Clear"),
         GUI_button_load_last_settings(gui=gui, button_name="Load last settings"),
-        GUISaveToElabFTW(gui=gui, elab_user=elab_user,
-                         equipment_templates=equipment_templates, button_name="save_to_elab")
+        GUIButtonSaveToElabFTW(gui=gui, elab_user=elab_user,
+                               equipment_templates=equipment_templates, button_name="save_to_elab")
     ]
 
     gui.run_gui(entries=entries, buttons=buttons)
