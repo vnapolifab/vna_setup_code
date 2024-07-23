@@ -1,0 +1,670 @@
+Index: library_gui.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import os\r\nimport numpy as np\r\nimport ast\r\nimport json\r\nfrom abc import ABC, abstractmethod\r\n# from icecream import ic\r\n\r\nimport tkinter as tk\r\nfrom tkinter import ttk, messagebox\r\nimport tkinter.font as tkFont\r\n\r\nfrom library_misc import *\r\nimport CONSTANTS as c\r\n\r\nclass EntryNotFound(Exception):\r\n    pass\r\n\r\nclass GUI:\r\n    inputs = {}\r\n\r\n    def __init__(self, root, size, title):\r\n        self.root = root\r\n        self.size = size\r\n        self.title = title\r\n        self.set_style()\r\n\r\n\r\n    def set_style(self):\r\n        style = ttk.Style()\r\n        style.theme_use('clam')\r\n        style.configure('TLabel', font=('Helvetica', 12))\r\n        style.configure('TEntry', font=('Helvetica', 12), padding=5, highlightthickness=0)\r\n        style.configure('TButton', font=('Helvetica', 12), padding=5)\r\n        style.configure('TCombobox', font=('Helvetica', 12), padding=5)\r\n        style.map('TCombobox', fieldbackground=[('readonly', 'lightgrey')], selectbackground=[('readonly', 'lightgrey')], selectforeground=[('readonly', 'black')])\r\n        style.map('TEntry', fieldbackground=[('!disabled', 'white'), ('disabled', 'grey')])\r\n        self.root.configure(bg='light grey')\r\n\r\n\r\n    def run_gui(self, entries, buttons):\r\n        self.root.title(self.title)\r\n        self.root.geometry(self.size)\r\n        self.entries = entries\r\n        self.buttons = buttons\r\n\r\n        row = 0\r\n        for entry in self.entries:\r\n            entry.setup(row)\r\n            entry.row = row\r\n            row += entry.rows_occupied\r\n\r\n        for button in self.buttons:\r\n            button.setup(row)\r\n            row += entry.rows_occupied\r\n        \r\n        self.root.mainloop()\r\n        self.root.quit()\r\n\r\n\r\n    def find_entry(self, param_name):\r\n        for entry in self.entries:\r\n            if entry.param_name == param_name:\r\n                return entry\r\n        raise EntryNotFound(f\"Parameter {param_name} is not associated with an GUI_Input object\")\r\n        \r\n\r\n    def clear_all(self):\r\n        for entry in self.entries:\r\n            entry.clear()\r\n    \r\n\r\n    def get_value(self, param):\r\n        return self.find_entry(param).get()\r\n\r\n\r\n    def submit_values(self):\r\n        self.inputs = {}\r\n        for entry in self.entries:\r\n\r\n            valid, custom_error = entry.is_valid()\r\n            if not(valid):\r\n                message = custom_error if custom_error else f'Input for \"{entry.param_desc}\" is not valid!'\r\n                tk.messagebox.showerror(title=None, message=message)\r\n                return\r\n            \r\n            self.inputs[entry.param_name] = entry.get()\r\n        self.root.destroy()\r\n\r\n\r\n    def load(self, filename):\r\n        with open(filename, \"r\") as f:\r\n            json_obj = json.load(f)\r\n        for entry in self.entries:\r\n            entry.write(json_obj.get(entry.param_name, \"\"))\r\n\r\n\r\n\r\n\r\nclass GUI_input(ABC):\r\n    rows_occupied = 1\r\n    TEXT = 1\r\n    COMBOBOX = 2\r\n\r\n    def __init__(self, gui, param_name, param_desc, mandatory = True, hidden = False):\r\n        self.gui = gui\r\n        self.param_name = param_name\r\n        self.param_desc = param_desc\r\n        self.mandatory = mandatory\r\n        self.hidden = hidden\r\n\r\n    @abstractmethod\r\n    def setup(self):\r\n        pass\r\n\r\n    @abstractmethod\r\n    def is_valid(self):\r\n        pass\r\n\r\n    @abstractmethod\r\n    def clear(self):\r\n        pass\r\n\r\n    @abstractmethod\r\n    def write(self):\r\n        pass\r\n\r\n    @abstractmethod\r\n    def get(self):\r\n        pass\r\n\r\n\r\n\r\n# ====================== TEXT ======================\r\n\r\n\r\nclass GUI_input_text(GUI_input):\r\n    entry_type = GUI_input.TEXT\r\n\r\n    def setup(self, row):\r\n        ttk.Label(self.gui.root, text=self.param_desc, background='light grey').grid(row=row, column=0, sticky=\"w\", padx=5, pady=5)\r\n        self.entry_var = ttk.Entry(self.gui.root, width=50)\r\n        self.entry_var.grid(row=row, column=1, sticky=\"ew\", padx=5, pady=5)\r\n    \r\n    def is_valid(self):\r\n        custom_error_message = None\r\n        if self.entry_var.get() != \"\" or self.mandatory == False:\r\n            return True, custom_error_message\r\n        else:\r\n            return False, custom_error_message\r\n\r\n    def clear(self):\r\n        self.entry_var.delete(0, tk.END)\r\n\r\n    def write(self, content):\r\n        self.clear()\r\n        self.entry_var.insert(0, content)\r\n\r\n    def print_value(self):\r\n        print(self.entry_var.get().strip())\r\n\r\n    def get(self):\r\n        return self.entry_var.get().strip()\r\n\r\n\r\nclass GUI_input_text_measurement_name(GUI_input_text):\r\n    def is_valid(self):\r\n        custom_error_message = None\r\n        if self.entry_var.get() == \"\" and self.mandatory == True:\r\n            return False, custom_error_message\r\n        \r\n        path = os.path.join(c.DATA_FOLDER_NAME, self.gui.get_value(\"user_name\"), self.gui.get_value(\"sample_name\"), self.get())\r\n        print(path)\r\n        if not(os.path.exists(path)):\r\n            return True, None\r\n        else: \r\n            return False, \"This sample has already a measurement with this name!\"\r\n\r\n\r\nclass GUI_input_text_field_sweep(GUI_input_text):\r\n\r\n    def is_valid(self):\r\n        custom_error_message = None\r\n        if self.entry_var.get() != \"\" or self.mandatory == False:\r\n            return True, custom_error_message\r\n        else:\r\n            return False, custom_error_message\r\n\r\n    def get(self):\r\n        field_sweep_str = self.entry_var.get()\r\n        try:\r\n            # Check if the input string uses range notation (e.g., \"1:1:5\")\r\n            if ':' in field_sweep_str:\r\n                # Split the string by ':' to get start, step, stop values\r\n                start, step, stop = map(float, field_sweep_str.split(':'))\r\n                # Use range to generate the list of numbers\r\n                field_sweep_list = list(np.arange(start, stop + 0.00001, step))  # +0.00001 fa includere il numero finale, TODO trovare un modo migliore per includerlo\r\n            else:\r\n                # For comma-separated values, convert string to list of integers\r\n                # Handle both with and without brackets\r\n                if not field_sweep_str.startswith('['):\r\n                    field_sweep_str = f'[{field_sweep_str}]'\r\n                field_sweep_list = ast.literal_eval(field_sweep_str)\r\n                # Ensure the result is a list of floats\r\n                field_sweep_list = list(np.array(field_sweep_list).astype(float))\r\n            \r\n            for i in range(len(field_sweep_list)):\r\n                field_sweep_list[i] = ( np.round(field_sweep_list[i] *10**10)/10**10 )\r\n            \r\n            return field_sweep_list\r\n        except (ValueError, SyntaxError) as e:\r\n            return None\r\n        \r\n    def write(self, content):\r\n        self.clear()\r\n        self.entry_var.insert(0, str(list(np.array(content)[1:])))\r\n    \r\n        \r\nclass GUI_input_text_to_freq(GUI_input_text):\r\n\r\n    def write(self, content):\r\n        self.clear()\r\n        self.entry_var.insert(0, content/10**9)\r\n\r\n    def is_valid(self):\r\n        try:\r\n            float(self.entry_var.get())\r\n            return True, None\r\n        except:\r\n            return False, None\r\n\r\n    def get(self):\r\n            return float(self.entry_var.get())*10**9\r\n        \r\n\r\n    \r\n\r\nclass GUI_input_text_to_number(GUI_input_text):\r\n    def __init__(self, func=lambda string : float(string), *args, **kwargs):\r\n        self.func = func\r\n        super().__init__(*args, **kwargs)\r\n\r\n    def get(self):\r\n        return self.func(self.entry_var.get())\r\n\r\n\r\n# ====================== COMBOBOX ======================\r\n\r\n\r\nclass GUI_input_combobox(GUI_input):\r\n    entry_type = GUI_input.COMBOBOX\r\n\r\n    def __init__(self, values, **kwargs):\r\n        self.values = values\r\n        super().__init__(**kwargs)\r\n\r\n    def setup(self, row):\r\n        ttk.Label(self.gui.root, text=self.param_desc, background='light grey').grid(row=row, column=0, sticky=\"w\", padx=5, pady=5)\r\n        self.entry_var = ttk.Combobox(self.gui.root, state=\"readonly\", values=self.values, width=50)\r\n        self.entry_var.grid(row=row, column=1, sticky=\"ew\", padx=5, pady=5)\r\n        self.entry_var.bind('<<ComboboxSelected>>', self.on_change)\r\n\r\n    def is_valid(self):\r\n        custom_error_message = None\r\n        if self.entry_var.get() != \"\":\r\n            return True, custom_error_message\r\n        else:\r\n            return False, custom_error_message\r\n\r\n    def clear(self):\r\n        self.entry_var.set(\"\")\r\n\r\n    def write(self, content):\r\n        self.entry_var.set(content)\r\n\r\n    def get(self):\r\n        return self.entry_var.get()\r\n\r\n    def on_change(self, event):\r\n        pass\r\n\r\n\r\nclass GUI_input_combobox_user_name(GUI_input_combobox):\r\n    rows_occupied = 2\r\n    NEW_USER = \"---New User---\"\r\n\r\n    def setup(self, *args, **kwargs):\r\n        self.entry_var_text = ttk.Entry(self.gui.root, width=50)\r\n        super().setup(*args, **kwargs)\r\n\r\n    def get(self):\r\n        combobox_input = super().get()\r\n        return combobox_input if combobox_input != self.NEW_USER else self.entry_var_text.get()\r\n\r\n    def on_change(self, event):\r\n        if self.entry_var.get() == self.NEW_USER:\r\n            self.entry_var_text.grid(row=self.row+1, column=1, sticky=\"ew\", padx=5, pady=5)\r\n            self.gui.find_entry(\"sample_name\").entry_var[\"values\"] = [GUI_input_combobox_sample_name.NEW_SAMPLE]\r\n        else:\r\n            self.entry_var_text.grid_remove()\r\n            self.gui.find_entry(\"sample_name\").entry_var[\"values\"] = [GUI_input_combobox_sample_name.NEW_SAMPLE] + find_subfolder( os.path.join(c.DATA_FOLDER_NAME, self.get()) )\r\n\r\n\r\n\r\nclass GUI_input_combobox_sample_name(GUI_input_combobox):\r\n    rows_occupied = 2\r\n    NEW_SAMPLE = \"---New Sample---\"\r\n\r\n    def setup(self, *args, **kwargs):\r\n        self.entry_var_text = ttk.Entry(self.gui.root, width=50)\r\n        super().setup(*args, **kwargs)\r\n\r\n    def get(self):\r\n        combobox_input = super().get()\r\n        return combobox_input if combobox_input != self.NEW_SAMPLE else self.entry_var_text.get()\r\n\r\n    def on_change(self, event):\r\n        if self.entry_var.get() == self.NEW_SAMPLE:\r\n            self.entry_var_text.grid(row=self.row+1, column=1, sticky=\"ew\", padx=5, pady=5)\r\n        else:\r\n            self.entry_var_text.grid_remove()\r\n\r\n\r\n\r\nclass GUI_input_combobox_dipole_mode(GUI_input_combobox):\r\n    rows_occupied = 2\r\n    NEW_SAMPLE = \"---New Sample---\"\r\n\r\n    def get(self):\r\n        combobox_input = super().get()\r\n        return int(combobox_input)\r\n\r\n\r\nclass GUI_input_combobox_user_name_for_analysis(GUI_input_combobox):\r\n    def on_change(self, event):\r\n        self.gui.find_entry(\"sample_name\").entry_var[\"values\"] = find_subfolder( os.path.join(c.DATA_FOLDER_NAME, self.get()) )\r\n\r\nclass GUI_input_combobox_sample_name_for_analysis(GUI_input_combobox):\r\n    def on_change(self, event):\r\n        self.gui.find_entry(\"measurement_name\").entry_var[\"values\"] = find_subfolder( os.path.join(c.DATA_FOLDER_NAME, self.gui.find_entry(\"user_name\").get(), self.get()) )\r\n\r\n\r\n# ====================== BUTTONS ======================\r\n\r\n\r\nclass GUI_button(ABC):\r\n    rows_occupied = 1\r\n\r\n    def __init__(self, gui, button_name):\r\n        self.gui = gui\r\n        self.button_name = button_name\r\n\r\n    def setup(self, row):\r\n        self.entry_var = ttk.Button(self.gui.root, text=self.button_name, command=self.on_press, width=20)\r\n        self.entry_var.grid(row=row, column=0, columnspan=2, padx=10, pady=10)\r\n\r\n    @abstractmethod\r\n    def on_press(self):\r\n        pass\r\n\r\n\r\nclass GUI_button_submit(GUI_button):\r\n    def on_press(self):\r\n        self.gui.submit_values()\r\n\r\n\r\nclass GUI_button_clear(GUI_button):\r\n    def on_press(self):\r\n        self.gui.clear_all()\r\n\r\n\r\nclass GUI_button_load_last_settings(GUI_button):\r\n    def on_press(self):\r\n        self.gui.load(\"last_settings.json\")\r\n\r\n\r\n\r\ndef find_subfolder(folder_path):\r\n    try:\r\n        subfolders = next(os.walk(folder_path))[1]\r\n    except FileNotFoundError:\r\n        messagebox.showerror(\"Folder Not Found\", f\"The '{folder_path}' folder does not exist.\")\r\n        subfolders = []\r\n    return subfolders\r\n\r\n\r\n\r\ndef gui_measurement_startup():\r\n    gui = GUI(root=tk.Tk(), size=\"500x800\", title=\"Parameter Input GUI\")\r\n\r\n    entries = [\r\n        GUI_input_combobox_user_name(   gui=gui,    param_name=\"user_name\",            param_desc=\"User\",                  values=[GUI_input_combobox_user_name.NEW_USER] + find_subfolder(c.DATA_FOLDER_NAME)),\r\n        GUI_input_combobox_sample_name( gui=gui,    param_name=\"sample_name\",          param_desc=\"Sample\",                values=[]),\r\n        GUI_input_text_measurement_name(gui=gui,    param_name=\"measurement_name\",     param_desc=\"Measurement name\"       ),\r\n        GUI_input_text(                 gui=gui,    param_name=\"description\",          param_desc=\"Description\",           mandatory=False),\r\n        GUI_input_combobox_dipole_mode( gui=gui,    param_name=\"dipole_mode\",          param_desc=\"Dipole mode\",           values=[1]),\r\n        GUI_input_combobox(             gui=gui,    param_name=\"s_parameter\",          param_desc=\"S Parameter\",           values=[\"S11\", \"S22\", \"S33\", \"S44\", \"S12\", \"S21\", \"S13\", \"S31\", \"S23\", \"S32\", \"S24\", \"S42\", \"S34\", \"S43\", \"S14\", \"S41\"]),\r\n        GUI_input_text_field_sweep(     gui=gui,    param_name=\"field_sweep\",          param_desc=\"Field sweep [mT]\"       ),\r\n        GUI_input_text(                 gui=gui,    param_name=\"angle\",                param_desc=\"Angle [deg]\",           mandatory=False), # TODO chagne it so it si not mandatory only in osme dipole mode\r\n        GUI_input_text_to_freq(         gui=gui,    param_name=\"start_frequency\",      param_desc=\"Start frequency [GHz]\"  ),\r\n        GUI_input_text_to_freq(         gui=gui,    param_name=\"stop_frequency\",       param_desc=\"Stop frequency [GHz]\"   ),\r\n        GUI_input_text_to_number(       gui=gui,    param_name=\"number_of_points\",     param_desc=\"Number of points\",      func=lambda x : int(x)),\r\n        GUI_input_text_to_number(       gui=gui,    param_name=\"bandwidth\",            param_desc=\"Bandwidth [Hz]\"         ),\r\n        GUI_input_text_to_number(       gui=gui,    param_name=\"power\",                param_desc=\"Power [dBm]\"            ),\r\n        GUI_input_text_to_number(       gui=gui,    param_name=\"ref_field\",            param_desc=\"Ref field [mT]\"         ),\r\n        GUI_input_text(                 gui=gui,    param_name=\"cal_file\",             param_desc=\"Calibration file\",      mandatory=False),\r\n    ]\r\n\r\n\r\n\r\n    buttons = [\r\n        GUI_button_submit(              gui=gui,    button_name=\"Submit\"            ),\r\n        GUI_button_clear(               gui=gui,    button_name=\"Clear\"             ),\r\n        GUI_button_load_last_settings(  gui=gui,    button_name=\"Load last settings\")\r\n    ]\r\n\r\n\r\n    gui.run_gui(entries=entries, buttons=buttons)\r\n\r\n    return gui.inputs if gui.inputs else None\r\n\r\n\r\n\r\n\r\ndef gui_analysis_startup():\r\n    gui = GUI(root=tk.Tk(), size=\"500x200\", title=\"Parameter Input GUI\")\r\n\r\n    entries = [\r\n        GUI_input_combobox_user_name_for_analysis(  gui=gui, param_name=\"user_name\",        param_desc=\"User\",             values=find_subfolder(c.DATA_FOLDER_NAME)),\r\n        GUI_input_combobox_sample_name_for_analysis(gui=gui, param_name=\"sample_name\",      param_desc=\"Sample\",           values=[]),\r\n        GUI_input_combobox(                         gui=gui, param_name=\"measurement_name\", param_desc=\"Measurement name\", values=[]),\r\n    ]\r\n\r\n    buttons = [\r\n        GUI_button_submit(              gui=gui,    button_name=\"Submit\"            ),\r\n    ]\r\n\r\n    gui.run_gui(entries=entries, buttons=buttons)\r\n    \r\n    return os.path.join(c.DATA_FOLDER_NAME, gui.inputs[\"user_name\"], gui.inputs[\"sample_name\"], gui.inputs[\"measurement_name\"]) if gui.inputs else None\r\n\r\n\r\n\r\n\r\nif __name__ == \"__main__\":\r\n    # ans = gui_analysis_startup()  \r\n    ans = gui_measurement_startup()\r\n    print(ans)\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/library_gui.py b/library_gui.py
+--- a/library_gui.py	(revision 638ce4e58a88eb521a15bd12e592e39d14ad310e)
++++ b/library_gui.py	(date 1721635395119)
+@@ -12,9 +12,29 @@
+ from library_misc import *
+ import CONSTANTS as c
+ 
++import httpx
++
++url = "https://test.fair.labdb.eu.org"
++import dataclasses
++from typing import Optional
++
++
++@dataclasses.dataclass
++class User:
++    email: str
++    userid: int
++
++
++@dataclasses.dataclass
++class UserTeams:
++    name: str
++    id: int
++
++
+ class EntryNotFound(Exception):
+     pass
+ 
++
+ class GUI:
+     inputs = {}
+ 
+@@ -24,7 +44,6 @@
+         self.title = title
+         self.set_style()
+ 
+-
+     def set_style(self):
+         style = ttk.Style()
+         style.theme_use('clam')
+@@ -32,11 +51,11 @@
+         style.configure('TEntry', font=('Helvetica', 12), padding=5, highlightthickness=0)
+         style.configure('TButton', font=('Helvetica', 12), padding=5)
+         style.configure('TCombobox', font=('Helvetica', 12), padding=5)
+-        style.map('TCombobox', fieldbackground=[('readonly', 'lightgrey')], selectbackground=[('readonly', 'lightgrey')], selectforeground=[('readonly', 'black')])
++        style.map('TCombobox', fieldbackground=[('readonly', 'lightgrey')],
++                  selectbackground=[('readonly', 'lightgrey')], selectforeground=[('readonly', 'black')])
+         style.map('TEntry', fieldbackground=[('!disabled', 'white'), ('disabled', 'grey')])
+         self.root.configure(bg='light grey')
+ 
+-
+     def run_gui(self, entries, buttons):
+         self.root.title(self.title)
+         self.root.geometry(self.size)
+@@ -52,41 +71,36 @@
+         for button in self.buttons:
+             button.setup(row)
+             row += entry.rows_occupied
+-        
++
+         self.root.mainloop()
+         self.root.quit()
+ 
+-
+     def find_entry(self, param_name):
+         for entry in self.entries:
+             if entry.param_name == param_name:
+                 return entry
+         raise EntryNotFound(f"Parameter {param_name} is not associated with an GUI_Input object")
+-        
+ 
+     def clear_all(self):
+         for entry in self.entries:
+             entry.clear()
+-    
+ 
+     def get_value(self, param):
+         return self.find_entry(param).get()
+ 
+-
+     def submit_values(self):
+         self.inputs = {}
+         for entry in self.entries:
+ 
+             valid, custom_error = entry.is_valid()
+-            if not(valid):
++            if not (valid):
+                 message = custom_error if custom_error else f'Input for "{entry.param_desc}" is not valid!'
+                 tk.messagebox.showerror(title=None, message=message)
+                 return
+-            
++
+             self.inputs[entry.param_name] = entry.get()
+         self.root.destroy()
+ 
+-
+     def load(self, filename):
+         with open(filename, "r") as f:
+             json_obj = json.load(f)
+@@ -94,14 +108,12 @@
+             entry.write(json_obj.get(entry.param_name, ""))
+ 
+ 
+-
+-
+ class GUI_input(ABC):
+     rows_occupied = 1
+     TEXT = 1
+     COMBOBOX = 2
+ 
+-    def __init__(self, gui, param_name, param_desc, mandatory = True, hidden = False):
++    def __init__(self, gui, param_name, param_desc, mandatory=True, hidden=False):
+         self.gui = gui
+         self.param_name = param_name
+         self.param_desc = param_desc
+@@ -129,7 +141,6 @@
+         pass
+ 
+ 
+-
+ # ====================== TEXT ======================
+ 
+ 
+@@ -137,10 +148,11 @@
+     entry_type = GUI_input.TEXT
+ 
+     def setup(self, row):
+-        ttk.Label(self.gui.root, text=self.param_desc, background='light grey').grid(row=row, column=0, sticky="w", padx=5, pady=5)
++        ttk.Label(self.gui.root, text=self.param_desc, background='light grey').grid(row=row, column=0, sticky="w",
++                                                                                     padx=5, pady=5)
+         self.entry_var = ttk.Entry(self.gui.root, width=50)
+         self.entry_var.grid(row=row, column=1, sticky="ew", padx=5, pady=5)
+-    
++
+     def is_valid(self):
+         custom_error_message = None
+         if self.entry_var.get() != "" or self.mandatory == False:
+@@ -167,12 +179,13 @@
+         custom_error_message = None
+         if self.entry_var.get() == "" and self.mandatory == True:
+             return False, custom_error_message
+-        
+-        path = os.path.join(c.DATA_FOLDER_NAME, self.gui.get_value("user_name"), self.gui.get_value("sample_name"), self.get())
++
++        path = os.path.join(c.DATA_FOLDER_NAME, self.gui.get_value("user_name"), self.gui.get_value("sample_name"),
++                            self.get())
+         print(path)
+-        if not(os.path.exists(path)):
++        if not (os.path.exists(path)):
+             return True, None
+-        else: 
++        else:
+             return False, "This sample has already a measurement with this name!"
+ 
+ 
+@@ -193,7 +206,8 @@
+                 # Split the string by ':' to get start, step, stop values
+                 start, step, stop = map(float, field_sweep_str.split(':'))
+                 # Use range to generate the list of numbers
+-                field_sweep_list = list(np.arange(start, stop + 0.00001, step))  # +0.00001 fa includere il numero finale, TODO trovare un modo migliore per includerlo
++                field_sweep_list = list(np.arange(start, stop + 0.00001,
++                                                  step))  # +0.00001 fa includere il numero finale, TODO trovare un modo migliore per includerlo
+             else:
+                 # For comma-separated values, convert string to list of integers
+                 # Handle both with and without brackets
+@@ -202,24 +216,24 @@
+                 field_sweep_list = ast.literal_eval(field_sweep_str)
+                 # Ensure the result is a list of floats
+                 field_sweep_list = list(np.array(field_sweep_list).astype(float))
+-            
++
+             for i in range(len(field_sweep_list)):
+-                field_sweep_list[i] = ( np.round(field_sweep_list[i] *10**10)/10**10 )
+-            
++                field_sweep_list[i] = (np.round(field_sweep_list[i] * 10 ** 10) / 10 ** 10)
++
+             return field_sweep_list
+         except (ValueError, SyntaxError) as e:
+             return None
+-        
++
+     def write(self, content):
+         self.clear()
+         self.entry_var.insert(0, str(list(np.array(content)[1:])))
+-    
+-        
++
++
+ class GUI_input_text_to_freq(GUI_input_text):
+ 
+     def write(self, content):
+         self.clear()
+-        self.entry_var.insert(0, content/10**9)
++        self.entry_var.insert(0, content / 10 ** 9)
+ 
+     def is_valid(self):
+         try:
+@@ -229,13 +243,11 @@
+             return False, None
+ 
+     def get(self):
+-            return float(self.entry_var.get())*10**9
+-        
++        return float(self.entry_var.get()) * 10 ** 9
+ 
+-    
+ 
+ class GUI_input_text_to_number(GUI_input_text):
+-    def __init__(self, func=lambda string : float(string), *args, **kwargs):
++    def __init__(self, func=lambda string: float(string), *args, **kwargs):
+         self.func = func
+         super().__init__(*args, **kwargs)
+ 
+@@ -249,12 +261,13 @@
+ class GUI_input_combobox(GUI_input):
+     entry_type = GUI_input.COMBOBOX
+ 
+-    def __init__(self, values, **kwargs):
++    def __init__(self, values: Optional[list[str]], **kwargs):
+         self.values = values
+         super().__init__(**kwargs)
+ 
+     def setup(self, row):
+-        ttk.Label(self.gui.root, text=self.param_desc, background='light grey').grid(row=row, column=0, sticky="w", padx=5, pady=5)
++        ttk.Label(self.gui.root, text=self.param_desc, background='light grey').grid(row=row, column=0, sticky="w",
++                                                                                     padx=5, pady=5)
+         self.entry_var = ttk.Combobox(self.gui.root, state="readonly", values=self.values, width=50)
+         self.entry_var.grid(row=row, column=1, sticky="ew", padx=5, pady=5)
+         self.entry_var.bind('<<ComboboxSelected>>', self.on_change)
+@@ -293,12 +306,13 @@
+ 
+     def on_change(self, event):
+         if self.entry_var.get() == self.NEW_USER:
+-            self.entry_var_text.grid(row=self.row+1, column=1, sticky="ew", padx=5, pady=5)
++            self.entry_var_text.grid(row=self.row + 1, column=1, sticky="ew", padx=5, pady=5)
+             self.gui.find_entry("sample_name").entry_var["values"] = [GUI_input_combobox_sample_name.NEW_SAMPLE]
+         else:
+             self.entry_var_text.grid_remove()
+-            self.gui.find_entry("sample_name").entry_var["values"] = [GUI_input_combobox_sample_name.NEW_SAMPLE] + find_subfolder( os.path.join(c.DATA_FOLDER_NAME, self.get()) )
+-
++            self.gui.find_entry("sample_name").entry_var["values"] = [
++                                                                         GUI_input_combobox_sample_name.NEW_SAMPLE] + find_subfolder(
++                os.path.join(c.DATA_FOLDER_NAME, self.get()))
+ 
+ 
+ class GUI_input_combobox_sample_name(GUI_input_combobox):
+@@ -315,12 +329,11 @@
+ 
+     def on_change(self, event):
+         if self.entry_var.get() == self.NEW_SAMPLE:
+-            self.entry_var_text.grid(row=self.row+1, column=1, sticky="ew", padx=5, pady=5)
++            self.entry_var_text.grid(row=self.row + 1, column=1, sticky="ew", padx=5, pady=5)
+         else:
+             self.entry_var_text.grid_remove()
+ 
+ 
+-
+ class GUI_input_combobox_dipole_mode(GUI_input_combobox):
+     rows_occupied = 2
+     NEW_SAMPLE = "---New Sample---"
+@@ -332,11 +345,14 @@
+ 
+ class GUI_input_combobox_user_name_for_analysis(GUI_input_combobox):
+     def on_change(self, event):
+-        self.gui.find_entry("sample_name").entry_var["values"] = find_subfolder( os.path.join(c.DATA_FOLDER_NAME, self.get()) )
++        self.gui.find_entry("sample_name").entry_var["values"] = find_subfolder(
++            os.path.join(c.DATA_FOLDER_NAME, self.get()))
++
+ 
+ class GUI_input_combobox_sample_name_for_analysis(GUI_input_combobox):
+     def on_change(self, event):
+-        self.gui.find_entry("measurement_name").entry_var["values"] = find_subfolder( os.path.join(c.DATA_FOLDER_NAME, self.gui.find_entry("user_name").get(), self.get()) )
++        self.gui.find_entry("measurement_name").entry_var["values"] = find_subfolder(
++            os.path.join(c.DATA_FOLDER_NAME, self.gui.find_entry("user_name").get(), self.get()))
+ 
+ 
+ # ====================== BUTTONS ======================
+@@ -373,7 +389,6 @@
+         self.gui.load("last_settings.json")
+ 
+ 
+-
+ def find_subfolder(folder_path):
+     try:
+         subfolders = next(os.walk(folder_path))[1]
+@@ -383,65 +398,153 @@
+     return subfolders
+ 
+ 
++# class GUI_input_combobox_user_name(GUI_input_combobox):
++#     rows_occupied = 2
++#     NEW_USER = "---ELABFTW Username---"
++#
++#     def setup(self, *args, **kwargs):
++#         self.entry_var_text = ttk.Entry(self.gui.root, width=50)
++#         super().setup(*args, **kwargs)
++#
++#     def get(self):
++#         combobox_input = super().get()
++#         return combobox_input if combobox_input != self.NEW_USER else self.entry_var_text.get()
++#
++#     def on_change(self, event):
++#         if self.entry_var.get() == self.NEW_USER:
++#             self.entry_var_text.grid(row=self.row+1, column=1, sticky="ew", padx=5, pady=5)
++#             self.gui.find_entry("sample_name").entry_var["values"] = [GUI_input_combobox_sample_name.NEW_SAMPLE]
++#         else:
++#             self.entry_var_text.grid_remove()
++#             self.gui.find_entry("sample_name").entry_var["values"] = [GUI_input_combobox_sample_name.NEW_SAMPLE] + find_subfolder( os.path.join(c.DATA_FOLDER_NAME, self.get()) )
++
++
++def save_users() -> list[User]:
++    user_list: list[User] = [User(email=user["email"], userid=user["userid"]) for user in
++                             httpx.get(f"{url}/users", verify=False).json()]
++    return user_list
++
++
++class GUI_input_combobox_elab_users(GUI_input_combobox):
++    entry_type = GUI_input.COMBOBOX
++
++    def __init__(self, values: list[User], **kwargs):
++        self.user_list: list[User] = values
++        self.values = [user.email for user in values]
++        self.user_teams: Optional[list[UserTeams]] = None
++        super().__init__(values=self.values, **kwargs)
++
++    def setup(self, row):
++        ttk.Label(self.gui.root, text=self.param_desc, background='light grey').grid(row=row, column=10, sticky="w",
++                                                                                     padx=5, pady=5)
++        self.entry_var = ttk.Combobox(self.gui.root, state="readonly", values=self.values,
++                                      width=50)
++        self.entry_var.grid(row=row, column=1, sticky="ew", padx=5, pady=5)
++        self.entry_var.bind('<<ComboboxSelected>>', self.on_change)
++        self.entry_var.grid(row=row, column=15, sticky="ew", padx=5, pady=5)
++        # userteams
++        ttk.Label(self.gui.root, text="ElabUser_teams", background='light grey').grid(row=row + 1, column=10,
++                                                                                      sticky="w",
++                                                                                      padx=5, pady=5)
++        self.user_teams_combobox = ttk.Combobox(self.gui.root, state="readonly", width=50)
++        self.user_teams_combobox.grid(row=row + 1, column=15, sticky="ew", padx=5, pady=5)
++        self.user_teams_combobox.bind('<<ComboboxSelected>>', self.save_teams_id)
++
++    def on_change(self, event):
++        userid: int = [user.userid for user in self.user_list if user.email == self.entry_var.get()][0]
++        self.user_teams = [UserTeams(id=team["id"], name=team["name"]) for team in
++                           httpx.get(f"{url}/users/{userid}", verify=False).json()]
++        self.user_teams_combobox["values"] = [team.name for team in self.user_teams]
++
++    def save_teams_id(self, event):
++        team_id: int = [team.id for team in self.user_teams if team.name == self.user_teams_combobox.get()][0]
++
++
++class GUIEquipmentTemplates(GUI_input_combobox):
++    entry_type = GUI_input.COMBOBOX
++
++    def __init__(self, **kwargs):
++        self.selected_experiment_id: Optional[int] = None
++        self.experiments_templates = httpx.get(f"{url}/equipment/radio_frequency_station", verify=False).json()
++        self.values = list(self.experiments_templates.keys())
++        super().__init__(self.values, **kwargs)
++
++    def setup(self, row):
++        # userteams
++        ttk.Label(self.gui.root, text=self.param_desc, background='light grey').grid(row=row + 1, column=10,
++                                                                                     sticky="w",
++                                                                                     padx=5, pady=5)
++        self.entry_var = ttk.Combobox(self.gui.root, state="readonly", width=50, values=self.values)
++        self.entry_var.grid(row=row + 1, column=15, sticky="ew", padx=5, pady=5)
++        self.entry_var.bind('<<ComboboxSelected>>', self.on_change)
++
++    def on_change(self, event):
++        self.selected_experiment_id: int = self.experiments_templates[self.entry_var.get()][
++            "id"]
+ 
+ def gui_measurement_startup():
+-    gui = GUI(root=tk.Tk(), size="500x800", title="Parameter Input GUI")
+-
++    gui = GUI(root=tk.Tk(), size="1200x800", title="Parameter Input GUI")
++    user_list: list[User] = save_users()
+     entries = [
+-        GUI_input_combobox_user_name(   gui=gui,    param_name="user_name",            param_desc="User",                  values=[GUI_input_combobox_user_name.NEW_USER] + find_subfolder(c.DATA_FOLDER_NAME)),
+-        GUI_input_combobox_sample_name( gui=gui,    param_name="sample_name",          param_desc="Sample",                values=[]),
+-        GUI_input_text_measurement_name(gui=gui,    param_name="measurement_name",     param_desc="Measurement name"       ),
+-        GUI_input_text(                 gui=gui,    param_name="description",          param_desc="Description",           mandatory=False),
+-        GUI_input_combobox_dipole_mode( gui=gui,    param_name="dipole_mode",          param_desc="Dipole mode",           values=[1]),
+-        GUI_input_combobox(             gui=gui,    param_name="s_parameter",          param_desc="S Parameter",           values=["S11", "S22", "S33", "S44", "S12", "S21", "S13", "S31", "S23", "S32", "S24", "S42", "S34", "S43", "S14", "S41"]),
+-        GUI_input_text_field_sweep(     gui=gui,    param_name="field_sweep",          param_desc="Field sweep [mT]"       ),
+-        GUI_input_text(                 gui=gui,    param_name="angle",                param_desc="Angle [deg]",           mandatory=False), # TODO chagne it so it si not mandatory only in osme dipole mode
+-        GUI_input_text_to_freq(         gui=gui,    param_name="start_frequency",      param_desc="Start frequency [GHz]"  ),
+-        GUI_input_text_to_freq(         gui=gui,    param_name="stop_frequency",       param_desc="Stop frequency [GHz]"   ),
+-        GUI_input_text_to_number(       gui=gui,    param_name="number_of_points",     param_desc="Number of points",      func=lambda x : int(x)),
+-        GUI_input_text_to_number(       gui=gui,    param_name="bandwidth",            param_desc="Bandwidth [Hz]"         ),
+-        GUI_input_text_to_number(       gui=gui,    param_name="power",                param_desc="Power [dBm]"            ),
+-        GUI_input_text_to_number(       gui=gui,    param_name="ref_field",            param_desc="Ref field [mT]"         ),
+-        GUI_input_text(                 gui=gui,    param_name="cal_file",             param_desc="Calibration file",      mandatory=False),
++        GUI_input_combobox_user_name(gui=gui, param_name="user_name", param_desc="User",
++                                     values=[GUI_input_combobox_user_name.NEW_USER] + find_subfolder(
++                                         c.DATA_FOLDER_NAME)),
++        GUI_input_combobox_elab_users(gui=gui, param_name="ELABFTW_user_name", param_desc="ELABFTW_user_name",
++                                      values=user_list),
++        GUIEquipmentTemplates(gui=gui, param_name="Experiments_List", param_desc="Experiments_List"),
++        GUI_input_combobox_sample_name(gui=gui, param_name="sample_name", param_desc="Sample", values=[]),
++        GUI_input_text_measurement_name(gui=gui, param_name="measurement_name", param_desc="Measurement name"),
++        GUI_input_text(gui=gui, param_name="description", param_desc="Description", mandatory=False),
++        GUI_input_combobox_dipole_mode(gui=gui, param_name="dipole_mode", param_desc="Dipole mode", values=[1]),
++        GUI_input_combobox(gui=gui, param_name="s_parameter", param_desc="S Parameter",
++                           values=["S11", "S22", "S33", "S44", "S12", "S21", "S13", "S31", "S23", "S32", "S24", "S42",
++                                   "S34", "S43", "S14", "S41"]),
++        GUI_input_text_field_sweep(gui=gui, param_name="field_sweep", param_desc="Field sweep [mT]"),
++        GUI_input_text(gui=gui, param_name="angle", param_desc="Angle [deg]", mandatory=False),
++        # TODO chagne it so it si not mandatory only in osme dipole mode
++        GUI_input_text_to_freq(gui=gui, param_name="start_frequency", param_desc="Start frequency [GHz]"),
++        GUI_input_text_to_freq(gui=gui, param_name="stop_frequency", param_desc="Stop frequency [GHz]"),
++        GUI_input_text_to_number(gui=gui, param_name="number_of_points", param_desc="Number of points",
++                                 func=lambda x: int(x)),
++        GUI_input_text_to_number(gui=gui, param_name="bandwidth", param_desc="Bandwidth [Hz]"),
++        GUI_input_text_to_number(gui=gui, param_name="power", param_desc="Power [dBm]"),
++        GUI_input_text_to_number(gui=gui, param_name="ref_field", param_desc="Ref field [mT]"),
++        GUI_input_text(gui=gui, param_name="cal_file", param_desc="Calibration file", mandatory=False),
+     ]
+ 
+-
+-
+     buttons = [
+-        GUI_button_submit(              gui=gui,    button_name="Submit"            ),
+-        GUI_button_clear(               gui=gui,    button_name="Clear"             ),
+-        GUI_button_load_last_settings(  gui=gui,    button_name="Load last settings")
++        GUI_button_submit(gui=gui, button_name="Submit"),
++        GUI_button_clear(gui=gui, button_name="Clear"),
++        GUI_button_load_last_settings(gui=gui, button_name="Load last settings")
+     ]
+ 
+-
+     gui.run_gui(entries=entries, buttons=buttons)
+ 
+     return gui.inputs if gui.inputs else None
+ 
+ 
+-
+-
+ def gui_analysis_startup():
+     gui = GUI(root=tk.Tk(), size="500x200", title="Parameter Input GUI")
+ 
+     entries = [
+-        GUI_input_combobox_user_name_for_analysis(  gui=gui, param_name="user_name",        param_desc="User",             values=find_subfolder(c.DATA_FOLDER_NAME)),
+-        GUI_input_combobox_sample_name_for_analysis(gui=gui, param_name="sample_name",      param_desc="Sample",           values=[]),
+-        GUI_input_combobox(                         gui=gui, param_name="measurement_name", param_desc="Measurement name", values=[]),
++        GUI_input_combobox_user_name_for_analysis(gui=gui, param_name="user_name", param_desc="User",
++                                                  values=find_subfolder(c.DATA_FOLDER_NAME)),
++        GUI_input_combobox_sample_name_for_analysis(gui=gui, param_name="sample_name", param_desc="Sample", values=[]),
++        GUI_input_combobox(gui=gui, param_name="measurement_name", param_desc="Measurement name", values=[]),
+     ]
+ 
+     buttons = [
+-        GUI_button_submit(              gui=gui,    button_name="Submit"            ),
++        GUI_button_submit(gui=gui, button_name="Submit"),
+     ]
+ 
+     gui.run_gui(entries=entries, buttons=buttons)
+-    
+-    return os.path.join(c.DATA_FOLDER_NAME, gui.inputs["user_name"], gui.inputs["sample_name"], gui.inputs["measurement_name"]) if gui.inputs else None
+ 
++    return os.path.join(c.DATA_FOLDER_NAME, gui.inputs["user_name"], gui.inputs["sample_name"],
++                        gui.inputs["measurement_name"]) if gui.inputs else None
+ 
+ 
+-
+ if __name__ == "__main__":
+-    # ans = gui_analysis_startup()  
++    users = save_users()
++    # ans = gui_analysis_startup()
+     ans = gui_measurement_startup()
+     print(ans)
+Index: measurement_routine.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from library_analysis import *\r\nfrom library_power_supply import *\r\nfrom library_misc import *\r\nfrom library_vna import *\r\nfrom library_file_management import *\r\nimport CONSTANTS as c\r\n\r\ndef measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument, field_sweep: list[float], angle: float, user_folder: str, sample_folder: str, measurement_name: str, dipole: int, Sparam: str, demag: bool = False) -> str:\r\n    \"\"\"\r\n    Main function that is called by other files. \r\n    Goes through the whole routine for initializing, measuring and saving.\r\n    \"\"\"\r\n\r\n    try:    # Everything is encapsulated in a try except to always set the current to 0 in case of an exeption\r\n\r\n\r\n        # ============================\r\n        # Based on dipole variable, the program assigns a value to 'ps' which is used to govern the power supply and 'conversion' which holds the A to mT conversion value\r\n        # ============================\r\n\r\n        if dipole == 1 or dipole == 3 or dipole == 4:\r\n            \r\n            if (dipole == 1 and (Sparam == 'S33' or Sparam == 'S34' or Sparam == 'S43' or Sparam == 'S44')):\r\n                ps = ps1\r\n                #conversion = 55.494 \r\n                offset = 1.7452\r\n                conversion = 49.901\r\n\r\n            \r\n            elif (dipole == 1 and (Sparam == 'S11' or Sparam == 'S13' or Sparam == 'S31' or Sparam == 'S33')):\r\n                #ps = ps2\r\n                # conversion = 63.150\r\n                #conversion = 8.240  #coils gap = 29mm\r\n                #conversion = 5.620   # coils gap = 55mm\r\n                # conversion = 6.886  # Coils \r\n                # conversion = 9.646 # Coils \r\n                print(\"Debug please\")\r\n\r\n            elif (dipole == 3):\r\n                ps = ps1\r\n                conversion = 42.421\r\n\r\n            elif (dipole == 4):\r\n                ps = ps1\r\n                conversion = 45.217\r\n\r\n                # Routine if a quadrupole is used\r\n            elif dipole == 2: # TODO the code does not support different coonversions for the two power supplies, fix this\r\n                if ps1 == None or ps2 == None:\r\n                    raise Exception(\"Quadrupole selected but one of the power supplies is not properly connected.\")\r\n                ps = TwoPowerSupply(ps1=ps1, ps2=ps2)\r\n                    \r\n            else:\r\n                ps = None\r\n                \r\n            if conversion == None or ps == None:\r\n                raise Exception(\"Invalid dipole_mode parameter\")\r\n            \r\n\r\n        # ============================\r\n        # Now the actual measurement routine starts\r\n        # ============================\r\n\r\n        #if demag:  # First demagnetization sweep \r\n            #ps.demag_sweep()\r\n\r\n        second_demag = demag and field_sweep[0]!=0  # If ref field != 0 a second demag field is needed \r\n\r\n        freqs_S33, fields_S33, amps_S33, phases_S33 = np.array([]), np.array([]), np.array([]), np.array([])\r\n        freqs_S34, fields_S34, amps_S34, phases_S34 = np.array([]), np.array([]), np.array([]), np.array([])\r\n        freqs_S43, fields_S43, amps_S43, phases_S43 = np.array([]), np.array([]), np.array([]), np.array([])\r\n        freqs_S44, fields_S44, amps_S44, phases_S44 = np.array([]), np.array([]), np.array([]), np.array([])\r\n\r\n        for i, field in enumerate(field_sweep):  # MAIN FOR LOOP\r\n            #if i == 1 and second_demag:\r\n                #ps.demag_sweep()\r\n\r\n            current = (field-offset)/conversion\r\n\r\n\r\n            for Sparam in [\"S33\", \"S43\", \"S34\", \"S44\"]: #TODO scommenta\r\n                logger.info(f\"Setting field...\")\r\n                ps.setCurrent(current)\r\n                logger.info(f\"Field set to {field_sweep[i]} mT\")\r\n\r\n                logger.info(f\"Waiting {c.SETTLING_TIME}s...\")\r\n                sleep(SETTLING_TIME)\r\n                logger.info(\"Settling time over\")\r\n\r\n                logger.info(\"Measuring...\") \r\n                freq,a,p = measure_amp_and_phase(instr, Sparam)\r\n                # x,y,p = measure_dB(instr,Sparam)\r\n                logger.info(\"Finished measuring\\n\")\r\n\r\n                if Sparam == \"S33\":\r\n                    freqs_S33  = np.concatenate( (freqs_S33, freq) )    # Concatenation of new data with the already acquired data\r\n                    fields_S33 = np.concatenate( (fields_S33, [field]*len(freq)) )\r\n                    amps_S33   = np.concatenate( (amps_S33, a) )\r\n                    phases_S33 = np.concatenate( (phases_S33, p) )\r\n                elif Sparam == \"S43\":\r\n                    freqs_S43  = np.concatenate( (freqs_S43, freq) )    # Concatenation of new data with the already acquired data\r\n                    fields_S43 = np.concatenate( (fields_S43, [field]*len(freq)) )\r\n                    amps_S43   = np.concatenate( (amps_S43, a) )\r\n                    phases_S43 = np.concatenate( (phases_S43, p) )\r\n                elif Sparam == \"S34\":\r\n                    freqs_S34  = np.concatenate( (freqs_S34, freq) )    # Concatenation of new data with the already acquired data\r\n                    fields_S34 = np.concatenate( (fields_S34, [field]*len(freq)) )\r\n                    amps_S34   = np.concatenate( (amps_S34, a) )\r\n                    phases_S34 = np.concatenate( (phases_S34, p) )\r\n                elif Sparam == \"S44\":\r\n                    freqs_S44  = np.concatenate( (freqs_S44, freq) )    # Concatenation of new data with the already acquired data\r\n                    fields_S44 = np.concatenate( (fields_S44, [field]*len(freq)) )\r\n                    amps_S44   = np.concatenate( (amps_S44, a) )\r\n                    phases_S44 = np.concatenate( (phases_S44, p) )\r\n\r\n\r\n        logger.info(f'Saving data...')\r\n        save_data(freqs_S33, fields_S33, amps_S33, phases_S33, user_folder, sample_folder, measurement_name = f\"{measurement_name}_S33\")\r\n        logger.info(f'Saved file \"{measurement_name}_S33.csv\"')\r\n\r\n        logger.info(f'Saving data...')\r\n        save_data(freqs_S43, fields_S43, amps_S43, phases_S43, user_folder, sample_folder, measurement_name = f\"{measurement_name}_S43\")\r\n        logger.info(f'Saved file \"{measurement_name}_S43.csv\"')\r\n\r\n        logger.info(f'Saving data...')\r\n        save_data(freqs_S34, fields_S34, amps_S34, phases_S34, user_folder, sample_folder, measurement_name = f\"{measurement_name}_S34\")\r\n        logger.info(f'Saved file \"{measurement_name}_S34.csv\"')\r\n\r\n        logger.info(f'Saving data...')\r\n        save_data(freqs_S44, fields_S44, amps_S44, phases_S44, user_folder, sample_folder, measurement_name = f\"{measurement_name}_S44\")\r\n        logger.info(f'Saved file \"{measurement_name}_S44.csv\"')\r\n\r\n\r\n        ps.setCurrent(0)  # Set current back to 0 at the end of the routine\r\n        \r\n        return\r\n\r\n\r\n\r\n\r\n    except Exception as e:  # If any error occurs, first set the current to 0 then raise the exeption\r\n        ps.setCurrent(0)\r\n        raise e
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/measurement_routine.py b/measurement_routine.py
+--- a/measurement_routine.py	(revision 638ce4e58a88eb521a15bd12e592e39d14ad310e)
++++ b/measurement_routine.py	(date 1721313838137)
+@@ -78,7 +78,7 @@
+             current = (field-offset)/conversion
+ 
+ 
+-            for Sparam in ["S33", "S43", "S34", "S44"]: #TODO scommenta
++            for Sparam in ["S43"]: #, "S43", "S34", "S44"]: #TODO scommenta
+                 logger.info(f"Setting field...")
+                 ps.setCurrent(current)
+                 logger.info(f"Field set to {field_sweep[i]} mT")
+@@ -114,21 +114,21 @@
+                     phases_S44 = np.concatenate( (phases_S44, p) )
+ 
+ 
+-        logger.info(f'Saving data...')
+-        save_data(freqs_S33, fields_S33, amps_S33, phases_S33, user_folder, sample_folder, measurement_name = f"{measurement_name}_S33")
+-        logger.info(f'Saved file "{measurement_name}_S33.csv"')
++        #logger.info(f'Saving data...')
++        #save_data(freqs_S33, fields_S33, amps_S33, phases_S33, user_folder, sample_folder, measurement_name = f"{measurement_name}_S33")
++        #logger.info(f'Saved file "{measurement_name}_S33.csv"')
+ 
+         logger.info(f'Saving data...')
+         save_data(freqs_S43, fields_S43, amps_S43, phases_S43, user_folder, sample_folder, measurement_name = f"{measurement_name}_S43")
+         logger.info(f'Saved file "{measurement_name}_S43.csv"')
+ 
+-        logger.info(f'Saving data...')
+-        save_data(freqs_S34, fields_S34, amps_S34, phases_S34, user_folder, sample_folder, measurement_name = f"{measurement_name}_S34")
+-        logger.info(f'Saved file "{measurement_name}_S34.csv"')
++        #logger.info(f'Saving data...')
++        #save_data(freqs_S34, fields_S34, amps_S34, phases_S34, user_folder, sample_folder, measurement_name = f"{measurement_name}_S34")
++        #logger.info(f'Saved file "{measurement_name}_S34.csv"')
+ 
+-        logger.info(f'Saving data...')
+-        save_data(freqs_S44, fields_S44, amps_S44, phases_S44, user_folder, sample_folder, measurement_name = f"{measurement_name}_S44")
+-        logger.info(f'Saved file "{measurement_name}_S44.csv"')
++        #logger.info(f'Saving data...')
++        #save_data(freqs_S44, fields_S44, amps_S44, phases_S44, user_folder, sample_folder, measurement_name = f"{measurement_name}_S44")
++        #logger.info(f'Saved file "{measurement_name}_S44.csv"')
+ 
+ 
+         ps.setCurrent(0)  # Set current back to 0 at the end of the routine
+Index: library_vna.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from library_analysis import *\r\nfrom library_power_supply import *\r\nfrom library_misc import *\r\nimport numpy as np\r\nfrom time import sleep\r\nimport json\r\nfrom RsInstrument.RsInstrument import RsInstrument\r\n\r\n\"\"\"\r\nThis file contains necessary functions to control and operate the VNA.\r\n# TODO implement shared VNA object\r\n\r\nUnused queries list:\r\n:MMEMORY:STORE:CORRection 1, 'calibration_30_01_2024.cal'     Save calibration\r\n\"\"\"\r\n\r\n\r\ndef setupConnectionVNA(give_additional_info: bool = False) -> RsInstrument:\r\n    \"\"\"\r\n    Connects to the VNA.\r\n    Returns object that contains methods to control the vna.\r\n    \"\"\"\r\n    \r\n    resource_string_1 = 'TCPIP::192.168.2.101::INSTR'  # Standard LAN connection (also called VXI-11)\r\n    resource_string_2 = 'TCPIP::192.168.2.101::hislip0'  # Hi-Speed LAN connection - see 1MA208\r\n    resource_string_3 = 'GPIB::20::INSTR'  # GPIB Connection\r\n    resource_string_4 = 'USB::0x0AAD::0x0119::022019943::INSTR'  # USB-TMC (Test and Measurement Class)\r\n    resource_string_5 = 'RSNRP::0x0095::104015::INSTR'  # R&S Powersensor NRP-Z86\r\n    instr = RsInstrument(resource_string_3, True, False)\r\n\r\n    idn = instr.query_str('*IDN?')\r\n    print(\"VNA connected correctly via GPIB\")\r\n\r\n    if give_additional_info:\r\n        print(f\"\\nHello, I am: '{idn}'\")\r\n        print(f'RsInstrument driver version: {instr.driver_version}')\r\n        print(f'Instrument full name: {instr.full_instrument_model_name}')\r\n        print(f'Instrument installed options: {\",\".join(instr.instrument_options)}')\r\n\r\n    return instr\r\n\r\n\r\n\r\ndef applySettings(instr: RsInstrument, settings: object) -> None:\r\n    \"\"\"\r\n    This function takes the instrument object and a settings dict variable, then translates settings from the settings variable in queries for the VNA.\r\n    \"\"\"\r\n\r\n    # Set start frequency\r\n    instr.write(\"SENS1:FREQ:STAR \" + f\"{settings['start_frequency']}\")  # Replace with your desired start frequency\r\n\r\n    # Set stop frequency\r\n    instr.write(\"SENS1:FREQ:STOP \"+ f\"{settings['stop_frequency']}\")  # Replace with your desired stop frequency\r\n\r\n    # Set bandwidth\r\n    instr.write(\"SENS1:BAND \" + f\"{settings['bandwidth']}\")  # Replace with your desired bandwidth\r\n\r\n    # Set power\r\n    instr.write(\"SOUR1:POW \" + f\"{settings['power']}\")  # Replace with your desired power level\r\n\r\n    # Set number of points\r\n    instr.write(\"SENS1:SWE:POIN \" + f\"{settings['number_of_points']}\")  # Replace with your desired number of points\r\n\r\n    # Reload calibration\r\n    instr.write_str(\":MMEMORY:LOAD:CORRection 1, '2024_06_20.cal'\") #TODO rendere la calibration accessibile allo user anche lato codice\r\n    # instr.write_str(\":MMEMORY:LOAD:CORRection  1, 'calibration_08_02_2024.cal'\")\r\n\r\n    instr.visa_timeout = ( settings['bandwidth']**-1 * settings['number_of_points'] *10 )*1000  + 100  # estimation times an arbitrary coeff \r\n\r\n\r\n\r\ndef measure_dB(instr: RsInstrument, Sparam: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:\r\n    \"\"\"\r\n    Queries the VNA for values.\r\n    Takes as input the vna instrument object and the S parameter that should be measured.\r\n    Returns frequencies and amplitude in dB.\r\n    \"\"\"\r\n\r\n    # Create a trace on channel 1 with the specified S-parameter\r\n    instr.write(f'SENS:SWE:TYPE LIN')  # Set sweep type to linear\r\n    instr.write(f'CALC:PAR:DEF:EXT \"Trc1\", {Sparam}')  # Create trace with specified S-parameter\r\n    instr.write(f'DISP:WIND:TRAC:FEED \"Trc1\"')  # Display the trace\r\n\r\n    # Trigger single sweep\r\n    instr.write(\":INITiate1:CONTinuous 0\")\r\n    instr.write(\":INITiate1:IMMediate\")\r\n\r\n    # Wait for measurement to complete\r\n    instr.query_with_opc(\":INITiate1:IMMediate; *OPC?\", 2000000)  # TODO mettere un numero più sensato\r\n\r\n    tracedata = instr.query_str('CALCulate1:DATA? FDAT')  # Get measurement values for complete trace\r\n    tracelist = list(map(str, tracedata.split(',')))  # Convert the received string into a list\r\n    amp_db = np.array(tracelist, dtype='float32')\r\n\r\n    freqdata = instr.query_str('CALCulate1:DATA:STIMulus?')  # Get frequency list for complete trace\r\n    freqlist = list(map(str, freqdata.split(',')))  # Convert the received string into a list\r\n    freq = np.array(freqlist, dtype='float32')\r\n    phase = np.zeros(len(amp_db))\r\n\r\n    return freq, amp_db, phase\r\n\r\n\r\n\r\ndef measure_amp_and_phase(instr: RsInstrument, Sparam: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:\r\n    \"\"\"\r\n    Queries the VNA for values.\r\n    Takes as input the vna instrument object and the S parameter that should be measured.\r\n    Returns frequencies, amplitude (linear) and phase.\r\n    \"\"\"\r\n    # Trigger single sweep\r\n    instr.write(\":INITiate1:CONTinuous 0\")\r\n    instr.query_with_opc(\":INITiate1:IMMediate; *OPC?\", 2000000)  # TODO mettere un numero più sensato\r\n        \r\n    # Create a trace on channel 1 with the specified S-parameter\r\n    #instr.write(f'SENS:SWE:TYPE LIN')  # Set sweep type to linear \r\n    instr.write(f'CALC:PAR:DEF:EXT \"Trc1\", {Sparam}')  # Create trace with specified S-parameter\r\n    instr.write(f'DISP:WIND:TRAC:FEED \"Trc1\"')  # Display the trace\r\n\r\n\r\n    # Wait for measurement to complete\r\n    # instr.query_opc(999999999)\r\n    # instr.query()\r\n    instr.query_with_opc(\":INITiate1:IMMediate; *OPC?\", 2000000)  # TODO mettere un numero più sensato\r\n    tracedata = instr.query_str('CALCulate1:DATA? SDAT')  # Get measurement values for complete trace\r\n    #print(\"TRACEDATA\\n\", tracedata)\r\n    tracelist = list(map(str, tracedata.split(',')))  # Convert the received string into a list \r\n    tracelist = np.array(tracelist, dtype='float32')\r\n    re = []\r\n    im = []\r\n    S = []\r\n    amp = []\r\n    phase = []\r\n\r\n    i = 0\r\n    for i in range(len(tracelist)):\r\n        if (i%2)==0:\r\n            re.append(tracelist[i])\r\n        else:\r\n            im.append(tracelist[i])\r\n\r\n    for i in range(len(re)):\r\n        S.append(re[i]+1j*im[i]) \r\n        amp.append(np.abs(S[i]))\r\n        phase.append(np.angle(S[i])) #Bisogna capire perchè con la fase non ci viene bene (*0 non ci andrebbe)\r\n\r\n    freqdata = instr.query_str('CALCulate1:DATA:STIMulus?')  # Get frequency list for complete trace\r\n    freqlist = list(map(str, freqdata.split(',')))  # Convert the received string into a list\r\n    freq = np.array(freqlist, dtype='float32')\r\n\r\n\r\n    return freq, amp, phase
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/library_vna.py b/library_vna.py
+--- a/library_vna.py	(revision 638ce4e58a88eb521a15bd12e592e39d14ad310e)
++++ b/library_vna.py	(date 1721390860043)
+@@ -62,7 +62,7 @@
+     instr.write("SENS1:SWE:POIN " + f"{settings['number_of_points']}")  # Replace with your desired number of points
+ 
+     # Reload calibration
+-    instr.write_str(":MMEMORY:LOAD:CORRection 1, '2024_06_20.cal'") #TODO rendere la calibration accessibile allo user anche lato codice
++    instr.write_str(":MMEMORY:LOAD:CORRection 1, 'TDR calibration.cal'") #TODO rendere la calibration accessibile allo user anche lato codice
+     # instr.write_str(":MMEMORY:LOAD:CORRection  1, 'calibration_08_02_2024.cal'")
+ 
+     instr.visa_timeout = ( settings['bandwidth']**-1 * settings['number_of_points'] *10 )*1000  + 100  # estimation times an arbitrary coeff 
+@@ -86,12 +86,13 @@
+     instr.write(":INITiate1:IMMediate")
+ 
+     # Wait for measurement to complete
+-    instr.query_with_opc(":INITiate1:IMMediate; *OPC?", 2000000)  # TODO mettere un numero più sensato
++    instr.query_with_opc(":INITiate1:IMMediate; *OPC?", 20000000000)  # TODO mettere un numero più sensato
+ 
+     tracedata = instr.query_str('CALCulate1:DATA? FDAT')  # Get measurement values for complete trace
+     tracelist = list(map(str, tracedata.split(',')))  # Convert the received string into a list
+     amp_db = np.array(tracelist, dtype='float32')
+-
++  
++    instr.query_with_opc(":INITiate1:IMMediate; *OPC?", 20000000000)  # TODO mettere un numero più sensato
+     freqdata = instr.query_str('CALCulate1:DATA:STIMulus?')  # Get frequency list for complete trace
+     freqlist = list(map(str, freqdata.split(',')))  # Convert the received string into a list
+     freq = np.array(freqlist, dtype='float32')
+@@ -108,8 +109,8 @@
+     Returns frequencies, amplitude (linear) and phase.
+     """
+     # Trigger single sweep
++    instr.query_with_opc(":INITiate1:IMMediate; *OPC?", 2000000000)  # TODO mettere un numero più sensato
+     instr.write(":INITiate1:CONTinuous 0")
+-    instr.query_with_opc(":INITiate1:IMMediate; *OPC?", 2000000)  # TODO mettere un numero più sensato
+         
+     # Create a trace on channel 1 with the specified S-parameter
+     #instr.write(f'SENS:SWE:TYPE LIN')  # Set sweep type to linear 
+@@ -120,7 +121,7 @@
+     # Wait for measurement to complete
+     # instr.query_opc(999999999)
+     # instr.query()
+-    instr.query_with_opc(":INITiate1:IMMediate; *OPC?", 2000000)  # TODO mettere un numero più sensato
++    instr.query_with_opc(":INITiate1:IMMediate; *OPC?", 2000000000)  # TODO mettere un numero più sensato
+     tracedata = instr.query_str('CALCulate1:DATA? SDAT')  # Get measurement values for complete trace
+     #print("TRACEDATA\n", tracedata)
+     tracelist = list(map(str, tracedata.split(',')))  # Convert the received string into a list 
+Index: gui_measurement.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from datetime import datetime\r\n\r\nfrom logger import logger\r\nfrom library_analysis import *\r\nfrom library_gui import *\r\nfrom library_vna import *\r\nfrom library_power_supply import *\r\nfrom CONSTANTS import *\r\nfrom measurement_routine import measurement_routine\r\n\r\n# TODO list:\r\n# - fare una demag_sweep per il quadrupoli che alterna i campi dei due invece di fare prima uno poi l'altro\r\n# - Impedire di chiamare un sample o user \"new sample\" o \"new user\"\r\n\r\n\r\nprint(\"*** LOG SCREEN ***\")\r\nsettings = gui_measurement_startup()\r\nif settings == None:\r\n    raise Exception(\"The GUI was closed manually\")\r\n\r\n# Adds date time to measurement info\r\nsettings[\"datetime\"] = str(datetime.now()).rstrip(\"0123456789\").rstrip(\".\")\r\n\r\n\r\nprint(\"Power supply 1 > \", end=\"\"); \r\nps1 = setupConnectionPS('COM4', 9600)\r\n\r\nprint(\"Power supply 2 > \", end=\"\"); \r\nps2 = setupConnectionPS('COM3', 9600)\r\n\r\nprint(\"VNA            > \", end=\"\"); \r\ninstr = setupConnectionVNA()\r\n\r\n\r\nsettings[\"field_sweep\"] = list(np.concatenate([[float(settings[\"ref_field\"])], settings[\"field_sweep\"]]))\r\n\r\napplySettings(instr, settings)\r\nsave_settings(settings)\r\n\r\nmeasurement_routine(\r\n    ps1, \r\n    ps2, \r\n    instr, \r\n    settings[\"field_sweep\"],\r\n    settings[\"angle\"],\r\n    settings[\"user_name\"],\r\n    settings[\"sample_name\"],\r\n    settings[\"measurement_name\"],\r\n    settings[\"dipole_mode\"],\r\n    settings[\"s_parameter\"],\r\n    demag=False\r\n)\r\n\r\n# Save metadata:\r\nold_name = settings[\"measurement_name\"]\r\nfor sparam in [\"S33\", \"S43\", \"S34\", \"S44\"]: #TODO scommenta\r\n    settings[\"measurement_name\"] = f\"{old_name}_{sparam}\"\r\n    settings[\"s_parameter\"] = sparam\r\n    save_metadata(settings)\r\nupdate_log(settings)
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/gui_measurement.py b/gui_measurement.py
+--- a/gui_measurement.py	(revision 638ce4e58a88eb521a15bd12e592e39d14ad310e)
++++ b/gui_measurement.py	(date 1721314041738)
+@@ -53,7 +53,7 @@
+ 
+ # Save metadata:
+ old_name = settings["measurement_name"]
+-for sparam in ["S33", "S43", "S34", "S44"]: #TODO scommenta
++for sparam in ["S43"]: #, "S43", "S34", "S44"]: #TODO scommenta
+     settings["measurement_name"] = f"{old_name}_{sparam}"
+     settings["s_parameter"] = sparam
+     save_metadata(settings)
+Index: library_analysis.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import numpy as np\r\nimport matplotlib.pyplot as plt\r\nfrom scipy.ndimage import gaussian_filter1d\r\nfrom scipy.optimize import curve_fit \r\nimport json\r\nfrom itertools import cycle\r\n\r\nfrom library_misc import *\r\nfrom library_file_management import *\r\nfrom CONSTANTS import *\r\n\r\n\"\"\"\r\nThis library containsfunctions used for the analysis of measurement results.\r\nIn this file functions are modified to be compatible with the gui.\r\n\"\"\"\r\n\r\n\r\ndef analysisFMR(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, phases: np.ndarray, measurement_path: str, ref_n = 0, show_plots=True) -> tuple[np.ndarray, np.ndarray]:\r\n    \"\"\"\r\n    This function takes as input the frequencies, fields, amplitudes and phases and plots relevant data for FMR resonance.\r\n    ref_n is the index number for the reference measurement, default is zero.\r\n    \"\"\"\r\n\r\n    n_traces = len(amplitudes[:,0])\r\n    n_points = len(freq)\r\n    \r\n    amp_ref, phase_ref = amplitudes[ref_n], phases[ref_n]\r\n    phase_ref = unwrap_phase(phase_ref)\r\n\r\n    traces = np.zeros((n_traces, n_points))\r\n    Ur = np.zeros((n_traces, n_points))\r\n\r\n    # Calculate U\r\n    for i in range(n_traces):\r\n        amp, phase = amplitudes[i], phases[i]\r\n        phase = unwrap_phase(phase)\r\n\r\n        #U = 1j * (np.log((amp * np.exp(1j * phase*0)) / (amp_ref * np.exp(0))) / np.log(amp_ref * np.exp(0)))\r\n        #U = 1j * (np.log((amp * np.exp(1j * phase)) / (amp_ref * np.exp(1j * phase_ref))) / np.log(amp_ref * np.exp(1j * phase_ref)))\r\n        #U = -1j * (((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) / (amp_ref * np.exp(1j * phase_ref)))\r\n        U = (amp * np.exp(1j * phase)-(amp_ref * np.exp(1j * phase_ref)))/(amp_ref * np.exp(1j * phase_ref))\r\n        #U = ((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) \r\n        #U = np.abs(1j * (((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) / (amp_ref * np.exp(1j * phase_ref))))\r\n        #U = (((amp) - (amp_ref)) / (amp_ref ))\r\n        # U[0] = 0  # First value explodes due to discontinuity\r\n \r\n        Ur[i,:] = np.real(U)\r\n        # amplitudes[i, :] = amp\r\n        traces[i, :] = np.imag(U)\r\n        phases[i, :] = phase\r\n\r\n    Us = Ur+1j*traces\r\n\r\n    # # post-processing   ( removed )\r\n    # for i in range(n_traces):\r\n    #     traces_postprocessing[i,:] = gaussian_filter1d(traces[i, :], 6)\r\n\r\n\r\n    # Plottavamo [3:] per esclusdere i primi tre punti. Perchè? ora invece con [0:] funziona\r\n\r\n\r\n    # Plotting\r\n    if show_plots:\r\n        \r\n        plt.figure()\r\n        plt.title(\"Imag(U)\")\r\n        for i in range(n_traces): \r\n            plt.plot(freq[0:], traces[i,0:])\r\n        plt.xlabel(\"Frequency (GHz)\")\r\n        plt.ylabel(\"Imag(U) [arb. u.]\")\r\n        plt.legend([f\"{f} mT\" for f in fields])\r\n        save_plot(measurement_path, \"imag_u.png\")\r\n\r\n        plt.figure() \r\n        plt.title(\"Real(U)\")\r\n        for i in range(len(traces)): \r\n            plt.plot(freq[0:], Ur[i,0:])\r\n        plt.legend([f\"{f} mT\" for f in fields])\r\n        plt.xlabel(\"Frequency (GHz)\")\r\n        plt.ylabel(\"Re(U) [arb. u.]\")\r\n        save_plot(measurement_path, \"real_u.png\")\r\n\r\n        plt.figure()\r\n        plt.title(\"Transmission coefficient\")\r\n        for i in range(n_traces): \r\n            plt.plot(freq[0:], amplitudes[i,0:])\r\n        plt.legend([f\"{f} mT\" for f in fields])\r\n        plt.xlabel(\"Frequency (GHz)\")\r\n        plt.ylabel(\"T\")\r\n        save_plot(measurement_path, \"t_coeff.png\")\r\n        \r\n        plt.figure() \r\n        plt.title(\"Phase\")\r\n        for i in range(n_traces): \r\n            plt.plot(freq[0:], phases[i,0:])\r\n        plt.legend([f\"{f} mT\" for f in fields])\r\n        plt.xlabel(\"Frequency (GHz)\")\r\n        plt.ylabel(\"Phase\")\r\n        save_plot(measurement_path, \"phase.png\")\r\n\r\n    return traces, Us\r\n\r\n\r\n\r\ndef analysisKittel(freq: np.ndarray, traces: np.ndarray, fields: np.ndarray, measurement_path: str) -> tuple[np.ndarray, np.ndarray]:\r\n    \"\"\"\r\n    This function takes as input traces and fields and estimates Ms from a fit of the Kittel function.\r\n    Returns frequencies of the FMR peaks and the Ms.\r\n    \"\"\"\r\n\r\n    f_max = []\r\n    for trace in traces[1:]:  # excludes reference from peak finder\r\n        index = np.argmax(trace)\r\n        f_max.append( freq[index] )\r\n\r\n    fields = fields[1:]  # drop reference field\r\n\r\n    add_zero = False\r\n    if add_zero:\r\n        f_max = np.concatenate([[0], f_max])\r\n        fields = np.concatenate([[0], fields])\r\n        \r\n\r\n    popt, pcov = curve_fit(FMR_tang, fields, f_max, 1e6)\r\n    M_fit = popt[0]\r\n\r\n    print(\"Fitted value for Ms: \" + str(M_fit))\r\n\r\n    plt.figure()\r\n    plt.plot(fields, np.array(f_max))\r\n    plt.plot(fields, FMR_tang(fields, M_fit))\r\n    plt.xlabel(\"External Field (mT)\");\r\n    plt.ylabel(\"Frequency (GHz)\");\r\n    plt.legend([\"Measurement data\", f\"Fitted Kittel, Ms={M_fit/10**6:.3}e6 A/m\"])\r\n    save_plot(measurement_path, \"Fitted Kittel.png\")\r\n\r\n    return f_max, M_fit\r\n\r\n\r\ndef analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndarray, measurement_path: str, show_plots=True) -> None:\r\n    fields_no_ref = fields[1:]\r\n    n_freq_points = u_freq_sweep.shape[1]\r\n\r\n    # Defines u_field_sweep: rows are field dependent, columns frequency dependent\r\n    u_field_sweep = np.transpose(u_freq_sweep[1:, :])  # [1:, :] to exclude first freq sweep (reference)\r\n    n_field_points = u_field_sweep.shape[1]\r\n\r\n\r\n    # Defines field_peaks: array with fields corrisponding to the maximum of u_field_sweep\r\n    field_peaks = np.zeros(shape=(n_freq_points, ))\r\n    for i in range(n_freq_points):\r\n        field_peaks[i] = fields_no_ref[ np.argmax(u_field_sweep[i,:]) ]\r\n\r\n\r\n    # U must be used or the fit won't work ----> la Lorentziana usata per fittare ha fondo nullo, se non normalizzi riportando il fondo a zero (come si fa nel calcolo di U) la curva non fitta\r\n    g, mu0  = 1.76e11, 4e-7*np.pi\r\n    conversion = 795.7747  # the field needs to be transformed in A/m before being used\r\n\r\n    alpha, alpha_raw, FWHMs = np.zeros([n_freq_points,]), np.zeros([n_freq_points,]), np.zeros([n_freq_points,])\r\n    A = np.zeros([n_freq_points])\r\n    f = np.zeros([n_freq_points])\r\n    H_fmr = np.zeros([n_freq_points])\r\n    phi = np.zeros([n_freq_points])\r\n\r\n\r\n    colors = cycle([\r\n        '#1f77b4',  # blue\r\n        '#ff7f0e',  # orange\r\n        '#2ca02c',  # green\r\n        '#d62728',  # red\r\n        '#9467bd',  # purple\r\n        '#8c564b',  # brown\r\n        '#e377c2',  # pink\r\n        '#7f7f7f',  # gray\r\n        '#bcbd22',  # lime green-yellow\r\n        '#17becf'   # cyan-teal\r\n    ])\r\n\r\n\r\n    # Plot U as a function of H for fixed frequencies\r\n    if show_plots:\r\n\r\n        plt.figure()\r\n        plt.title(\"Raw data\")\r\n        for n in range(n_freq_points):\r\n            plt.plot(fields_no_ref, u_field_sweep[n,:])        \r\n        plt.legend([ f\"{f/10**9:.2f} GHz\" for f in freqs ])\r\n        plt.xlabel(\"External Field (mT)\")\r\n        plt.ylabel(\"Suscettivity (arb. u.)\")\r\n        save_plot(measurement_path, \"Raw data.png\")\r\n\r\n\r\n\r\n    # \r\n    # ===== CODE TO FIT DATA AND REMOVE BACKGROUND =====\r\n    # \r\n\r\n    plt.figure()\r\n    backgrounds = np.zeros([n_freq_points, n_field_points])\r\n    center = np.zeros(n_freq_points)\r\n    width = np.zeros(n_freq_points)\r\n    peak = np.zeros(n_freq_points)\r\n\r\n\r\n    #Useful to create the legend of the fitted spectra with the background present\r\n    j = 0\r\n    i = 0\r\n    frequencies_bi = [0]*2*len(freqs)\r\n\r\n    for i in range(n_freq_points):\r\n        frequencies_bi[j] = freqs[i]\r\n        frequencies_bi[j+1] = freqs[i]\r\n        #frequencies_bi[j+2] = freqs[i]\r\n        j = j+2\r\n\r\n\r\n    slope = 0\r\n    inhomog = 0\r\n\r\n    for i in range(n_freq_points):\r\n\r\n\r\n        if DEBUG_MODE:\r\n               \r\n            center[i], width[i], peak[i], a, b, x1, x2, m = lorentzian_fit(fields_no_ref, u_field_sweep[i,:], [field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:])])\r\n\r\n            [A[i],f[i],FWHMs[i],H_fmr[i],phi[i]] = suscettivity_fit(fields_no_ref, u_field_sweep[i,:], [0.1, freqs[i], 0.1, field_peaks[i], 0.5])\r\n\r\n            x = fields_no_ref\r\n            background = a*(x < x1) + b*(x > x2) + ((x >= x1) & (x < x2)) * (a +(b-a)* (x-(x1))/(x2-x1)) + m*x\r\n\r\n            backgrounds[i,:] = background\r\n            \r\n            # # --- DOUBLE FIT (two fits, one for background subtraction and then a new lorentian fit without background)\r\n            #center, width, peak, center2, width2, peak2,a, b, x1, x2 = multi_lorentzian_fit(fields_no_ref, u_field_sweep[i,:], [field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:]), 1.1*field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:])/2])\r\n\r\n\r\n\r\n\r\n\r\n            #alpha_raw[i] = conversion*(width*g*mu0)/(4*np.pi*freqs[i])\r\n            #print(f\"{freqs[i]/10**9:.2f}) Alpha from raw data: {alpha_raw[i]:.5f}\")\r\n        \r\n            # center, width, peak, a, b, x1, x2 = lorentzian_fit(fields_no_ref, u_field_sweep[i,:], [field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:])], remove_background=True)\r\n            # trace_no_background = u_field_sweep[i,:] - getLinearBackground(fields_no_ref, a, b, x1, x2)\r\n            # center, width, peak = lorentzian_fit(fields_no_ref, trace_no_background, [field_peaks[i], 0.1*field_peaks[i], np.max(trace_no_background)])\r\n            # # ---\r\n\r\n\r\n            # --- PEAK + SHOULDER FIT\r\n            # center, width, peak= lorentzian_fit(fields_no_ref, u_field_sweep[i,:], [field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:])])\r\n            # alpha_raw[i] = conversion*(width*g*mu0)/(4*np.pi*freqs[i])\r\n            # print(f\"{freqs[i]/10**9:.2f}) Alpha from raw data: {alpha_raw[i]:.5f}\")\r\n        \r\n            # center, width, peak, center2, width2, peak2, a, b, x1, x2 = double_lorentzian_fit(fields_no_ref, u_field_sweep[i,:], [field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:]), 1.1*field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:])/2], remove_background=True)\r\n            # trace_no_background = u_field_sweep[i,:] - getLinearBackground(fields_no_ref, a, b, x1, x2)\r\n                \r\n            # center, width, peak = lorentzian_fit(fields_no_ref, u_field_sweep[i,:], initial_guess = [field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:])])\r\n            # alpha_raw[i] = conversion*(width*g*mu0)/(4*np.pi*freqs[i])\r\n            # print(f\"{freqs[i]/10**9:.2f}) Alpha from raw data: {alpha_raw[i]:.5f}\")\r\n        \r\n            # center, width, peak, a, b, x1, x2 = lorentzian_fit(fields_no_ref, u_field_sweep[i,:], [field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:])], remove_background=True)\r\n            # trace_no_background = u_field_sweep[i,:] - getLinearBackground(fields_no_ref, a, b, x1, x2)\r\n            # center, width, peak, center2, width2, peak2 = double_lorentzian_fit(fields_no_ref, trace_no_background, [field_peaks[i], 0.1*field_peaks[i], np.max(trace_no_background), 1.1*field_peaks[i], 0.1*field_peaks[i], np.max(trace_no_background)/2])\r\n            # # center, width, peak, a, b, x1, x2 = lorentzian_fit(fields_no_ref, u_field_sweep[i,:], [field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:])], remove_background=True)\r\n            # # ---\r\n\r\n\r\n\r\n            \r\n            alpha[i] = conversion*(FWHMs[i]*g*mu0)/(4*np.pi*freqs[i])\r\n            print(f\"{freqs[i]/10**9:.2f}) Alpha: {alpha[i]:.5f}\")\r\n\r\n\r\n            # # PLOTS\r\n            c = next(colors)\r\n            plt.plot(fields_no_ref, u_field_sweep[i,:], marker=MARKER, markersize=MARKER_SIZE, color=c)\r\n            #plt.plot(fields_no_ref, lorentzian_curve(fields_no_ref, center[i], width[i], peak[i], a, b, x1, x2, m), \"-.\", color=c)\r\n\r\n            plt.plot(fields_no_ref, Mixed_suscettivity(fields_no_ref,A[i],f[i],FWHMs[i],H_fmr[i],phi[i]), marker=MARKER, markersize=MARKER_SIZE, color = 'black')\r\n\r\n            #plt.plot(fields_no_ref, background, \"--\", color=c)\r\n            \r\n\r\n            #plt.plot(fields_no_ref, multi_lorentzian_curve(fields_no_ref, center, center2, width, width2, peak, peak2, a, b, x1, x2), \"-.\", color=c)\r\n            # plt.plot(fields_no_ref, lorentzian_curve(fields_no_ref, center2, width2, peak2), \"--\", color=c)\r\n            # plt.plot(fields_no_ref, lorentzian_curve(fields_no_ref, center, width, peak)+lorentzian_curve(fields_no_ref, center2, width2, peak2), \"--\", color=c)\r\n           \r\n            # da aggiungere la legenda\r\n            plt.title(\"Fitted data (with background)\")\r\n            plt.legend([ f\"{f/10**9:.2f} GHz\" for f in frequencies_bi ])\r\n            plt.xlabel(\"External Field (mT)\")\r\n            plt.ylabel(\"Suscettivity (arb. u.)\")\r\n            save_plot(measurement_path, \"Fitted data (with background).png\")\r\n\r\n\r\n\r\n    colors = cycle([\r\n        '#1f77b4',  # blue\r\n        '#ff7f0e',  # orange\r\n        '#2ca02c',  # green\r\n        '#d62728',  # red\r\n        '#9467bd',  # purple\r\n        '#8c564b',  # brown\r\n        '#e377c2',  # pink\r\n        '#7f7f7f',  # gray\r\n        '#bcbd22',  # lime green-yellow\r\n        '#17becf'   # cyan-teal\r\n    ])\r\n\r\n    # New figure with the background subtracted peaks \r\n    plt.figure()\r\n\r\n    for i in range(n_freq_points):\r\n\r\n        # center, width, peak, a, b, x1, x2, x = lorentzian_fit(fields_no_ref, u_field_sweep[i,:], [field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:])])\r\n        # #center, width, peak, center2, width2, peak2,a, b, x1, x2 = multi_lorentzian_fit(fields_no_ref, u_field_sweep[i,:], [field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:]), 1.1*field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:])/2])\r\n        # x = fields_no_ref\r\n        # background = a*(x < x1) + b*(x > x2) + ((x >= x1) & (x < x2)) * (a +(b-a)* (x-(x1))/(x2-x1)) + m*x\r\n\r\n        c = next(colors)\r\n        #plt.plot(fields_no_ref, multi_lorentzian_curve(fields_no_ref, center, center2, width, width2, peak, peak2, a, b, x1, x2)-background, \"-\", color=c)\r\n        #plt.plot(fields_no_ref, lorentzian_curve(fields_no_ref, center[i], width[i], peak[i], a, b, x1, x2, m)-backgrounds[i,:], \"--\", color=c)\r\n        plt.plot(fields_no_ref, u_field_sweep[i,:]-backgrounds[i,:], marker=MARKER, markersize=MARKER_SIZE, color=c)\r\n        \r\n        # da aggiungere la legenda\r\n        plt.title(\"Fitted data (background removed)\")\r\n        plt.legend([ f\"{f/10**9:.2f} GHz\" for f in freqs ])\r\n        plt.xlabel(\"External Field (mT)\")\r\n        plt.ylabel(\"Suscettivity (arb. u.)\")\r\n        save_plot(measurement_path, \"Fitted data (background removed).png\")\r\n\r\n\r\n    # Other plots\r\n\r\n    #Get alpha from linear fit of FWHMs vs f\r\n    #TODO understand if it was implemented properely or not: differs in excess by a factor 2 with respect to the alpha obtained by Lorentzian fit\r\n    [slope,inhomog] = linear_fit(freqs,FWHMs/2,[0.001,0])\r\n    alpha_from_slope = slope*g/(2*np.pi*1000)\r\n    print(f\"Alpha from slope: {alpha_from_slope:.5f}) Inhomogeneous broadening (HWHM): {inhomog:.5f}\")\r\n\r\n\r\n    plt.figure()\r\n    plt.title(\"HWHM vs f\")\r\n    plt.plot(freqs, FWHMs/2)\r\n    plt.plot(freqs, line_curve(freqs, slope,inhomog))\r\n    plt.legend(['Experimental data', 'Linear fit'])\r\n    plt.xlabel(\"frequency (GHz)\")\r\n    plt.ylabel(\"HWHM (mT)\")\r\n    save_plot(measurement_path, \"HWHM vs f.png\")\r\n\r\n\r\n    plt.figure()\r\n    plt.title(\"$\\\\Delta$H vs H\")\r\n    plt.plot(field_peaks, FWHMs)\r\n    plt.xlabel(\"External Field (mT)\")\r\n    plt.ylabel(\"FWHM (mT)\")\r\n    save_plot(measurement_path, \"Delta H vs H.png\")\r\n\r\n\r\n    plt.figure()\r\n    plt.title(\"Hr vs f\")\r\n    plt.plot(freqs, field_peaks)\r\n    plt.xlabel(\"f (Hz)\")\r\n    plt.ylabel(\"Hr (mT)\")\r\n    save_plot(measurement_path, \"Hr vs f.png\")\r\n\r\n\r\n    # print(\"\\n*** Averaged data: ***\")\r\n    # print(f\"Alpha from raw data: {np.average(alpha_raw):.5f}\")\r\n    # print(f\"Alpha from background removal: {np.average(alpha):.5f}\")\r\n\r\n\r\n\r\n# *******************\r\n\r\n\r\n\r\ndef analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, phases: np.ndarray, measurement_path: str, s_parameter: str, ref_n = 0, show_plots=True) -> tuple[np.ndarray, np.ndarray]:\r\n    \"\"\"\r\n    This function takes as input the frequencies, fields, amplitudes and phases and plots relevant data for FMR resonance.\r\n    ref_n is the index number for the reference measurement, default is zero.\r\n    \"\"\"\r\n\r\n    n_traces = len(amplitudes[:,0])\r\n    n_points = len(freq)\r\n\r\n    # init\r\n    traces_no_background_real = np.zeros((n_traces, n_points))\r\n    traces_no_background_imag = np.zeros((n_traces, n_points))\r\n    traces_no_background_complex = np.zeros((n_traces, n_points), dtype = 'complex_')\r\n    amplitudes_no_background = np.zeros((n_traces, n_points))\r\n    \r\n    amp_ref, phase_ref = amplitudes[ref_n], phases[ref_n]\r\n    phase_ref = unwrap_phase(phase_ref)\r\n\r\n    # Signal processing\r\n    for i in range(n_traces):\r\n        amp, phase = amplitudes[i,:], phases[i,:]\r\n        phase = unwrap_phase(phase)\r\n\r\n        traces_no_background_complex[i,:] = amp * np.exp(1j * phase) - amp_ref * np.exp(1j * phase_ref)\r\n \r\n        traces_no_background_real[i,:] = np.real(traces_no_background_complex[i,:])\r\n        traces_no_background_imag[i,:] = np.imag(traces_no_background_complex[i,:])\r\n        amplitudes_no_background[i,:] = amplitudes[i,:] - amp_ref\r\n\r\n    # Init\r\n    amplitudes_dB = np.zeros((n_traces, n_points))\r\n    amplitudes_dB_no_background = np.zeros((n_traces, n_points))\r\n\r\n    for i in range(n_traces):\r\n        amplitudes_dB[i,:] = 20*np.log10(amplitudes[i,:])\r\n        amplitudes_dB_no_background[i,:] = 20*np.log10(amplitudes_no_background[i,:])\r\n\r\n\r\n    # Plotting\r\n    if show_plots:\r\n\r\n        plt.figure( figsize=(FULLSCREEN_SIZE) )\r\n        plt.title(\"Imaginary part (no background)\")\r\n        for i in range(n_traces): \r\n            plt.plot(freq[0:]/10**9, traces_no_background_imag[i,0:], marker=MARKER, markersize=MARKER_SIZE,linewidth=1.5)\r\n        plt.legend([f\"{f} mT\" for f in fields])\r\n        plt.xlabel(\"Frequency (GHz)\", fontsize=AXIS_FONTSIZE)\r\n        plt.ylabel(f\"Imag({s_parameter}) [arb. u.]\", fontsize=AXIS_FONTSIZE)\r\n        plt.xticks(fontsize=AXIS_FONTSIZE)\r\n        plt.yticks(fontsize=AXIS_FONTSIZE)\r\n        plt.grid()\r\n        save_plot(measurement_path, \"imag.png\")\r\n\r\n\r\n        plt.figure( figsize=(FULLSCREEN_SIZE) ) \r\n        plt.title(\"Real part (no background)\")\r\n        for i in range(len(traces_no_background_real)): \r\n            plt.plot(freq[0:]/10**9, traces_no_background_real[i,0:], linewidth=1.5)\r\n        plt.legend([f\"{f} mT\" for f in fields])\r\n        plt.xlabel(\"Frequency (GHz)\", fontsize=AXIS_FONTSIZE)\r\n        plt.ylabel(f\"Re({s_parameter}) [arb. u.]\", fontsize=AXIS_FONTSIZE)\r\n        plt.xticks(fontsize=AXIS_FONTSIZE)\r\n        plt.yticks(fontsize=AXIS_FONTSIZE)\r\n        plt.grid()\r\n        save_plot(measurement_path, \"real.png\")\r\n\r\n\r\n        plt.figure( figsize=(FULLSCREEN_SIZE) )\r\n        plt.title(\"Transmission coefficient\")\r\n        for i in range(n_traces): \r\n            plt.plot(freq[0:]/10**9, amplitudes[i,0:], linewidth=1.5)\r\n        plt.legend([f\"{f} mT\" for f in fields])\r\n        plt.xlabel(\"Frequency (GHz)\", fontsize=AXIS_FONTSIZE)\r\n        plt.ylabel(\"T\", fontsize=AXIS_FONTSIZE)\r\n        plt.xticks(fontsize=AXIS_FONTSIZE)\r\n        plt.yticks(fontsize=AXIS_FONTSIZE)\r\n        plt.grid()\r\n        save_plot(measurement_path, \"t_coeff.png\")\r\n        \r\n\r\n        plt.figure( figsize=(FULLSCREEN_SIZE) ) \r\n        plt.title(\"Phase\")\r\n        for i in range(n_traces): \r\n            plt.plot(freq[0:]/10**9, phases[i,0:], linewidth=1.5)\r\n        plt.legend([f\"{f} mT\" for f in fields])\r\n        plt.xlabel(\"Frequency (GHz)\", fontsize=AXIS_FONTSIZE)\r\n        plt.ylabel(\"Phase\", fontsize=AXIS_FONTSIZE)\r\n        plt.xticks(fontsize=AXIS_FONTSIZE)\r\n        plt.yticks(fontsize=AXIS_FONTSIZE)\r\n        plt.grid()\r\n        save_plot(measurement_path, \"phase.png\")\r\n\r\n        \r\n        plt.figure( figsize=(FULLSCREEN_SIZE) ) \r\n        plt.title(\"Transmission coefficient (dB)\")\r\n        for i in range(n_traces): \r\n            plt.plot(freq[0:]/10**9, amplitudes_dB[i,0:], linewidth=1.5)\r\n        plt.legend([f\"{f} mT\" for f in fields])\r\n        plt.xlabel(\"Frequency (GHz)\", fontsize=AXIS_FONTSIZE)\r\n        plt.ylabel(\"t (dB)\", fontsize=AXIS_FONTSIZE)\r\n        plt.xticks(fontsize=AXIS_FONTSIZE)\r\n        plt.yticks(fontsize=AXIS_FONTSIZE)\r\n        plt.grid()\r\n        save_plot(measurement_path, \"trasmission_dB.png\")\r\n\r\n\r\n        plt.figure() \r\n        plt.title(\"Transmission coefficient no background (dB)\")\r\n        for i in range(n_traces): \r\n            plt.plot(freq[0:]/10**9, amplitudes_dB_no_background[i,0:])\r\n        plt.legend([f\"{f} mT\" for f in fields])\r\n        plt.xlabel(\"Frequency (GHz)\")\r\n        plt.ylabel(\"t (dB)\")\r\n        save_plot(measurement_path, \"trasmission_dB_no_background.png\")\r\n\r\n    return [traces_no_background_imag, traces_no_background_complex]\r\n\r\n\r\n\r\n# ********************\r\n\r\n\r\n\r\ndef unwrap_phase(phase):\r\n    \"\"\"\r\n    Takes phase as input and removes jumps from +pi to -pi that are generated by default in the VNA data.\r\n    \"\"\"\r\n    phase_unwrapped = np.zeros_like(phase)\r\n    for i in range(1, len(phase)):\r\n        phase_unwrapped[i] = phase[i]\r\n        while phase_unwrapped[i] > phase_unwrapped[i - 1]:\r\n            phase_unwrapped[i] -= 2 * np.pi\r\n    return phase_unwrapped\r\n\r\n\r\ndef calculate_FWHM(freq, data):\r\n    \"\"\"\r\n    Calulcates FWHM of a trace with no fit, just calculating the distance between midpoints. \r\n    \"\"\"\r\n    \r\n    max_val = np.max(data)\r\n    max_idx = np.argmax(data)\r\n\r\n    half_max = max_val / 2\r\n\r\n    ind1 = max_idx\r\n    while data[ind1] > half_max:\r\n        ind1 -= 1\r\n\r\n    ind2 = max_idx\r\n    while data[ind2] > data[max_idx] / 2:\r\n        ind2 += 1\r\n\r\n    fwhm = freq[ind2] - freq[ind1]\r\n    return fwhm\r\n\r\n\r\ndef FMR_tang(H0, M):\r\n    \"\"\"\r\n    Calculates the ideal Kittel relation.\r\n    Takes as input the external field and the saturation magnetization.\r\n    \"\"\"\r\n\r\n    g, mu0  = 1.76e11, 4e-7*np.pi\r\n    H = H0 * 1e-3 / mu0\r\n    FMR =  ((g * mu0)/(2*np.pi)) * np.sqrt(H * (H + M))\r\n    return FMR\r\n\r\n\r\ndef lorentzian_curve(x, center, fwhm, peak_height, a=0, b=0, x1=0, x2=1, m=0):\r\n    \"\"\"\r\n    Generates a Lorentzian curve.\r\n    \"\"\"\r\n\r\n    A = np.pi*fwhm*peak_height/2\r\n    lorentzian =  (A / np.pi) * (fwhm/2 / ((x - center)**2 + (fwhm/2)**2))  # Lorentzian formula \r\n\r\n    dx = fwhm/2 *3\r\n    background = getLinearBackground(x, a, b, x1, x2)\r\n    # a*(x < center-dx) + b*(x > center+dx) + ((x >= center-dx) & (x < center+dx)) * (a +(b-a)* (x-(center-dx))/(2*dx))  # TODO cancellare se il codice funziona\r\n\r\n    return lorentzian + background + m*x\r\n\r\n\r\ndef multi_lorentzian_curve(x, center1, center2, fwhm1, fwhm2, peak_height1, peak_height2, a=0, b=0, x1=0, x2=1):\r\n    \"\"\"\r\n    Generates a Lorentzian curve.\r\n    \"\"\"\r\n\r\n    A1 = np.pi*fwhm1*peak_height1/2\r\n    lorentzian1 =  (A1 / np.pi) * (fwhm1/2 / ((x - center1)**2 + (fwhm1/2)**2))  # Lorentzian formula \r\n\r\n    A2 = np.pi*fwhm2*peak_height2/2\r\n    lorentzian2 =  (A2 / np.pi) * (fwhm2/2 / ((x - center2)**2 + (fwhm2/2)**2))  # Lorentzian formula \r\n\r\n    #dx = fwhm/2 *3\r\n    background = getLinearBackground(x, a, b, x1, x2)\r\n    # a*(x < center-dx) + b*(x > center+dx) + ((x >= center-dx) & (x < center+dx)) * (a +(b-a)* (x-(center-dx))/(2*dx))  # TODO cancellare se il codice funziona\r\n\r\n    return lorentzian1 + lorentzian2 + background\r\n\r\n\r\ndef getLinearBackground(x, a, b, x1, x2):\r\n    return a*(x < x1) + b*(x > x2) + ((x >= x1) & (x < x2)) * (a +(b-a)* (x-(x1))/(x2-x1))\r\n\r\n\r\ndef lorentzian_fit(x,y,initial_guess):\r\n    \"\"\"\r\n    Fits data with a lorentian ,used for more accurate FWHM calculations.\r\n    \"\"\"\r\n\r\n    # popt, pcov = curve_fit(lorentzian_curve, x,y, initial_guess, bounds=([0.75*initial_guess[0], 0, 0], [1.25*initial_guess[0],np.inf , np.inf]))\r\n    try:\r\n        popt, pcov = curve_fit(lorentzian_curve, x,y, initial_guess + [0, 0, initial_guess[0]-initial_guess[1], initial_guess[0]+initial_guess[1], 0], bounds = ([0,0,0,-np.inf,-np.inf,-np.inf,0,-np.inf], [np.inf,np.inf,np.inf,np.inf,np.inf,np.inf,np.inf, np.inf]))\r\n        [center, fwhm, peak_height, a, b, x1, x2, m] = popt\r\n        return center, fwhm, peak_height, a, b, x1, x2, m\r\n        \r\n    except:  # TODO specificare l'eccezione giusta, questo deve venire riportato se non trova la giusta interpolazione\r\n        return float(\"nan\"), float(\"nan\"), float(\"nan\"), float(\"nan\"), float(\"nan\"), float(\"nan\"), float(\"nan\"), float(\"nan\")\r\n       \r\n\r\ndef multi_lorentzian_fit(x,y,initial_guess):\r\n    \"\"\"\r\n    Fits data with a lorentian ,used for more accurate FWHM calculations.\r\n    \"\"\"\r\n\r\n    # popt, pcov = curve_fit(lorentzian_curve, x,y, initial_guess, bounds=([0.75*initial_guess[0], 0, 0], [1.25*initial_guess[0],np.inf , np.inf]))\r\n    try:\r\n        popt, pcov = curve_fit(multi_lorentzian_curve, x,y, initial_guess + [0, 0, x[0], x[-1]])\r\n        [center, fwhm, peak_height, center2, fwhm2, peak_height2] = popt\r\n        return center, fwhm, peak_height, center2, fwhm2, peak_height2\r\n        \r\n    except:  # TODO specificare l'eccezione giusta, questo deve venire riportato se non trova la giusta interpolazione\r\n        return float(\"nan\"), float(\"nan\"), float(\"nan\"), float(\"nan\"), float(\"nan\"), float(\"nan\"), float(\"nan\"), float(\"nan\"), float(\"nan\"), float(\"nan\")\r\n        \r\n\r\n\r\ndef double_lorentzian_fit(x,y,initial_guess, remove_background=False):\r\n    \"\"\"\r\n    Fits data with two lorentians ,used for more accurate FWHM calculations.\r\n    \"\"\"\r\n\r\n    # popt, pcov = curve_fit(lorentzian_curve, x,y, initial_guess, bounds=([0.75*initial_guess[0], 0, 0], [1.25*initial_guess[0],np.inf , np.inf]))\r\n    \r\n\r\n    try:\r\n        if not(remove_background):\r\n            popt, pcov = curve_fit(double_lorentzian_curve_no_background, x,y, initial_guess, bounds=(0, np.inf))\r\n            [center, fwhm, peak_height, center2, fwhm2, peak_height2] = popt\r\n            return center, fwhm, peak_height, center2, fwhm2, peak_height2\r\n        else:\r\n            popt, pcov = curve_fit(double_lorentzian_curve, x,y, initial_guess + [0, 0, x[0], x[-1]], bounds=(0, np.inf))\r\n            [center, fwhm, peak_height, center2, fwhm2, peak_height2, a, b, x1, x2] = popt\r\n            return center, fwhm, peak_height, center2, fwhm2, peak_height2, a, b, x1, x2\r\n        \r\n\r\n    except:  # TODO specificare l'eccezione giusta, questo deve venire riportato se non trova la giusta interpolazione\r\n        if not(remove_background):\r\n            return float(\"nan\"), float(\"nan\"), float(\"nan\"), float(\"nan\"), float(\"nan\"), float(\"nan\")\r\n        else:\r\n            return float(\"nan\"), float(\"nan\"), float(\"nan\"), float(\"nan\"), float(\"nan\"), float(\"nan\"), float(\"nan\"), float(\"nan\"), float(\"nan\"), float(\"nan\")\r\n\r\n\r\ndef double_lorentzian_curve_no_background(x, center_1, fwhm_1, peak_height_1, center_2, fwhm_2, peak_height_2):\r\n    \"\"\"\r\n    Generate a Lorentzian curve.\r\n\r\n    Parameters:\r\n    - x: NumPy array, x-axis values.\r\n    - center: Center of the Lorentzian curve.\r\n    - fwhm: Full Width at Half Maximum of the Lorentzian curve.\r\n    - peak_height: Desired maximum value of the Lorentzian curve.\r\n\r\n    Returns:\r\n    - NumPy array representing the Lorentzian curve.\r\n    \"\"\"\r\n    A_1 = np.pi*fwhm_1*peak_height_1/2\r\n    lorentzian1 = (A_1 / np.pi) * (fwhm_1/2 / ((x - center_1)**2 + (fwhm_1/2)**2))  # Lorentzian formula\r\n    \r\n    A_2 = np.pi*fwhm_2*peak_height_2/2\r\n    lorentzian2 = (A_2 / np.pi) * (fwhm_2/2 / ((x - center_2)**2 + (fwhm_2/2)**2))  # Lorentzian formula\r\n\r\n    lorentzian = lorentzian1 + lorentzian2\r\n\r\n    return lorentzian\r\n\r\n\r\ndef double_lorentzian_curve(x, center_1, fwhm_1, peak_height_1, center_2, fwhm_2, peak_height_2, a, b, x1, x2):\r\n    \"\"\"\r\n    Generate a Lorentzian curve.\r\n\r\n    Parameters:\r\n    - x: NumPy array, x-axis values.\r\n    - center: Center of the Lorentzian curve.\r\n    - fwhm: Full Width at Half Maximum of the Lorentzian curve.\r\n    - peak_height: Desired maximum value of the Lorentzian curve.\r\n\r\n    Returns:\r\n    - NumPy array representing the Lorentzian curve.\r\n    \"\"\"\r\n    A_1 = np.pi*fwhm_1*peak_height_1/2\r\n    lorentzian1 = (A_1 / np.pi) * (fwhm_1/2 / ((x - center_1)**2 + (fwhm_1/2)**2))  # Lorentzian formula\r\n    \r\n    A_2 = np.pi*fwhm_2*peak_height_2/2\r\n    lorentzian2 = (A_2 / np.pi) * (fwhm_2/2 / ((x - center_2)**2 + (fwhm_2/2)**2))  # Lorentzian formula\r\n\r\n    background = getLinearBackground(x, a, b, x1, x2)\r\n\r\n    lorentzian = lorentzian1 + lorentzian2 + background\r\n\r\n    return lorentzian\r\n\r\n\r\ndef linear_fit(x,y,initial_guess):\r\n    \"\"\"\r\n    Fits data with a linear curve.\r\n    \"\"\"\r\n    \r\n    try:\r\n        popt, pcov = curve_fit(line_curve, x, y, initial_guess, bounds = ([0,0], [np.inf,np.inf]))\r\n        [a,b] = popt\r\n        return a, b\r\n        \r\n    except:  # TODO specificare l'eccezione giusta, questo deve venire riportato se non trova la giusta interpolazione\r\n        return float(\"nan\"), float(\"nan\")\r\n    \r\n\r\ndef line_curve(x, a=0, b=0):\r\n    \"\"\"\r\n    Generates a line curve.\r\n    \"\"\"\r\n    line =  a*x+b\r\n\r\n    return line\r\n\r\ndef Re_suscettivity(fields,A,f,FWHM,H_fmr):\r\n\r\n    y = A*((fields-H_fmr)/((FWHM/2)**2 + (fields-H_fmr)**2))\r\n\r\n    return(y)\r\n\r\n\r\ndef Im_suscettivity(fields,A,f,FWHM,H_fmr):\r\n\r\n    y = A*((FWHM/2)/((FWHM/2)**2 + (fields-H_fmr)**2))\r\n\r\n    return(y)\r\n\r\n\r\ndef Mixed_suscettivity(fields,A,f,FWHM,H_fmr,phi):\r\n\r\n    y = -np.sin(phi)*Re_suscettivity(fields,A,f,FWHM,H_fmr) + np.cos(phi)*Im_suscettivity(fields,A,f,FWHM,H_fmr)\r\n\r\n    return(y)\r\n\r\n\r\ndef suscettivity_fit(x,y,initial_guess):\r\n    \"\"\"\r\n    Fits data with a mixture of the real and imaginary part of the expected suscettivity functional form, weighted by a phase term\r\n    #TODO da commentare meglio\r\n    \"\"\"\r\n\r\n    try:\r\n        popt, pcov = curve_fit(Mixed_suscettivity, x,y, initial_guess, bounds = ([0,0,0,0,0], [np.inf,np.inf,np.inf, np.inf, 2*np.pi]))\r\n        [A,f,FWHM,H_fmr,phi] = popt\r\n        return A,f,FWHM,H_fmr,phi\r\n        \r\n    except:  \r\n        return float(\"nan\"), float(\"nan\"), float(\"nan\"), float(\"nan\"), float(\"nan\")\r\n    \r\n\r\n\r\n\r\n\r\ndef analysisFMR_derivative(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, phases: np.ndarray, measurement_path: str, ref_n = 0, show_plots=True) -> tuple[np.ndarray, np.ndarray]:\r\n    \"\"\"\r\n    This function takes as input the frequencies, fields, amplitudes and phases and plots relevant data for FMR resonance.\r\n    ref_n is the index number for the reference measurement, default is zero.\r\n    \"\"\"\r\n\r\n    n_traces = len(amplitudes[:,0])\r\n    n_points = len(freq)\r\n    \r\n    amp_ref, phase_ref = amplitudes[ref_n], phases[ref_n]\r\n    phase_ref = unwrap_phase(phase_ref)\r\n\r\n    traces = np.zeros((n_traces, n_points))\r\n    Ur = np.zeros((n_traces, n_points))\r\n\r\n    # Calculate U\r\n    for i in range(n_traces):\r\n        amp, phase = amplitudes[i], phases[i]\r\n        phase = unwrap_phase(phase)\r\n\r\n        U = (amp * np.exp(1j * phase))\r\n\r\n \r\n        Ur[i,:] = np.real(U)\r\n        # amplitudes[i, :] = amp\r\n        traces[i, :] = np.imag(U)\r\n        phases[i, :] = phase\r\n\r\n    Us = Ur+1j*traces\r\n\r\n\r\n    return traces, Us\r\n\r\n\r\n\r\n\r\ndef analysis_field_derivative(freq: np.ndarray, traces: np.ndarray, fields: np.ndarray, measurement_path: str) -> tuple[np.ndarray, np.ndarray]:\r\n    \"\"\"\r\n    This function takes as input traces and fields and estimates Ms from a fit of the Kittel function.\r\n    Returns frequencies of the FMR peaks and the Ms.\r\n    \"\"\"\r\n    dS = traces[3]-traces[2]#-traces[4]\r\n    dH = (traces[2]+traces[3]+traces[4])/3\r\n    q = dS#/dH\r\n\r\n    plt.figure()\r\n    plt.xlabel('f')\r\n    plt.ylabel('d2S/d2H')\r\n    plt.plot(freq,q)\r\n    plt.show()\r\n\r\n    return q\r\n\r\n\r\n\r\ndef analysisFMR_subtraction(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, phases: np.ndarray, measurement_path: str, ref_n = 0, show_plots=True) -> tuple[np.ndarray, np.ndarray]:\r\n    \"\"\"\r\n    This function takes as input the frequencies, fields, amplitudes and phases and plots relevant data for FMR resonance.\r\n    ref_n is the index number for the reference measurement, default is zero.\r\n    \"\"\"\r\n\r\n    n_traces = len(amplitudes[:,0])\r\n    n_points = len(freq)\r\n    \r\n    amp_ref, phase_ref = amplitudes[ref_n], phases[ref_n]\r\n    phase_ref = unwrap_phase(phase_ref)\r\n\r\n    traces = np.zeros((n_traces, n_points))\r\n    Ur = np.zeros((n_traces, n_points))\r\n\r\n    # Calculate U\r\n    for i in range(n_traces):\r\n        amp, phase = amplitudes[i], phases[i]\r\n        phase = unwrap_phase(phase)\r\n\r\n        #U = 1j * (np.log((amp * np.exp(1j * phase*0)) / (amp_ref * np.exp(0))) / np.log(amp_ref * np.exp(0)))\r\n        #U = 1j * (np.log((amp * np.exp(1j * phase)) / (amp_ref * np.exp(1j * phase_ref))) / np.log(amp_ref * np.exp(1j * phase_ref)))\r\n        #U = -1j * (((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) / (amp_ref * np.exp(1j * phase_ref)))\r\n        U = (amp * np.exp(1j * phase))#-(amp_ref * np.exp(1j * phase_ref)))/(amp_ref * np.exp(1j * phase_ref))\r\n        #U = ((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) \r\n        #U = np.abs(1j * (((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) / (amp_ref * np.exp(1j * phase_ref))))\r\n        #U = (((amp) - (amp_ref)) / (amp_ref ))\r\n        # U[0] = 0  # First value explodes due to discontinuity\r\n \r\n        Ur[i,:] = np.real(U)\r\n        # amplitudes[i, :] = amp\r\n        traces[i, :] = np.imag(U)\r\n        phases[i, :] = phase\r\n\r\n    Us = Ur+1j*traces\r\n\r\n    # # post-processing   ( removed )\r\n    # for i in range(n_traces):\r\n    #     traces_postprocessing[i,:] = gaussian_filter1d(traces[i, :], 6)\r\n\r\n\r\n    # Plottavamo [3:] per esclusdere i primi tre punti. Perchè? ora invece con [0:] funziona\r\n\r\n    return traces, Us\r\n\r\n\r\n\r\n\r\ndef analysisFMR_Maria(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, phases: np.ndarray, measurement_path: str, ref_n = 0, show_plots=True) -> tuple[np.ndarray, np.ndarray]:\r\n    \"\"\"\r\n    This function takes as input the frequencies, fields, amplitudes and phases and plots relevant data for FMR resonance.\r\n    ref_n is the index number for the reference measurement, default is zero.\r\n    \"\"\"\r\n\r\n    n_traces = len(amplitudes[:,0])\r\n    n_points = len(freq)\r\n    \r\n    amp_ref, phase_ref = amplitudes[ref_n], phases[ref_n]\r\n    phase_ref = unwrap_phase(phase_ref)\r\n\r\n    traces = np.zeros((n_traces, n_points))\r\n    Ur = np.zeros((n_traces, n_points))\r\n\r\n    # Calculate U\r\n    for i in range(n_traces):\r\n        amp, phase = amplitudes[i], phases[i]\r\n        phase = unwrap_phase(phase)\r\n\r\n        #U = 1j * (np.log((amp * np.exp(1j * phase*0)) / (amp_ref * np.exp(0))) / np.log(amp_ref * np.exp(0)))\r\n        #U = 1j * (np.log((amp * np.exp(1j * phase)) / (amp_ref * np.exp(1j * phase_ref))) / np.log(amp_ref * np.exp(1j * phase_ref)))\r\n        #U = -1j * (((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) / (amp_ref * np.exp(1j * phase_ref)))\r\n        U = (amp * np.exp(1j * phase)-(amp_ref * np.exp(1j * phase_ref)))/(amp_ref * np.exp(1j * phase_ref))\r\n        #U = ((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) \r\n        #U = np.abs(1j * (((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) / (amp_ref * np.exp(1j * phase_ref))))\r\n        #U = (((amp) - (amp_ref)) / (amp_ref ))\r\n        # U[0] = 0  # First value explodes due to discontinuity\r\n \r\n        Ur[i,:] = np.real(U)\r\n        # amplitudes[i, :] = amp\r\n        traces[i, :] = np.imag(U)\r\n        phases[i, :] = phase\r\n\r\n    Us = Ur+1j*traces\r\n\r\n    # # post-processing   ( removed )\r\n    # for i in range(n_traces):\r\n    #     traces_postprocessing[i,:] = gaussian_filter1d(traces[i, :], 6)\r\n\r\n\r\n    # Plottavamo [3:] per esclusdere i primi tre punti. Perchè? ora invece con [0:] funziona\r\n\r\n\r\n    return traces, Us\r\n\r\n\r\ndef analysisFMR_MariaPhase(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, phases: np.ndarray, measurement_path: str, ref_n = 0, show_plots=True) -> tuple[np.ndarray, np.ndarray]:\r\n    \"\"\"\r\n    This function takes as input the frequencies, fields, amplitudes and phases and plots relevant data for FMR resonance.\r\n    ref_n is the index number for the reference measurement, default is zero.\r\n    \"\"\"\r\n    n_traces = len(amplitudes[:,0])\r\n    n_points = len(freq)\r\n    \r\n    amp_ref, phase_ref = amplitudes[ref_n], phases[ref_n]\r\n    phase_ref = unwrap_phase(phase_ref)\r\n\r\n    re_trace = np.zeros((n_traces, n_points))\r\n    im_trace = np.zeros((n_traces, n_points))\r\n    re_ref = np.zeros((n_traces, n_points))\r\n    im_ref = np.zeros((n_traces, n_points))\r\n\r\n    # Calculate U\r\n    for i in range(n_traces):\r\n        amp, phase = amplitudes[i], phases[i]\r\n        phase = unwrap_phase(phase)\r\n        U = amp * np.exp(1j * phase)\r\n        U_ref = amp_ref * np.exp(1j * phase_ref)\r\n \r\n        # amplitudes[i, :] = amp\r\n        re_ref[i, :] = np.real(U_ref)\r\n        im_ref[i, :] = np.imag(U_ref)\r\n        re_trace[i, :] = np.real(U)\r\n        im_trace[i, :] = np.imag(U)\r\n\r\n    return re_trace, im_trace, re_ref, im_ref\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/library_analysis.py b/library_analysis.py
+--- a/library_analysis.py	(revision 638ce4e58a88eb521a15bd12e592e39d14ad310e)
++++ b/library_analysis.py	(date 1721376100708)
+@@ -482,14 +482,14 @@
+         save_plot(measurement_path, "trasmission_dB.png")
+ 
+ 
+-        plt.figure() 
+-        plt.title("Transmission coefficient no background (dB)")
+-        for i in range(n_traces): 
+-            plt.plot(freq[0:]/10**9, amplitudes_dB_no_background[i,0:])
+-        plt.legend([f"{f} mT" for f in fields])
+-        plt.xlabel("Frequency (GHz)")
+-        plt.ylabel("t (dB)")
+-        save_plot(measurement_path, "trasmission_dB_no_background.png")
++       # plt.figure() 
++       # plt.title("Transmission coefficient no background (dB)")
++       # for i in range(n_traces): 
++       #     plt.plot(freq[0:]/10**9, amplitudes_dB_no_background[i,0:])
++       # plt.legend([f"{f} mT" for f in fields])
++       # plt.xlabel("Frequency (GHz)")
++       # plt.ylabel("t (dB)")
++       # save_plot(measurement_path, "trasmission_dB_no_background.png")
+ 
+     return [traces_no_background_imag, traces_no_background_complex]
+ 
+Index: controller.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from library_analysis import *\r\nfrom library_gui import *\r\nfrom library_vna import *\r\nfrom library_power_supply import *\r\nfrom CONSTANTS import *\r\n\r\n\r\n# Connects power supplies\r\nprint(\"Power supply 1 > \", end=\"\"); \r\nif \"ps1\" in locals(): ps1.closeConnection()\r\nps1 = setupConnectionPS('COM4', 9600)\r\n\r\nprint(\"Power supply 2 > \", end=\"\"); \r\nif \"ps2\" in locals(): ps2.closeConnection()\r\nps2 = setupConnectionPS('COM3', 9600)\r\n\r\n# Connects VNA\r\nprint(\"VNA            > \", end=\"\"); \r\ninstr = setupConnectionVNA()\r\nprint()\r\n\r\n\r\nps2.setCurrent(2)\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/controller.py b/controller.py
+--- a/controller.py	(revision 638ce4e58a88eb521a15bd12e592e39d14ad310e)
++++ b/controller.py	(date 1721315385461)
+@@ -9,15 +9,16 @@
+ print("Power supply 1 > ", end=""); 
+ if "ps1" in locals(): ps1.closeConnection()
+ ps1 = setupConnectionPS('COM4', 9600)
++ps1.demag_sweep()
+ 
+-print("Power supply 2 > ", end=""); 
+-if "ps2" in locals(): ps2.closeConnection()
+-ps2 = setupConnectionPS('COM3', 9600)
++#print("Power supply 2 > ", end=""); 
++#if "ps2" in locals(): ps2.closeConnection()
++#ps2 = setupConnectionPS('COM3', 9600)
+ 
+ # Connects VNA
+-print("VNA            > ", end=""); 
+-instr = setupConnectionVNA()
+-print()
++#print("VNA            > ", end=""); 
++#instr = setupConnectionVNA()
++#print()
+ 
+ 
+-ps2.setCurrent(2)
++#ps2.setCurrent(2)
