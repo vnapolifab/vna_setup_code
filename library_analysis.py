@@ -25,7 +25,8 @@ def analysisFMR(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, ph
     n_points = len(freq)
     
     amp_ref, phase_ref = amplitudes[ref_n], phases[ref_n]
-    phase_ref = unwrap_phase(phase_ref)
+    #phase_ref = unwrap_phase(phase_ref)
+    phase_ref = np.unwrap(phase_ref)
 
     traces = np.zeros((n_traces, n_points))
     Ur = np.zeros((n_traces, n_points))
@@ -33,12 +34,13 @@ def analysisFMR(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, ph
     # Calculate U
     for i in range(n_traces):
         amp, phase = amplitudes[i], phases[i]
-        phase = unwrap_phase(phase)
+        #phase = unwrap_phase(phase)
+        phase = np.unwrap(phase)
 
         #U = 1j * (np.log((amp * np.exp(1j * phase*0)) / (amp_ref * np.exp(0))) / np.log(amp_ref * np.exp(0)))
         #U = 1j * (np.log((amp * np.exp(1j * phase)) / (amp_ref * np.exp(1j * phase_ref))) / np.log(amp_ref * np.exp(1j * phase_ref)))
         #U = -1j * (((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) / (amp_ref * np.exp(1j * phase_ref)))
-        U = (amp * np.exp(1j * phase)-(amp_ref * np.exp(1j * phase_ref)))/(amp_ref * np.exp(1j * phase_ref))
+        U = -1j*(amp * np.exp(1j * phase)-(amp_ref * np.exp(1j * phase_ref)))/(amp_ref * np.exp(1j * phase_ref))
         #U = ((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) 
         #U = np.abs(1j * (((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) / (amp_ref * np.exp(1j * phase_ref))))
         #U = (((amp) - (amp_ref)) / (amp_ref ))
@@ -47,6 +49,7 @@ def analysisFMR(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, ph
         Ur[i,:] = np.real(U)
         # amplitudes[i, :] = amp
         traces[i, :] = np.imag(U)
+        #traces[i, :] = np.abs(U)
         phases[i, :] = phase
 
     Us = Ur+1j*traces
@@ -392,14 +395,16 @@ def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, pha
     amplitudes_no_background = np.zeros((n_traces, n_points))
     
     amp_ref, phase_ref = amplitudes[ref_n], phases[ref_n]
-    phase_ref = unwrap_phase(phase_ref)
+    #phase_ref = unwrap_phase(phase_ref)
+    phase_ref = np.unwrap(phase_ref)
 
     # Signal processing
     for i in range(n_traces):
         amp, phase = amplitudes[i,:], phases[i,:]
-        phase = unwrap_phase(phase)
+        #phase = unwrap_phase(phase)
+        phase = np.unwrap(phase)
 
-        traces_no_background_complex[i,:] = amp * np.exp(1j * phase) - amp_ref * np.exp(1j * phase_ref)
+        traces_no_background_complex[i,:] = (amp * np.exp(1j * phase))-(amp_ref * np.exp(1j * phase_ref))
  
         traces_no_background_real[i,:] = np.real(traces_no_background_complex[i,:])
         traces_no_background_imag[i,:] = np.imag(traces_no_background_complex[i,:])
@@ -407,11 +412,11 @@ def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, pha
 
     # Init
     amplitudes_dB = np.zeros((n_traces, n_points))
-    amplitudes_dB_no_background = np.zeros((n_traces, n_points))
+    #amplitudes_dB_no_background = np.zeros((n_traces, n_points))
 
     for i in range(n_traces):
         amplitudes_dB[i,:] = 20*np.log10(amplitudes[i,:])
-        amplitudes_dB_no_background[i,:] = 20*np.log10(amplitudes_no_background[i,:])
+     #   amplitudes_dB_no_background[i,:] = 20*np.log10(amplitudes_no_background[i,:])
 
 
     # Plotting
@@ -482,14 +487,14 @@ def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, pha
         save_plot(measurement_path, "trasmission_dB.png")
 
 
-        plt.figure() 
-        plt.title("Transmission coefficient no background (dB)")
-        for i in range(n_traces): 
-            plt.plot(freq[0:]/10**9, amplitudes_dB_no_background[i,0:])
-        plt.legend([f"{f} mT" for f in fields])
-        plt.xlabel("Frequency (GHz)")
-        plt.ylabel("t (dB)")
-        save_plot(measurement_path, "trasmission_dB_no_background.png")
+        #plt.figure() 
+        #plt.title("Transmission coefficient no background (dB)")
+        #for i in range(n_traces): 
+          #  plt.plot(freq[0:]/10**9, amplitudes_dB_no_background[i,0:])
+        #plt.legend([f"{f} mT" for f in fields])
+        #plt.xlabel("Frequency (GHz)")
+        #plt.ylabel("t (dB)")
+        #save_plot(measurement_path, "trasmission_dB_no_background.png")
 
     return [traces_no_background_imag, traces_no_background_complex]
 
