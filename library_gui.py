@@ -19,6 +19,7 @@ import dataclasses
 from typing import Optional, Any
 import copy
 
+
 @dataclasses.dataclass
 class User:
     email: str
@@ -73,7 +74,6 @@ class GUI:
             row += entry.rows_occupied
 
         self.root.mainloop()
-        self.root.quit()
 
     def find_entry(self, param_name):
         for entry in self.entries:
@@ -151,7 +151,7 @@ class GUI_input_text(GUI_input):
     def setup(self, row):
         ttk.Label(self.gui.root, text=self.param_desc, background='light grey').grid(row=row, column=0, sticky="w",
                                                                                      padx=5, pady=5)
-        self.entry_var = ttk.Entry(self.gui.root, width=50)
+        self.entry_var = ttk.Entry(self.gui.root, width=10)
         self.entry_var.grid(row=row, column=1, sticky="ew", padx=5, pady=5)
 
     def is_valid(self):
@@ -298,7 +298,7 @@ class GUI_input_combobox_user_name(GUI_input_combobox):
     NEW_USER = "---New User---"
 
     def setup(self, *args, **kwargs):
-        self.entry_var_text = ttk.Entry(self.gui.root, width=50)
+        self.entry_var_text = ttk.Entry(self.gui.root, width=10)
         super().setup(*args, **kwargs)
 
     def get(self):
@@ -321,7 +321,7 @@ class GUI_input_combobox_sample_name(GUI_input_combobox):
     NEW_SAMPLE = "---New Sample---"
 
     def setup(self, *args, **kwargs):
-        self.entry_var_text = ttk.Entry(self.gui.root, width=50)
+        self.entry_var_text = ttk.Entry(self.gui.root, width=10)
         super().setup(*args, **kwargs)
 
     def get(self):
@@ -393,12 +393,16 @@ class GUI_button_load_last_settings(GUI_button):
 # ELABFTW
 class GUIButtonSaveToElabFTW(GUI_button):
     def __init__(self, gui, button_name, elab_user, equipment_templates):
-        self.elab_user: GUI_input_combobox_elab_users = elab_user
+        self.elab_user: GuiInputComboboxElabUsers = elab_user
         self.equipment_templates: GUIEquipmentTemplates = equipment_templates
         super().__init__(gui, button_name)
 
+    def setup(self, row):
+        self.entry_var = ttk.Button(self.gui.root, text=self.button_name, command=self.on_press, width=20)
+        self.entry_var.grid(row=row, column=20, columnspan=2, padx=10, pady=10)
+
     def on_press(self):
-        
+
         mod_template = copy.deepcopy(self.equipment_templates.saved_template)
         for parameter in self.equipment_templates.saved_template["metadata"]["extra_fields"]:
             if parameter in self.gui.inputs.keys():
@@ -421,6 +425,7 @@ class GUIButtonSaveToElabFTW(GUI_button):
         else:
             print("Doh!")
 
+
 def find_subfolder(folder_path):
     try:
         subfolders = next(os.walk(folder_path))[1]
@@ -436,7 +441,7 @@ def save_users() -> list[User]:
     return user_list
 
 
-class GUI_input_combobox_elab_users(GUI_input_combobox):
+class GuiInputComboboxElabUsers(GUI_input_combobox):
     entry_type = GUI_input.COMBOBOX
     to_be_submitted = False
 
@@ -449,19 +454,18 @@ class GUI_input_combobox_elab_users(GUI_input_combobox):
         super().__init__(values=self.values, **kwargs)
 
     def setup(self, row):
-        ttk.Label(self.gui.root, text=self.param_desc, background='light grey').grid(row=row, column=10, sticky="w",
+        ttk.Label(self.gui.root, text=self.param_desc, background='light grey').grid(row=row, column=15, sticky="w",
                                                                                      padx=5, pady=5)
         self.entry_var = ttk.Combobox(self.gui.root, state="readonly", values=self.values,
                                       width=50)
-        self.entry_var.grid(row=row, column=1, sticky="ew", padx=5, pady=5)
+        self.entry_var.grid(row=row, column=20, sticky="ew", padx=5, pady=5)
         self.entry_var.bind('<<ComboboxSelected>>', self.on_change)
-        self.entry_var.grid(row=row, column=15, sticky="ew", padx=5, pady=5)
         # userteams
-        ttk.Label(self.gui.root, text="ElabUser_teams", background='light grey').grid(row=row + 1, column=10,
-                                                                                      sticky="w",
-                                                                                      padx=5, pady=5)
+        ttk.Label(self.gui.root, text="User Teams", background='light grey').grid(row=row + 2, column=15,
+                                                                                  sticky="w",
+                                                                                  padx=5, pady=5)
         self.user_teams_combobox = ttk.Combobox(self.gui.root, state="readonly", width=50)
-        self.user_teams_combobox.grid(row=row + 1, column=15, sticky="ew", padx=5, pady=5)
+        self.user_teams_combobox.grid(row=row + 2, column=20, sticky="ew", padx=5, pady=5)
         self.user_teams_combobox.bind('<<ComboboxSelected>>', self.save_teams_id)
 
     def on_change(self, event):
@@ -487,18 +491,17 @@ class GUIEquipmentTemplates(GUI_input_combobox):
 
     def setup(self, row):
         # userteams
-        ttk.Label(self.gui.root, text=self.param_desc, background='light grey').grid(row=row + 1, column=10,
+        ttk.Label(self.gui.root, text=self.param_desc, background='light grey').grid(row=4, column=15,
                                                                                      sticky="w",
                                                                                      padx=5, pady=5)
         self.entry_var = ttk.Combobox(self.gui.root, state="readonly", width=50, values=self.values)
-        self.entry_var.grid(row=row + 1, column=15, sticky="ew", padx=5, pady=5)
+        self.entry_var.grid(row=4, column=20, sticky="ew", padx=5, pady=5)
         self.entry_var.bind('<<ComboboxSelected>>', self.on_change)
 
     def on_change(self, event):
         self.saved_experiment_id: int = self.experiments_templates[self.entry_var.get()][
             "id"]
         self.saved_template = self.experiments_templates[self.entry_var.get()]
-
 
 
 def gui_measurement_startup():
@@ -528,22 +531,24 @@ def gui_measurement_startup():
         GUI_input_text(gui=gui, param_name="cal_file", param_desc="Calibration file", mandatory=False)
     ]
     # ELABFTW
-    elab_user = GUI_input_combobox_elab_users(gui=gui, param_name="ELABFTW_user_name", param_desc="ELABFTW_user_name",
-                                              values=user_list, mandatory=False)
-    equipment_templates = GUIEquipmentTemplates(gui=gui, param_name="Experiments_List", param_desc="Experiments_List",
+    elab_user = GuiInputComboboxElabUsers(gui=gui, param_name="ELABFTW User Name", param_desc="ELABFTW User Name",
+                                          values=user_list, mandatory=False)
+    equipment_templates = GUIEquipmentTemplates(gui=gui, param_name="Experiments Templates",
+                                                param_desc="Experiments Templates",
                                                 mandatory=False)
-    entries.append(elab_user)
-    entries.append(equipment_templates)
+    save_to_elab_button = GUIButtonSaveToElabFTW(gui=gui, elab_user=elab_user,
+                                                 equipment_templates=equipment_templates, button_name="save_to_elab")
     buttons = [
         GUI_button_submit(gui=gui, button_name="Submit"),
         GUI_button_clear(gui=gui, button_name="Clear"),
         GUI_button_load_last_settings(gui=gui, button_name="Load last settings"),
-        GUIButtonSaveToElabFTW(gui=gui, elab_user=elab_user,
-                               equipment_templates=equipment_templates, button_name="save_to_elab")
+
     ]
 
+    elab_user.setup(row=0)
+    equipment_templates.setup(row=2)
+    save_to_elab_button.setup(row=5)
     gui.run_gui(entries=entries, buttons=buttons)
-
     return gui.inputs if gui.inputs else None
 
 
