@@ -48,12 +48,12 @@ measurement_routine(
     settings["measurement_name"],
     settings["dipole_mode"],
     settings["s_parameter"],
-    demag=False
+    demag=True
 )
 
 # Save metadata:
 old_name = settings["measurement_name"]
-for sparam in ["S43"]:#, "S43", "S34", "S44"]: #TODO scommenta
+for sparam in ["S33", "S43", "S34", "S44"]: #TODO scommenta
     settings["measurement_name"] = f"{old_name}_{sparam}"
     settings["s_parameter"] = sparam
     save_metadata(settings)
