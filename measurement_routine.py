@@ -61,15 +61,15 @@ def measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument,
         # Now the actual measurement routine starts
         # ============================
 
-        #if demag:  # First demagnetization sweep 
-            #ps.demag_sweep()
+        if demag:  # First demagnetization sweep 
+            ps.demag_sweep()
 
         #second_demag = demag and field_sweep[0]!=0  # If ref field != 0 a second demag field is needed 
 
-        #freqs_S33, fields_S33, amps_S33, phases_S33 = np.array([]), np.array([]), np.array([]), np.array([])
-        #freqs_S34, fields_S34, amps_S34, phases_S34 = np.array([]), np.array([]), np.array([]), np.array([])
+        freqs_S33, fields_S33, amps_S33, phases_S33 = np.array([]), np.array([]), np.array([]), np.array([])
+        freqs_S34, fields_S34, amps_S34, phases_S34 = np.array([]), np.array([]), np.array([]), np.array([])
         freqs_S43, fields_S43, amps_S43, phases_S43 = np.array([]), np.array([]), np.array([]), np.array([])
-        #freqs_S44, fields_S44, amps_S44, phases_S44 = np.array([]), np.array([]), np.array([]), np.array([])
+        freqs_S44, fields_S44, amps_S44, phases_S44 = np.array([]), np.array([]), np.array([]), np.array([])
 
         for i, field in enumerate(field_sweep):  # MAIN FOR LOOP
             #if i == 1 and second_demag:
@@ -78,7 +78,7 @@ def measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument,
             current = (field-offset)/conversion
 
 
-            for Sparam in ["S43"]:#, "S43", "S34", "S44"]: #TODO scommenta
+            for Sparam in ["S33", "S43", "S34", "S44"]: #TODO scommenta
                 logger.info(f"Setting field...")
                 ps.setCurrent(current)
                 logger.info(f"Field set to {field_sweep[i]} mT")
@@ -114,21 +114,21 @@ def measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument,
                     phases_S44 = np.concatenate( (phases_S44, p) )
 
 
-        #logger.info(f'Saving data...')
-        #save_data(freqs_S33, fields_S33, amps_S33, phases_S33, user_folder, sample_folder, measurement_name = f"{measurement_name}_S33")
-        #logger.info(f'Saved file "{measurement_name}_S33.csv"')
+        logger.info(f'Saving data...')
+        save_data(freqs_S33, fields_S33, amps_S33, phases_S33, user_folder, sample_folder, measurement_name = f"{measurement_name}_S33")
+        logger.info(f'Saved file "{measurement_name}_S33.csv"')
 
         logger.info(f'Saving data...')
         save_data(freqs_S43, fields_S43, amps_S43, phases_S43, user_folder, sample_folder, measurement_name = f"{measurement_name}_S43")
         logger.info(f'Saved file "{measurement_name}_S43.csv"')
 
-        #logger.info(f'Saving data...')
-        #save_data(freqs_S34, fields_S34, amps_S34, phases_S34, user_folder, sample_folder, measurement_name = f"{measurement_name}_S34")
-        #logger.info(f'Saved file "{measurement_name}_S34.csv"')
+        logger.info(f'Saving data...')
+        save_data(freqs_S34, fields_S34, amps_S34, phases_S34, user_folder, sample_folder, measurement_name = f"{measurement_name}_S34")
+        logger.info(f'Saved file "{measurement_name}_S34.csv"')
 
-        #logger.info(f'Saving data...')
-        #save_data(freqs_S44, fields_S44, amps_S44, phases_S44, user_folder, sample_folder, measurement_name = f"{measurement_name}_S44")
-        #logger.info(f'Saved file "{measurement_name}_S44.csv"')
+        logger.info(f'Saving data...')
+        save_data(freqs_S44, fields_S44, amps_S44, phases_S44, user_folder, sample_folder, measurement_name = f"{measurement_name}_S44")
+        logger.info(f'Saved file "{measurement_name}_S44.csv"')
 
 
         ps.setCurrent(0)  # Set current back to 0 at the end of the routine
