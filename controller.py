@@ -6,18 +6,36 @@ from CONSTANTS import *
 
 
 # Connects power supplies
+
 print("Power supply 1 > ", end=""); 
 if "ps1" in locals(): ps1.closeConnection()
 ps1 = setupConnectionPS('COM4', 9600)
+ps1.demag_sweep()
 
-print("Power supply 2 > ", end=""); 
-if "ps2" in locals(): ps2.closeConnection()
-ps2 = setupConnectionPS('COM3', 9600)
+field = 150
+
+offset = 1.7452
+conversion = 49.901
+
+current = (field-offset)/conversion
+
+
+ps1.setCurrent(current)
+
+
+
+
+
+
+
+#print("Power supply 2 > ", end=""); 
+#if "ps2" in locals(): ps2.closeConnection()
+#ps2 = setupConnectionPS('COM3', 9600)
 
 # Connects VNA
-print("VNA            > ", end=""); 
-instr = setupConnectionVNA()
-print()
+#print("VNA            > ", end=""); 
+#instr = setupConnectionVNA()
+#print()
 
 
-ps2.setCurrent(2)
+#ps2.setCurrent(2)
