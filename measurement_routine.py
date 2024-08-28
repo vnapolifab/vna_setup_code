@@ -5,7 +5,7 @@ from library_vna import *
 from library_file_management import *
 import CONSTANTS as c
 
-def measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument, field_sweep: list[float], angle: float, user_folder: str, sample_folder: str, measurement_name: str, dipole: int, Sparam: str, demag: bool = False) -> str:
+def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument, field_sweep: list[float], angle: float, user_folder: str, sample_folder: str, measurement_name: str, dipole: int, Sparam: str, demag: bool = False) -> str:
     """
     Main function that is called by other files. 
     Goes through the whole routine for initializing, measuring and saving.
@@ -71,6 +71,8 @@ def measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument,
         freqs_S43, fields_S43, amps_S43, phases_S43 = np.array([]), np.array([]), np.array([]), np.array([])
         freqs_S44, fields_S44, amps_S44, phases_S44 = np.array([]), np.array([]), np.array([]), np.array([])
 
+        j = 0
+
         for i, field in enumerate(field_sweep):  # MAIN FOR LOOP
             #if i == 1 and second_demag:
                 #ps.demag_sweep()
@@ -87,7 +89,8 @@ def measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument,
             logger.info("Settling time over")
 
             logger.info("Measuring...") 
-            freq,a1,p1,a2,p2,a3,p3,a4,p4 = measure_amp_and_phase(instr, Sparam)
+            freq,a1,p1,a2,p2,a3,p3,a4,p4 = measure_amp_and_phase(instr, Sparam, j)
+            j = j+1
             # x,y,p = measure_dB(instr,Sparam)
             logger.info("Finished measuring\n")
 
@@ -116,18 +119,30 @@ def measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument,
             logger.info(f'Saving data...')
             save_data(freqs_S33, fields_S33, amps_S33, phases_S33, user_folder, sample_folder, measurement_name = f"{measurement_name}_S33")
             logger.info(f'Saved file "{measurement_name}_S33.csv"')
+            settings["measurement_name"] = f"{measurement_name}_S33"
+            settings["s_parameter"] = 'S33'
+            save_metadata(settings)
 
             logger.info(f'Saving data...')
             save_data(freqs_S43, fields_S43, amps_S43, phases_S43, user_folder, sample_folder, measurement_name = f"{measurement_name}_S43")
             logger.info(f'Saved file "{measurement_name}_S43.csv"')
+            settings["measurement_name"] = f"{measurement_name}_S43"
+            settings["s_parameter"] = 'S43'
+            save_metadata(settings)
 
             logger.info(f'Saving data...')
             save_data(freqs_S34, fields_S34, amps_S34, phases_S34, user_folder, sample_folder, measurement_name = f"{measurement_name}_S34")
             logger.info(f'Saved file "{measurement_name}_S34.csv"')
+            settings["measurement_name"] = f"{measurement_name}_S34"
+            settings["s_parameter"] = 'S34'
+            save_metadata(settings)
 
             logger.info(f'Saving data...')
             save_data(freqs_S44, fields_S44, amps_S44, phases_S44, user_folder, sample_folder, measurement_name = f"{measurement_name}_S44")
             logger.info(f'Saved file "{measurement_name}_S44.csv"')
+            settings["measurement_name"] = f"{measurement_name}_S44"
+            settings["s_parameter"] = 'S44'
+            save_metadata(settings)
             print("\n\n")
 
 
