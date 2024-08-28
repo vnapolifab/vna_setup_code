@@ -31,6 +31,7 @@ def setupConnectionVNA(give_additional_info: bool = False) -> RsInstrument:
     idn = instr.query_str('*IDN?')
     print("VNA connected correctly via GPIB")
     instr.write(f'*RST')
+    instr.write("CALC1:PAR:DEL 'Trc1'")
 
     if give_additional_info:
         print(f"\nHello, I am: '{idn}'")
@@ -102,14 +103,18 @@ def measure_dB(instr: RsInstrument, Sparam: str) -> tuple[np.ndarray, np.ndarray
 
 
 
-def measure_amp_and_phase(instr: RsInstrument, Sparam: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+def measure_amp_and_phase(instr: RsInstrument, Sparam: str, i = 0) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Queries the VNA for values.
     Takes as input the vna instrument object and the S parameter that should be measured.
     Returns frequencies, amplitude (linear) and phase.
     """
 
-    instr.write("CALC1:PAR:DEL 'Trc1'")
+    if (i > 0):
+        instr.write("CALC1:PAR:DEL 'Tr1'")
+        instr.write("CALC1:PAR:DEL 'Tr2'")
+        instr.write("CALC1:PAR:DEL 'Tr3'")
+        instr.write("CALC1:PAR:DEL 'Tr4'")
 
     instr.write("CALC1:PAR:SDEF 'Tr1', 'S33'")
     instr.write(f'DISP:WIND1:STAT ON') 
