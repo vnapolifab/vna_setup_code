@@ -30,6 +30,7 @@ def setupConnectionVNA(give_additional_info: bool = False) -> RsInstrument:
 
     idn = instr.query_str('*IDN?')
     print("VNA connected correctly via GPIB")
+    instr.write(f'*RST')
 
     if give_additional_info:
         print(f"\nHello, I am: '{idn}'")
@@ -107,45 +108,118 @@ def measure_amp_and_phase(instr: RsInstrument, Sparam: str) -> tuple[np.ndarray,
     Takes as input the vna instrument object and the S parameter that should be measured.
     Returns frequencies, amplitude (linear) and phase.
     """
-    # Trigger single sweep
-    instr.write(":INITiate1:CONTinuous 0")
-    instr.query_with_opc(":INITiate1:IMMediate; *OPC?", 2000000)  # TODO mettere un numero più sensato
-        
-    # Create a trace on channel 1 with the specified S-parameter
-    #instr.write(f'SENS:SWE:TYPE LIN')  # Set sweep type to linear 
-    instr.write(f'CALC:PAR:DEF:EXT "Trc1", {Sparam}')  # Create trace with specified S-parameter
-    instr.write(f'DISP:WIND:TRAC:FEED "Trc1"')  # Display the trace
 
+    instr.write("CALC1:PAR:DEL 'Trc1'")
 
-    # Wait for measurement to complete
-    # instr.query_opc(999999999)
-    # instr.query()
-    instr.query_with_opc(":INITiate1:IMMediate; *OPC?", 2000000)  # TODO mettere un numero più sensato
-    tracedata = instr.query_str('CALCulate1:DATA? SDAT')  # Get measurement values for complete trace
-    #print("TRACEDATA\n", tracedata)
+    instr.write("CALC1:PAR:SDEF 'Tr1', 'S33'")
+    instr.write(f'DISP:WIND1:STAT ON') 
+    instr.write(f"DISP:WIND1:TRAC1:FEED 'Tr1'") 
+
+    instr.write("CALC1:PAR:SDEF 'Tr2', 'S43'")
+    instr.write(f'DISP:WIND2:STAT ON') 
+    instr.write(f'DISP:WIND2:TRAC2:FEED "Tr2"') 
+
+    instr.write("CALC1:PAR:SDEF 'Tr3', 'S34'")
+    instr.write(f'DISP:WIND3:STAT ON') 
+    instr.write(f'DISP:WIND3:TRAC3:FEED "Tr3"') 
+
+    instr.write("CALC1:PAR:SDEF 'Tr4', 'S44'")
+    instr.write(f'DISP:WIND4:STAT ON') 
+    instr.write(f'DISP:WIND4:TRAC4:FEED "Tr4"') 
+
+    instr.write(":INITiate1:CONTinuous:ALL OFF")
+    instr.query_with_opc(":INITiate1:IMMediate:ALL; *OPC?", 2000000)
+
+    tracedata = instr.query_str('CALCulate1:DATA:ALL? SDAT')  # Get measurement values for complete trace
+    chan_list = instr.query_str('CONF:CHAN:CATalog?')
+    print(chan_list)
+
+    trace_list = instr.query_str('CONF:CHAN:TRAC:CATalog?')
+    print(trace_list)
+
     tracelist = list(map(str, tracedata.split(',')))  # Convert the received string into a list 
     tracelist = np.array(tracelist, dtype='float32')
-    re = []
-    im = []
-    S = []
-    amp = []
-    phase = []
+    print(len(tracelist))
+    print(len(tracelist)/4)
+    print(int(len(tracelist)/4))
+
+    re1 = []
+    im1 = []
+    S1 = []
+    amp1 = []
+    phase1 = []
+
+    re2 = []
+    im2 = []
+    S2 = []
+    amp2 = []
+    phase2 = []
+
+    re3 = []
+    im3 = []
+    S3 = []
+    amp3 = []
+    phase3 = []
+
+    re4 = []
+    im4 = []
+    S4 = []
+    amp4 = []
+    phase4 = []
 
     i = 0
-    for i in range(len(tracelist)):
+    for i in range(int(len(tracelist)/4)):
         if (i%2)==0:
-            re.append(tracelist[i])
+            re1.append(tracelist[i])
         else:
-            im.append(tracelist[i])
+            im1.append(tracelist[i])
 
-    for i in range(len(re)):
-        S.append(re[i]+1j*im[i]) 
-        amp.append(np.abs(S[i]))
-        phase.append(np.angle(S[i])) #Bisogna capire perchè con la fase non ci viene bene (*0 non ci andrebbe)
+    for i in range(len(re1)):
+        S1.append(re1[i]+1j*im1[i]) 
+        amp1.append(np.abs(S1[i]))
+        phase1.append(np.angle(S1[i])) #Bisogna capire perchè con la fase non ci viene bene (*0 non ci andrebbe)
+
+
+    for i in range(int(len(tracelist)/4),int(len(tracelist)/2),1):
+        if (i%2)==0:
+            re2.append(tracelist[i])
+        else:
+            im2.append(tracelist[i])
+
+    for i in range(len(re2)):
+        S2.append(re2[i]+1j*im2[i]) 
+        amp2.append(np.abs(S2[i]))
+        phase2.append(np.angle(S2[i])) #Bisogna capire perchè con la fase non ci viene bene (*0 non ci andrebbe)
+
+
+    for i in range(int(len(tracelist)/2),int(3*len(tracelist)/4),1):
+        if (i%2)==0:
+            re3.append(tracelist[i])
+        else:
+            im3.append(tracelist[i])
+
+    for i in range(len(re3)):
+        S3.append(re3[i]+1j*im3[i]) 
+        amp3.append(np.abs(S3[i]))
+        phase3.append(np.angle(S3[i])) #Bisogna capire perchè con la fase non ci viene bene (*0 non ci andrebbe)
+
+
+    for i in range(3*int(len(tracelist)/4),int(len(tracelist)),1):
+        if (i%2)==0:
+            re4.append(tracelist[i])
+        else:
+            im4.append(tracelist[i])
+
+    for i in range(len(re4)):
+        S4.append(re4[i]+1j*im4[i]) 
+        amp4.append(np.abs(S4[i]))
+        phase4.append(np.angle(S4[i])) #Bisogna capire perchè con la fase non ci viene bene (*0 non ci andrebbe)
+
+
 
     freqdata = instr.query_str('CALCulate1:DATA:STIMulus?')  # Get frequency list for complete trace
     freqlist = list(map(str, freqdata.split(',')))  # Convert the received string into a list
     freq = np.array(freqlist, dtype='float32')
 
 
-    return freq, amp, phase
+    return freq, amp1, phase1, amp2, phase2, amp3, phase3, amp4, phase4
