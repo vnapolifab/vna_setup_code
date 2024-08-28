@@ -78,40 +78,39 @@ def measurement_routine(ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument,
             current = (field-offset)/conversion
 
 
-            for Sparam in ["S33", "S43", "S34", "S44"]: #TODO scommenta
-                logger.info(f"Setting field...")
-                ps.setCurrent(current)
-                logger.info(f"Field set to {field_sweep[i]} mT")
+            logger.info(f"Setting field...")
+            ps.setCurrent(current)
+            logger.info(f"Field set to {field_sweep[i]} mT")
 
-                logger.info(f"Waiting {c.SETTLING_TIME}s...")
-                sleep(SETTLING_TIME)
-                logger.info("Settling time over")
+            logger.info(f"Waiting {c.SETTLING_TIME}s...")
+            sleep(SETTLING_TIME)
+            logger.info("Settling time over")
 
-                logger.info("Measuring...") 
-                freq,a,p = measure_amp_and_phase(instr, Sparam)
-                # x,y,p = measure_dB(instr,Sparam)
-                logger.info("Finished measuring\n")
+            logger.info("Measuring...") 
+            freq,a1,p1,a2,p2,a3,p3,a4,p4 = measure_amp_and_phase(instr, Sparam)
+            # x,y,p = measure_dB(instr,Sparam)
+            logger.info("Finished measuring\n")
 
-                if Sparam == "S33":
-                    freqs_S33  = np.concatenate( (freqs_S33, freq) )    # Concatenation of new data with the already acquired data
-                    fields_S33 = np.concatenate( (fields_S33, [field]*len(freq)) )
-                    amps_S33   = np.concatenate( (amps_S33, a) )
-                    phases_S33 = np.concatenate( (phases_S33, p) )
-                elif Sparam == "S43":
-                    freqs_S43  = np.concatenate( (freqs_S43, freq) )    # Concatenation of new data with the already acquired data
-                    fields_S43 = np.concatenate( (fields_S43, [field]*len(freq)) )
-                    amps_S43   = np.concatenate( (amps_S43, a) )
-                    phases_S43 = np.concatenate( (phases_S43, p) )
-                elif Sparam == "S34":
-                    freqs_S34  = np.concatenate( (freqs_S34, freq) )    # Concatenation of new data with the already acquired data
-                    fields_S34 = np.concatenate( (fields_S34, [field]*len(freq)) )
-                    amps_S34   = np.concatenate( (amps_S34, a) )
-                    phases_S34 = np.concatenate( (phases_S34, p) )
-                elif Sparam == "S44":
-                    freqs_S44  = np.concatenate( (freqs_S44, freq) )    # Concatenation of new data with the already acquired data
-                    fields_S44 = np.concatenate( (fields_S44, [field]*len(freq)) )
-                    amps_S44   = np.concatenate( (amps_S44, a) )
-                    phases_S44 = np.concatenate( (phases_S44, p) )
+            
+            freqs_S33  = np.concatenate( (freqs_S33, freq) )    # Concatenation of new data with the already acquired data
+            fields_S33 = np.concatenate( (fields_S33, [field]*len(freq)) )
+            amps_S33   = np.concatenate( (amps_S33, a1) )
+            phases_S33 = np.concatenate( (phases_S33, p1) )
+        
+            freqs_S43  = np.concatenate( (freqs_S43, freq) )    # Concatenation of new data with the already acquired data
+            fields_S43 = np.concatenate( (fields_S43, [field]*len(freq)) )
+            amps_S43   = np.concatenate( (amps_S43, a2) )
+            phases_S43 = np.concatenate( (phases_S43, p2) )
+        
+            freqs_S34  = np.concatenate( (freqs_S34, freq) )    # Concatenation of new data with the already acquired data
+            fields_S34 = np.concatenate( (fields_S34, [field]*len(freq)) )
+            amps_S34   = np.concatenate( (amps_S34, a3) )
+            phases_S34 = np.concatenate( (phases_S34, p3) )
+        
+            freqs_S44  = np.concatenate( (freqs_S44, freq) )    # Concatenation of new data with the already acquired data
+            fields_S44 = np.concatenate( (fields_S44, [field]*len(freq)) )
+            amps_S44   = np.concatenate( (amps_S44, a4) )
+            phases_S44 = np.concatenate( (phases_S44, p4) )
 
 
             logger.info(f'Saving data...')
