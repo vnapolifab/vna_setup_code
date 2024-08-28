@@ -1,4 +1,5 @@
 .idea
+.idea/*
 /DATA/
 /__pycache__/
 /Notebooks/
