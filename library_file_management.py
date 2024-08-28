@@ -35,7 +35,8 @@ def save_data(freqs: list[float], fields: list[float], amps: list[float], phases
         os.mkdir(f"{root_folder}/{user_folder}/{sample_folder}")
 
     if os.path.exists( f"{root_folder}/{user_folder}/{sample_folder}/{measurement_name}" ):
-        raise Exception("ERROR in saveData(): A measurement for this sample with this name already exist.")
+        #raise Exception("ERROR in saveData(): A measurement for this sample with this name already exist.")
+        print('This filename already exists')
     else:
         os.mkdir(f"{root_folder}/{user_folder}/{sample_folder}/{measurement_name}")
 
