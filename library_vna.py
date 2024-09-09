@@ -133,7 +133,7 @@ def measure_amp_and_phase(instr: RsInstrument, Sparam: str, i = 0) -> tuple[np.n
     instr.write(f'DISP:WIND4:TRAC4:FEED "Tr4"') 
 
     instr.write(":INITiate1:CONTinuous:ALL OFF")
-    instr.query_with_opc(":INITiate1:IMMediate:ALL; *OPC?", 2000000)
+    instr.query_with_opc(":INITiate1:IMMediate:ALL; *OPC?", 1000000)
 
     tracedata = instr.query_str('CALCulate1:DATA:ALL? SDAT')  # Get measurement values for complete trace
     chan_list = instr.query_str('CONF:CHAN:CATalog?')
