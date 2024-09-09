@@ -61,8 +61,8 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
         # Now the actual measurement routine starts
         # ============================
 
-        if demag:  # First demagnetization sweep 
-            ps.demag_sweep()
+        #if demag:  # First demagnetization sweep 
+            #ps.demag_sweep()
 
         #second_demag = demag and field_sweep[0]!=0  # If ref field != 0 a second demag field is needed 
 
