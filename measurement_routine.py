@@ -23,8 +23,8 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
             if (dipole == 1 and (Sparam == 'S33' or Sparam == 'S34' or Sparam == 'S43' or Sparam == 'S44')):
                 ps = ps1
                 #conversion = 55.494 
-                offset = 1.7452
-                conversion = 49.901
+                offset = 2.55
+                conversion = 51.462
 
             
             elif (dipole == 1 and (Sparam == 'S11' or Sparam == 'S13' or Sparam == 'S31' or Sparam == 'S33')):
