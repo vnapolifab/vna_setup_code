@@ -144,9 +144,9 @@ def measure_amp_and_phase(instr: RsInstrument, Sparam: str, i = 0) -> tuple[np.n
 
     tracelist = list(map(str, tracedata.split(',')))  # Convert the received string into a list 
     tracelist = np.array(tracelist, dtype='float32')
-    print(len(tracelist))
-    print(len(tracelist)/4)
-    print(int(len(tracelist)/4))
+    #print(len(tracelist))
+    #print(len(tracelist)/4)
+    #print(int(len(tracelist)/4))
 
     re1 = []
     im1 = []
