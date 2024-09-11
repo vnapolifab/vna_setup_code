@@ -64,7 +64,7 @@ def applySettings(instr: RsInstrument, settings: object) -> None:
     instr.write("SENS1:SWE:POIN " + f"{settings['number_of_points']}")  # Replace with your desired number of points
 
     # Reload calibration
-    instr.write_str(":MMEMORY:LOAD:CORRection 1, 'NoveSettembre.cal'") #TODO rendere la calibration accessibile allo user anche lato codice
+    instr.write_str(":MMEMORY:LOAD:CORRection 1, " + f"'{settings['cal_name']}.cal'") #TODO rendere la calibration accessibile allo user anche lato codice
     # instr.write_str(":MMEMORY:LOAD:CORRection  1, 'calibration_08_02_2024.cal'")
 
     instr.visa_timeout = ( settings['bandwidth']**-1 * settings['number_of_points'] *10 )*1000  + 100  # estimation times an arbitrary coeff 
@@ -103,7 +103,7 @@ def measure_dB(instr: RsInstrument, Sparam: str) -> tuple[np.ndarray, np.ndarray
 
 
 
-def measure_amp_and_phase(instr: RsInstrument, Sparam: str, i = 0) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+def measure_amp_and_phase(instr: RsInstrument, Sparam: str, i = 0, avg = 1) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Queries the VNA for values.
     Takes as input the vna instrument object and the S parameter that should be measured.
@@ -116,24 +116,28 @@ def measure_amp_and_phase(instr: RsInstrument, Sparam: str, i = 0) -> tuple[np.n
         instr.write("CALC1:PAR:DEL 'Tr3'")
         instr.write("CALC1:PAR:DEL 'Tr4'")
 
-    instr.write("CALC1:PAR:SDEF 'Tr1', 'S33'")
+    instr.write("CALC1:PAR:SDEF 'Tr1', 'S33AVG'")
     instr.write(f'DISP:WIND1:STAT ON') 
     instr.write(f"DISP:WIND1:TRAC1:FEED 'Tr1'") 
 
-    instr.write("CALC1:PAR:SDEF 'Tr2', 'S43'")
+    instr.write("CALC1:PAR:SDEF 'Tr2', 'S43AVG'")
     instr.write(f'DISP:WIND2:STAT ON') 
     instr.write(f'DISP:WIND2:TRAC2:FEED "Tr2"') 
 
-    instr.write("CALC1:PAR:SDEF 'Tr3', 'S34'")
+    instr.write("CALC1:PAR:SDEF 'Tr3', 'S34AVG'")
     instr.write(f'DISP:WIND3:STAT ON') 
     instr.write(f'DISP:WIND3:TRAC3:FEED "Tr3"') 
 
-    instr.write("CALC1:PAR:SDEF 'Tr4', 'S44'")
+    instr.write("CALC1:PAR:SDEF 'Tr4', 'S44AVG'")
     instr.write(f'DISP:WIND4:STAT ON') 
     instr.write(f'DISP:WIND4:TRAC4:FEED "Tr4"') 
 
     instr.write(":INITiate1:CONTinuous:ALL OFF")
-    instr.query_with_opc(":INITiate1:IMMediate:ALL; *OPC?", 1000000)
+    instr.write(":SENSE1:AVER:COUN 5; :AVER ON")
+
+    for i in range(avg):
+        instr.query_with_opc(":INITiate1:IMMediate:ALL; *OPC?", 1000000)
+
 
     tracedata = instr.query_str('CALCulate1:DATA:ALL? SDAT')  # Get measurement values for complete trace
     chan_list = instr.query_str('CONF:CHAN:CATalog?')
@@ -182,7 +186,7 @@ def measure_amp_and_phase(instr: RsInstrument, Sparam: str, i = 0) -> tuple[np.n
     for i in range(len(re1)):
         S1.append(re1[i]+1j*im1[i]) 
         amp1.append(np.abs(S1[i]))
-        phase1.append(np.angle(S1[i])) #Bisogna capire perchè con la fase non ci viene bene (*0 non ci andrebbe)
+        phase1.append(np.angle(S1[i])) 
 
 
     for i in range(int(len(tracelist)/4),int(len(tracelist)/2),1):
@@ -194,7 +198,7 @@ def measure_amp_and_phase(instr: RsInstrument, Sparam: str, i = 0) -> tuple[np.n
     for i in range(len(re2)):
         S2.append(re2[i]+1j*im2[i]) 
         amp2.append(np.abs(S2[i]))
-        phase2.append(np.angle(S2[i])) #Bisogna capire perchè con la fase non ci viene bene (*0 non ci andrebbe)
+        phase2.append(np.angle(S2[i])) 
 
 
     for i in range(int(len(tracelist)/2),int(3*len(tracelist)/4),1):
@@ -206,7 +210,7 @@ def measure_amp_and_phase(instr: RsInstrument, Sparam: str, i = 0) -> tuple[np.n
     for i in range(len(re3)):
         S3.append(re3[i]+1j*im3[i]) 
         amp3.append(np.abs(S3[i]))
-        phase3.append(np.angle(S3[i])) #Bisogna capire perchè con la fase non ci viene bene (*0 non ci andrebbe)
+        phase3.append(np.angle(S3[i])) 
 
 
     for i in range(3*int(len(tracelist)/4),int(len(tracelist)),1):
@@ -218,7 +222,7 @@ def measure_amp_and_phase(instr: RsInstrument, Sparam: str, i = 0) -> tuple[np.n
     for i in range(len(re4)):
         S4.append(re4[i]+1j*im4[i]) 
         amp4.append(np.abs(S4[i]))
-        phase4.append(np.angle(S4[i])) #Bisogna capire perchè con la fase non ci viene bene (*0 non ci andrebbe)
+        phase4.append(np.angle(S4[i])) 
 
 
 
@@ -227,4 +231,4 @@ def measure_amp_and_phase(instr: RsInstrument, Sparam: str, i = 0) -> tuple[np.n
     freq = np.array(freqlist, dtype='float32')
 
 
-    return freq, amp1, phase1, amp2, phase2, amp3, phase3, amp4, phase4
+    return freq, amp1, phase1, amp2, phase2, amp3, phase3, amp4, phase4, S1, S2, S3, S4
