@@ -13,7 +13,7 @@ def create_measurement_path(settings):
 
     
 
-def save_data(freqs: list[float], fields: list[float], amps: list[float], phases: list[float], user_folder: str, sample_folder: str, measurement_name: str):
+def save_data(freqs: list[float], fields: list[float], amps: list[float], phases: list[float], S, user_folder: str, sample_folder: str, measurement_name: str):
     """
     Saves data in as {root_folder}/{user_folder}/{sample_folder}/{measurement_name} {suffix}", checks if existing measurements exist already and adds a suffix
     """
@@ -23,6 +23,7 @@ def save_data(freqs: list[float], fields: list[float], amps: list[float], phases
     df["Field"] = fields
     df["Amplitude"] = amps
     df["Phase"] = phases
+    df["S_param"] = S
 
     root_folder = f"{c.DATA_FOLDER_NAME}/"
     initialname = measurement_name
