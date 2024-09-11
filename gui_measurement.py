@@ -49,6 +49,7 @@ measurement_routine(
     settings["measurement_name"],
     settings["dipole_mode"],
     settings["s_parameter"],
+    settings["avg_factor"],
     demag=False
 )
 
