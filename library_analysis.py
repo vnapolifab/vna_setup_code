@@ -393,6 +393,7 @@ def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, pha
     traces_no_background_imag = np.zeros((n_traces, n_points))
     traces_no_background_complex = np.zeros((n_traces, n_points), dtype = 'complex_')
     amplitudes_no_background = np.zeros((n_traces, n_points))
+    phase_sub = np.zeros((n_traces, n_points))
     
     amp_ref, phase_ref = amplitudes[ref_n], phases[ref_n]
     #phase_ref = unwrap_phase(phase_ref)
@@ -405,6 +406,7 @@ def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, pha
         phase = np.unwrap(phase)
 
         traces_no_background_complex[i,:] = (amp * np.exp(1j * phase))-(amp_ref * np.exp(1j * phase_ref))
+        phase_sub[i,:] = np.angle(traces_no_background_complex[i,:])
  
         traces_no_background_real[i,:] = np.real(traces_no_background_complex[i,:])
         traces_no_background_imag[i,:] = np.imag(traces_no_background_complex[i,:])
@@ -465,6 +467,19 @@ def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, pha
         plt.title("Phase")
         for i in range(n_traces): 
             plt.plot(freq[0:]/10**9, np.unwrap(phases[i,0:]), linewidth=1.5)
+        plt.legend([f"{f} mT" for f in fields])
+        plt.xlabel("Frequency (GHz)", fontsize=AXIS_FONTSIZE)
+        plt.ylabel("Phase", fontsize=AXIS_FONTSIZE)
+        plt.xticks(fontsize=AXIS_FONTSIZE)
+        plt.yticks(fontsize=AXIS_FONTSIZE)
+        plt.grid()
+        save_plot(measurement_path, "phase.png")
+
+
+        plt.figure( figsize=(FULLSCREEN_SIZE) ) 
+        plt.title("Phase sub")
+        for i in range(n_traces): 
+            plt.plot(freq[0:]/10**9, np.unwrap(phase_sub[i,0:]), linewidth=1.5)
         plt.legend([f"{f} mT" for f in fields])
         plt.xlabel("Frequency (GHz)", fontsize=AXIS_FONTSIZE)
         plt.ylabel("Phase", fontsize=AXIS_FONTSIZE)
