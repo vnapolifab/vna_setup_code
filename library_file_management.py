@@ -37,7 +37,8 @@ def save_data(freqs: list[float], fields: list[float], amps: list[float], phases
 
     if os.path.exists( f"{root_folder}/{user_folder}/{sample_folder}/{measurement_name}" ):
         #raise Exception("ERROR in saveData(): A measurement for this sample with this name already exist.")
-        print('This filename already exists')
+        #print('This filename already exists')
+        print('\n')
     else:
         os.mkdir(f"{root_folder}/{user_folder}/{sample_folder}/{measurement_name}")
 
@@ -63,8 +64,8 @@ def load_measurement(measurement_path: str, transpose: bool = False) -> tuple[np
 
     df = pd.read_csv(os.path.join(measurement_path, f"{measurement_name}.csv"))
     freqs = (df.loc[ df["Field"] == fields[0] ])["Frequency"]
-
     amps, phases = np.zeros((n_field_points, n_freq_points)), np.zeros((n_field_points, n_freq_points))
+    
     for i, field in enumerate(fields):
         amps[i,:] = (df.loc[ df["Field"] == field ])["Amplitude"]
         phases[i,:] = (df.loc[ df["Field"] == field ])["Phase"]
