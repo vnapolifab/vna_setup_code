@@ -5,7 +5,7 @@ from library_vna import *
 from library_file_management import *
 import CONSTANTS as c
 
-def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument, field_sweep: list[float], angle: float, user_folder: str, sample_folder: str, measurement_name: str, dipole: int, Sparam: str, demag: bool = False) -> str:
+def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument, field_sweep: list[float], angle: float, user_folder: str, sample_folder: str, measurement_name: str, dipole: int, Sparam: str, avg:int = 1, demag: bool = False) -> str:
     """
     Main function that is called by other files. 
     Goes through the whole routine for initializing, measuring and saving.
@@ -66,10 +66,10 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
 
         #second_demag = demag and field_sweep[0]!=0  # If ref field != 0 a second demag field is needed 
 
-        freqs_S33, fields_S33, amps_S33, phases_S33 = np.array([]), np.array([]), np.array([]), np.array([])
-        freqs_S34, fields_S34, amps_S34, phases_S34 = np.array([]), np.array([]), np.array([]), np.array([])
-        freqs_S43, fields_S43, amps_S43, phases_S43 = np.array([]), np.array([]), np.array([]), np.array([])
-        freqs_S44, fields_S44, amps_S44, phases_S44 = np.array([]), np.array([]), np.array([]), np.array([])
+        freqs_S33, fields_S33, amps_S33, phases_S33, S33 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
+        freqs_S34, fields_S34, amps_S34, phases_S34, S34 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
+        freqs_S43, fields_S43, amps_S43, phases_S43, S43 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
+        freqs_S44, fields_S44, amps_S44, phases_S44, S44 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
 
         j = 0
 
@@ -89,7 +89,7 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
             logger.info("Settling time over")
 
             logger.info("Measuring...") 
-            freq,a1,p1,a2,p2,a3,p3,a4,p4 = measure_amp_and_phase(instr, Sparam, j)
+            freq,a1,p1,a2,p2,a3,p3,a4,p4,S1,S2,S3,S4 = measure_amp_and_phase(instr, Sparam, j, int(avg))
             j = j+1
             # x,y,p = measure_dB(instr,Sparam)
             logger.info("Finished measuring\n")
@@ -99,46 +99,50 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
             fields_S33 = np.concatenate( (fields_S33, [field]*len(freq)) )
             amps_S33   = np.concatenate( (amps_S33, a1) )
             phases_S33 = np.concatenate( (phases_S33, p1) )
+            S33 = np.concatenate( (S33, S1) )
         
             freqs_S43  = np.concatenate( (freqs_S43, freq) )    # Concatenation of new data with the already acquired data
             fields_S43 = np.concatenate( (fields_S43, [field]*len(freq)) )
             amps_S43   = np.concatenate( (amps_S43, a2) )
             phases_S43 = np.concatenate( (phases_S43, p2) )
+            S43 = np.concatenate( (S43, S2) )
         
             freqs_S34  = np.concatenate( (freqs_S34, freq) )    # Concatenation of new data with the already acquired data
             fields_S34 = np.concatenate( (fields_S34, [field]*len(freq)) )
             amps_S34   = np.concatenate( (amps_S34, a3) )
             phases_S34 = np.concatenate( (phases_S34, p3) )
+            S34 = np.concatenate( (S34, S3) )
         
             freqs_S44  = np.concatenate( (freqs_S44, freq) )    # Concatenation of new data with the already acquired data
             fields_S44 = np.concatenate( (fields_S44, [field]*len(freq)) )
             amps_S44   = np.concatenate( (amps_S44, a4) )
             phases_S44 = np.concatenate( (phases_S44, p4) )
+            S44 = np.concatenate( (S44, S4) )
 
 
             logger.info(f'Saving data...')
-            save_data(freqs_S33, fields_S33, amps_S33, phases_S33, user_folder, sample_folder, measurement_name = f"{measurement_name}_S33")
+            save_data(freqs_S33, fields_S33, amps_S33, phases_S33, S33, user_folder, sample_folder, measurement_name = f"{measurement_name}_S33")
             logger.info(f'Saved file "{measurement_name}_S33.csv"')
             settings["measurement_name"] = f"{measurement_name}_S33"
             settings["s_parameter"] = 'S33'
             save_metadata(settings)
 
             logger.info(f'Saving data...')
-            save_data(freqs_S43, fields_S43, amps_S43, phases_S43, user_folder, sample_folder, measurement_name = f"{measurement_name}_S43")
+            save_data(freqs_S43, fields_S43, amps_S43, phases_S43, S43, user_folder, sample_folder, measurement_name = f"{measurement_name}_S43")
             logger.info(f'Saved file "{measurement_name}_S43.csv"')
             settings["measurement_name"] = f"{measurement_name}_S43"
             settings["s_parameter"] = 'S43'
             save_metadata(settings)
 
             logger.info(f'Saving data...')
-            save_data(freqs_S34, fields_S34, amps_S34, phases_S34, user_folder, sample_folder, measurement_name = f"{measurement_name}_S34")
+            save_data(freqs_S34, fields_S34, amps_S34, phases_S34, S34, user_folder, sample_folder, measurement_name = f"{measurement_name}_S34")
             logger.info(f'Saved file "{measurement_name}_S34.csv"')
             settings["measurement_name"] = f"{measurement_name}_S34"
             settings["s_parameter"] = 'S34'
             save_metadata(settings)
 
             logger.info(f'Saving data...')
-            save_data(freqs_S44, fields_S44, amps_S44, phases_S44, user_folder, sample_folder, measurement_name = f"{measurement_name}_S44")
+            save_data(freqs_S44, fields_S44, amps_S44, phases_S44, S44, user_folder, sample_folder, measurement_name = f"{measurement_name}_S44")
             logger.info(f'Saved file "{measurement_name}_S44.csv"')
             settings["measurement_name"] = f"{measurement_name}_S44"
             settings["s_parameter"] = 'S44'
