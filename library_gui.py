@@ -402,7 +402,8 @@ def gui_measurement_startup():
         GUI_input_text_to_number(       gui=gui,    param_name="bandwidth",            param_desc="Bandwidth [Hz]"         ),
         GUI_input_text_to_number(       gui=gui,    param_name="power",                param_desc="Power [dBm]"            ),
         GUI_input_text_to_number(       gui=gui,    param_name="ref_field",            param_desc="Ref field [mT]"         ),
-        GUI_input_text(                 gui=gui,    param_name="cal_file",             param_desc="Calibration file",      mandatory=False),
+        GUI_input_text(                 gui=gui,    param_name="cal_name",             param_desc="Calibration file",      mandatory=False),
+        GUI_input_text(                 gui=gui,    param_name="avg_factor",           param_desc="Averaging factor",      ),
     ]
 
 
