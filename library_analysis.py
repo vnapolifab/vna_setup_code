@@ -464,7 +464,7 @@ def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, pha
         plt.figure( figsize=(FULLSCREEN_SIZE) ) 
         plt.title("Phase")
         for i in range(n_traces): 
-            plt.plot(freq[0:]/10**9, phases[i,0:], linewidth=1.5)
+            plt.plot(freq[0:]/10**9, np.unwrap(phases[i,0:]), linewidth=1.5)
         plt.legend([f"{f} mT" for f in fields])
         plt.xlabel("Frequency (GHz)", fontsize=AXIS_FONTSIZE)
         plt.ylabel("Phase", fontsize=AXIS_FONTSIZE)
