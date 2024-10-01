@@ -109,7 +109,7 @@ def measure_amp_and_phase(instr: RsInstrument, Sparam: str, i = 0, avg = 1) -> t
     Takes as input the vna instrument object and the S parameter that should be measured.
     Returns frequencies, amplitude (linear) and phase.
     """
-
+    #Parallel acquisition
     if (i > 0):
         instr.write("CALC1:PAR:DEL 'Tr1'")
         instr.write("CALC1:PAR:DEL 'Tr2'")
