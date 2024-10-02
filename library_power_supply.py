@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 """
 This library contains the PowerSupply object and other functions required to control the power supplies.
+One can choose between using a F2031 single power supply, a F2031 pair of power supplies or a Kepco BOP series power supply
 """
 
 class PowerSupply:
