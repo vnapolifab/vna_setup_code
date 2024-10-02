@@ -35,6 +35,9 @@ class PowerSupply:
         # Also sets the output states to 0 if current is set to 0, to 1 if current set to any other value
         # i : Output current [A]
 
+        #For Kepco power supplies uncomment the following line that sets the operation mode to "Current mode"
+        self.ser.write(bytes('FUNC:MODE {CURR}', 'utf-8')) 
+
         maxCurrent = 3.6
 
         if abs(i) > maxCurrent:
@@ -43,16 +46,24 @@ class PowerSupply:
         # elif abs(i) > 2:
         #     self.logger.warning('Using current greater than 0.5 A, make sure the electromagnet is properly cooled')
 
-        command = 'CUR {current:+}\r'.format(current=i)
+        #For F2031 power supplies uncomment the following line
+        #command = 'CUR {current:+}\r'.format(current=i)
+
+        #The fllowing command selects the operating current range. The possible options are '1' and '4', where '1' means full scale and '4' means 1/4 of the full scale
+        self.ser.write(bytes('[SOUR:]CURR[:LEV]:RANG 4', 'utf-'))  
+
+        #Command that decides the output current
+        command = '[SOUR:]CURR[:LEV][:IMM][:AMP] {current:+}\r'.format(current=i)
         if give_additional_info:
             print('Query:', command)
 
         self.ser.write(bytes(command, 'utf-8'))  # query to set current
 
-        response = self.read_to_r()
+        #Uncomment these lines if you are using the F2031 power supplies
+        #response = self.read_to_r()
 
-        if response != 'CMLT\r':
-            logger.warning("Unexpected response in function setCurrent, " + response)
+        #if response != 'CMLT\r':
+         #   logger.warning("Unexpected response in function setCurrent, " + response)
 
         if i==0:
             self.setOutputState(0)
@@ -67,17 +78,22 @@ class PowerSupply:
         # 1: Output state
         # 0: High impedance state
 
-        self.ser.write(bytes('OUT {state}\r'.format(state=state), 'utf-8'))
+        #For Kepco power supply uncomment the following line
+        self.ser.write(bytes('OUTP[:STAT] {state}\r'.format(state=state), 'utf-8'))
 
-        response = self.read_to_r()
-        if response != 'CMLT\r':
-            logger.warning("Unexpected response in function setOutputState, " + response)
-            response = self.read_to_r()
-            logger.warning("Unexpected response in function setOutputState, " + response)
+        #For F2031 power supplies uncomment the following lines
+        #self.ser.write(bytes('OUT {state}\r'.format(state=state), 'utf-8'))
+
+        #response = self.read_to_r()
+        #if response != 'CMLT\r':
+         #   logger.warning("Unexpected response in function setOutputState, " + response)
+          #  response = self.read_to_r()
+           # logger.warning("Unexpected response in function setOutputState, " + response)
 
         return
     
 
+    #Only used for F2031 power supplies
     def setRampRate(self, rate: float) -> None:
         # Sets ramp rate [A/s]
         # Rate should be in range the range 0.01 A/s < range < 2 A/s
@@ -117,6 +133,7 @@ class PowerSupply:
         self.ser.close()
 
     
+    #Only used for F2031 power supplies
     def demag_sweep(self) -> None:
         demag_sweep = [3, -1.5, 0.75, -0.375, 0.1875, -0.09375, 0.045, -0.02, 0.01, -0.005, 0.002, -0.001, 0.0005]
         logger.info("Executing demagnetizing sweep...")
@@ -129,6 +146,7 @@ class PowerSupply:
         logger.info("Completed demagnetizing sweep.\n")
 
 
+    #Only used for F2031 power supplies
     def setTriggers(self, val, give_additional_info = False) -> None:
         command = 'SWTRIG n{val}'
         if give_additional_info:
@@ -143,7 +161,7 @@ class PowerSupply:
         self.ser.write(bytes(command, 'utf-8'))  # query to set current
 
 
-
+#Only used for F2031 power supplies
 @dataclass
 class TwoPowerSupply():
     ps1: PowerSupply
