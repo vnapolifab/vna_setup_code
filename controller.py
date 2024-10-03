@@ -10,9 +10,9 @@ from CONSTANTS import *
 print("Power supply 1 > ", end=""); 
 if "ps1" in locals(): ps1.closeConnection()
 ps1 = setupConnectionPS('COM4', 9600)
-ps1.demag_sweep()
+#ps1.demag_sweep()
 
-field = 150
+field = 15
 
 offset = 1.7452
 conversion = 49.901
