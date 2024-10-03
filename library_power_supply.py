@@ -37,7 +37,7 @@ class PowerSupply:
         # i : Output current [A]
 
         #For Kepco power supplies uncomment the following line that sets the operation mode to "Current mode"
-        self.ser.write(bytes('FUNC:MODE {CURR}', 'utf-8')) 
+        #self.ser.write(bytes('FUNC:MODE {CURR}', 'utf-8')) 
 
         maxCurrent = 3.6
 
@@ -48,23 +48,23 @@ class PowerSupply:
         #     self.logger.warning('Using current greater than 0.5 A, make sure the electromagnet is properly cooled')
 
         #For F2031 power supplies uncomment the following line
-        #command = 'CUR {current:+}\r'.format(current=i)
+        command = 'CUR {current:+}\r'.format(current=i)
 
-        #The fllowing command selects the operating current range. The possible options are '1' and '4', where '1' means full scale and '4' means 1/4 of the full scale
-        self.ser.write(bytes('[SOUR:]CURR[:LEV]:RANG 4', 'utf-'))  
+        #The fllowing command selects the operating current range for the Kepco power supply. The possible options are '1' and '4', where '1' means full scale and '4' means 1/4 of the full scale
+        #self.ser.write(bytes('[SOUR:]CURR[:LEV]:RANG 4', 'utf-'))  
 
-        #Command that decides the output current
-        command = '[SOUR:]CURR[:LEV][:IMM][:AMP] {current:+}\r'.format(current=i)
+        #Command that decides the output current for the Kepco power supply
+        #command = '[SOUR:]CURR[:LEV][:IMM][:AMP] {current:+}\r'.format(current=i)
         if give_additional_info:
             print('Query:', command)
 
         self.ser.write(bytes(command, 'utf-8'))  # query to set current
 
         #Uncomment these lines if you are using the F2031 power supplies
-        #response = self.read_to_r()
+        response = self.read_to_r()
 
-        #if response != 'CMLT\r':
-         #   logger.warning("Unexpected response in function setCurrent, " + response)
+        if response != 'CMLT\r':
+            logger.warning("Unexpected response in function setCurrent, " + response)
 
         if i==0:
             self.setOutputState(0)
@@ -80,16 +80,16 @@ class PowerSupply:
         # 0: High impedance state
 
         #For Kepco power supply uncomment the following line
-        self.ser.write(bytes('OUTP[:STAT] {state}\r'.format(state=state), 'utf-8'))
+        #self.ser.write(bytes('OUTP[:STAT] {state}\r'.format(state=state), 'utf-8'))
 
         #For F2031 power supplies uncomment the following lines
-        #self.ser.write(bytes('OUT {state}\r'.format(state=state), 'utf-8'))
+        self.ser.write(bytes('OUT {state}\r'.format(state=state), 'utf-8'))
 
-        #response = self.read_to_r()
-        #if response != 'CMLT\r':
-         #   logger.warning("Unexpected response in function setOutputState, " + response)
-          #  response = self.read_to_r()
-           # logger.warning("Unexpected response in function setOutputState, " + response)
+        response = self.read_to_r()
+        if response != 'CMLT\r':
+            logger.warning("Unexpected response in function setOutputState, " + response)
+            response = self.read_to_r()
+            logger.warning("Unexpected response in function setOutputState, " + response)
 
         return
     
