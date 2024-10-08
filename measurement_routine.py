@@ -22,14 +22,14 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
 
         if dipole == 1 or dipole == 3 or dipole == 4:
             
-            if (dipole == 1 and (Sparam == 'S33' or Sparam == 'S34' or Sparam == 'S43' or Sparam == 'S44')):
+            if (dipole == 1 and (Sparam == 'S11' or Sparam == 'S14' or Sparam == 'S41' or Sparam == 'S44')):
                 ps = ps1
                 #conversion = 55.494 
                 offset = 2.1676
                 conversion = 122.98
 
             
-            elif (dipole == 1 and (Sparam == 'S11' or Sparam == 'S13' or Sparam == 'S31' or Sparam == 'S33')):
+            elif (dipole == 1 and (Sparam == 'S33' or Sparam == 'S34' or Sparam == 'S43' or Sparam == 'S44')):
                 #ps = ps2
                 # conversion = 63.150
                 #conversion = 8.240  #coils gap = 29mm
@@ -68,9 +68,9 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
 
         #second_demag = demag and field_sweep[0]!=0  # If ref field != 0 a second demag field is needed 
 
-        freqs_S33, fields_S33, amps_S33, phases_S33, S33 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
-        freqs_S34, fields_S34, amps_S34, phases_S34, S34 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
-        freqs_S43, fields_S43, amps_S43, phases_S43, S43 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
+        freqs_S11, fields_S11, amps_S11, phases_S11, S11 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
+        freqs_S14, fields_S14, amps_S14, phases_S14, S14 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
+        freqs_S41, fields_S41, amps_S41, phases_S41, S41 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
         freqs_S44, fields_S44, amps_S44, phases_S44, S44 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
 
         j = 0
@@ -97,23 +97,23 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
             logger.info("Finished measuring\n")
 
             
-            freqs_S33  = np.concatenate( (freqs_S33, freq) )    # Concatenation of new data with the already acquired data
-            fields_S33 = np.concatenate( (fields_S33, [field]*len(freq)) )
-            amps_S33   = np.concatenate( (amps_S33, a1) )
-            phases_S33 = np.concatenate( (phases_S33, p1) )
-            S33 = np.concatenate( (S33, S1) )
+            freqs_S11  = np.concatenate( (freqs_S11, freq) )    # Concatenation of new data with the already acquired data
+            fields_S11 = np.concatenate( (fields_S11, [field]*len(freq)) )
+            amps_S11   = np.concatenate( (amps_S11, a1) )
+            phases_S11 = np.concatenate( (phases_S11, p1) )
+            S11 = np.concatenate( (S11, S1) )
         
-            freqs_S43  = np.concatenate( (freqs_S43, freq) )    # Concatenation of new data with the already acquired data
-            fields_S43 = np.concatenate( (fields_S43, [field]*len(freq)) )
-            amps_S43   = np.concatenate( (amps_S43, a2) )
-            phases_S43 = np.concatenate( (phases_S43, p2) )
-            S43 = np.concatenate( (S43, S2) )
+            freqs_S41  = np.concatenate( (freqs_S41, freq) )    # Concatenation of new data with the already acquired data
+            fields_S41 = np.concatenate( (fields_S41, [field]*len(freq)) )
+            amps_S41   = np.concatenate( (amps_S41, a2) )
+            phases_S41 = np.concatenate( (phases_S41, p2) )
+            S41 = np.concatenate( (S41, S2) )
         
-            freqs_S34  = np.concatenate( (freqs_S34, freq) )    # Concatenation of new data with the already acquired data
-            fields_S34 = np.concatenate( (fields_S34, [field]*len(freq)) )
-            amps_S34   = np.concatenate( (amps_S34, a3) )
-            phases_S34 = np.concatenate( (phases_S34, p3) )
-            S34 = np.concatenate( (S34, S3) )
+            freqs_S14  = np.concatenate( (freqs_S14, freq) )    # Concatenation of new data with the already acquired data
+            fields_S14 = np.concatenate( (fields_S14, [field]*len(freq)) )
+            amps_S14   = np.concatenate( (amps_S14, a3) )
+            phases_S14 = np.concatenate( (phases_S14, p3) )
+            S14 = np.concatenate( (S14, S3) )
         
             freqs_S44  = np.concatenate( (freqs_S44, freq) )    # Concatenation of new data with the already acquired data
             fields_S44 = np.concatenate( (fields_S44, [field]*len(freq)) )
@@ -123,24 +123,24 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
 
 
             logger.info(f'Saving data...')
-            save_data(freqs_S33, fields_S33, amps_S33, phases_S33, S33, user_folder, sample_folder, measurement_name = f"{measurement_name}_S33")
-            logger.info(f'Saved file "{measurement_name}_S33.csv"')
-            settings["measurement_name"] = f"{measurement_name}_S33"
-            settings["s_parameter"] = 'S33'
+            save_data(freqs_S11, fields_S11, amps_S11, phases_S11, S11, user_folder, sample_folder, measurement_name = f"{measurement_name}_S11")
+            logger.info(f'Saved file "{measurement_name}_S11.csv"')
+            settings["measurement_name"] = f"{measurement_name}_S11"
+            settings["s_parameter"] = 'S11'
             save_metadata(settings)
 
             logger.info(f'Saving data...')
-            save_data(freqs_S43, fields_S43, amps_S43, phases_S43, S43, user_folder, sample_folder, measurement_name = f"{measurement_name}_S43")
-            logger.info(f'Saved file "{measurement_name}_S43.csv"')
-            settings["measurement_name"] = f"{measurement_name}_S43"
-            settings["s_parameter"] = 'S43'
+            save_data(freqs_S41, fields_S41, amps_S41, phases_S41, S41, user_folder, sample_folder, measurement_name = f"{measurement_name}_S41")
+            logger.info(f'Saved file "{measurement_name}_S41.csv"')
+            settings["measurement_name"] = f"{measurement_name}_S41"
+            settings["s_parameter"] = 'S41'
             save_metadata(settings)
 
             logger.info(f'Saving data...')
-            save_data(freqs_S34, fields_S34, amps_S34, phases_S34, S34, user_folder, sample_folder, measurement_name = f"{measurement_name}_S34")
-            logger.info(f'Saved file "{measurement_name}_S34.csv"')
-            settings["measurement_name"] = f"{measurement_name}_S34"
-            settings["s_parameter"] = 'S34'
+            save_data(freqs_S14, fields_S14, amps_S14, phases_S14, S14, user_folder, sample_folder, measurement_name = f"{measurement_name}_S14")
+            logger.info(f'Saved file "{measurement_name}_S14.csv"')
+            settings["measurement_name"] = f"{measurement_name}_S14"
+            settings["s_parameter"] = 'S14'
             save_metadata(settings)
 
             logger.info(f'Saving data...')
