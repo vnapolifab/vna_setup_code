@@ -14,8 +14,8 @@ ps1 = setupConnectionPS('COM4', 9600)
 
 field = 15
 
-offset = 1.7452
-conversion = 49.901
+offset = 2.1676
+conversion = 122.98
 
 current = (field-offset)/conversion
 
