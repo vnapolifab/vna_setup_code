@@ -18,13 +18,15 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
         # Based on dipole variable, the program assigns a value to 'ps' which is used to govern the power supply and 'conversion' which holds the A to mT conversion value
         # ============================
 
+        #Magnet used: GMW
+
         if dipole == 1 or dipole == 3 or dipole == 4:
             
             if (dipole == 1 and (Sparam == 'S33' or Sparam == 'S34' or Sparam == 'S43' or Sparam == 'S44')):
                 ps = ps1
                 #conversion = 55.494 
-                offset = 2.55
-                conversion = 51.462
+                offset = 2.1676
+                conversion = 122.98
 
             
             elif (dipole == 1 and (Sparam == 'S11' or Sparam == 'S13' or Sparam == 'S31' or Sparam == 'S33')):
