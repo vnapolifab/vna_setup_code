@@ -125,7 +125,7 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
             logger.info(f'Saving data...')
             save_data(freqs_S33, fields_S33, amps_S33, phases_S33, S33, user_folder, sample_folder, measurement_name = f"{measurement_name}_S33")
             logger.info(f'Saved file "{measurement_name}_S33.csv"')
-            settings["measurement_name"] = f"{measurement_name}_S3"
+            settings["measurement_name"] = f"{measurement_name}_S33"
             settings["s_parameter"] = 'S33'
             save_metadata(settings)
 
