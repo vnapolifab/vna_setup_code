@@ -116,15 +116,15 @@ def measure_amp_and_phase(instr: RsInstrument, Sparam: str, i = 0, avg = 1) -> t
         instr.write("CALC1:PAR:DEL 'Tr3'")
         instr.write("CALC1:PAR:DEL 'Tr4'")
 
-    instr.write("CALC1:PAR:SDEF 'Tr1', 'S11AVG'")
+    instr.write("CALC1:PAR:SDEF 'Tr1', 'S33AVG'")
     instr.write(f'DISP:WIND1:STAT ON') 
     instr.write(f"DISP:WIND1:TRAC1:FEED 'Tr1'") 
 
-    instr.write("CALC1:PAR:SDEF 'Tr2', 'S41AVG'")
+    instr.write("CALC1:PAR:SDEF 'Tr2', 'S43AVG'")
     instr.write(f'DISP:WIND2:STAT ON') 
     instr.write(f'DISP:WIND2:TRAC2:FEED "Tr2"') 
 
-    instr.write("CALC1:PAR:SDEF 'Tr3', 'S14AVG'")
+    instr.write("CALC1:PAR:SDEF 'Tr3', 'S34AVG'")
     instr.write(f'DISP:WIND3:STAT ON') 
     instr.write(f'DISP:WIND3:TRAC3:FEED "Tr3"') 
 
