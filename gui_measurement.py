@@ -55,7 +55,7 @@ measurement_routine(
 
 # Save metadata:
 old_name = settings["measurement_name"]
-for sparam in ["S11", "S41", "S14", "S44"]: #TODO scommenta
+for sparam in ["S33", "S43", "S34", "S44"]: #TODO scommenta
     settings["measurement_name"] = f"{old_name}_{sparam}"
     settings["s_parameter"] = sparam
 update_log(settings)
