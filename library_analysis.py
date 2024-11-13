@@ -39,8 +39,8 @@ def analysisFMR(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, ph
 
         #U = 1j * (np.log((amp * np.exp(1j * phase*0)) / (amp_ref * np.exp(0))) / np.log(amp_ref * np.exp(0)))
         #U = 1j * (np.log((amp * np.exp(1j * phase)) / (amp_ref * np.exp(1j * phase_ref))) / np.log(amp_ref * np.exp(1j * phase_ref)))
-        #U = -1j * (((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) / (amp_ref * np.exp(1j * phase_ref)))
-        U = -1j*(amp * np.exp(1j * phase)-(amp_ref * np.exp(1j * phase_ref)))/(amp_ref * np.exp(1j * phase_ref))
+        U = -1j * (((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) / (amp_ref * np.exp(1j * phase_ref)))
+        #U = -1j*(amp * np.exp(1j * phase)-(amp_ref * np.exp(1j * phase_ref)))/(amp_ref * np.exp(1j * phase_ref))
         #U = ((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) 
         #U = np.abs(1j * (((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) / (amp_ref * np.exp(1j * phase_ref))))
         #U = (((amp) - (amp_ref)) / (amp_ref ))
@@ -112,7 +112,7 @@ def analysisKittel(freq: np.ndarray, traces: np.ndarray, fields: np.ndarray, mea
     """
 
     f_max = []
-    for trace in traces[1:]:  # excludes reference from peak finder
+    for i,trace in enumerate(traces[1:]):  # excludes reference from peak finder
         index = np.argmax(trace)
         f_max.append( freq[index] )
 
@@ -559,7 +559,7 @@ def FMR_tang(H0, M):
     Takes as input the external field and the saturation magnetization.
     """
 
-    g, mu0  = 1.76e11, 4e-7*np.pi
+    g, mu0  = 1.822e11, 4e-7*np.pi
     H = H0 * 1e-3 / mu0
     FMR =  ((g * mu0)/(2*np.pi)) * np.sqrt(H * (H + M))
     return FMR
