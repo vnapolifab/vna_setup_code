@@ -1,9 +1,10 @@
 .idea
 .idea/*
-/DATA/
+/DATA/*
+/DATA_new_format/*
 /__pycache__/
 /Notebooks/
-/local/
+/local/*
 last_settings.json
 log_file.log
 log.txt
