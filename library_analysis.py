@@ -559,7 +559,7 @@ def FMR_tang(H0, M):
     Takes as input the external field and the saturation magnetization.
     """
 
-    g, mu0  = 1.822e11, 4e-7*np.pi
+    g, mu0  = 1.76e11, 4e-7*np.pi
     H = H0 * 1e-3 / mu0
     FMR =  ((g * mu0)/(2*np.pi)) * np.sqrt(H * (H + M))
     return FMR
