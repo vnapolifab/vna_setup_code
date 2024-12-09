@@ -12,10 +12,10 @@ if "ps1" in locals(): ps1.closeConnection()
 ps1 = setupConnectionPS('COM4', 9600)
 #ps1.demag_sweep()
 
-field = 15
+field = -0.44
 
-offset = 2.1676
-conversion = 122.98
+offset = 2.5145
+conversion = 77.026
 
 current = (field-offset)/conversion
 
