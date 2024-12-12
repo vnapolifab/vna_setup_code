@@ -23,10 +23,10 @@ settings["datetime"] = str(datetime.now()).rstrip("0123456789").rstrip(".")
 
 
 print("Power supply 1 > ", end=""); 
-ps1 = setupConnectionPS('COM4', 9600)
+ps1 = setupConnectionPS('COM3', 9600)
 
 print("Power supply 2 > ", end=""); 
-ps2 = setupConnectionPS('COM3', 9600)
+ps2 = setupConnectionPS('COM4', 9600)
 
 print("VNA            > ", end=""); 
 instr = setupConnectionVNA()
@@ -55,7 +55,7 @@ measurement_routine(
 
 # Save metadata:
 old_name = settings["measurement_name"]
-for sparam in ["S11", "S41", "S14", "S44"]: #TODO scommenta
+for sparam in ["S22", "S42", "S24", "S44"]: #TODO scommenta
     settings["measurement_name"] = f"{old_name}_{sparam}"
     settings["s_parameter"] = sparam
 update_log(settings)
