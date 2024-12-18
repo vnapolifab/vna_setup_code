@@ -38,7 +38,7 @@ def analysisFMR(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, ph
         phase = np.unwrap(phase)
 
         #U = 1j * (np.log((amp * np.exp(1j * phase*0)) / (amp_ref * np.exp(0))) / np.log(amp_ref * np.exp(0)))
-        #U = 1j * (np.log((amp * np.exp(1j * phase)) / (amp_ref * np.exp(1j * phase_ref))) / np.log(amp_ref * np.exp(1j * phase_ref)))
+        #U = 1j * (np.log((amp * np.exp(1j * phase)) / (amp_ref * np.exp(1j * phase_ref))) / np.log(amp_ref * np.exp(1j * phase_ref*0)))
         U = -1j * (((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) / (amp_ref * np.exp(1j * phase_ref)))
         #U = -1j*(amp * np.exp(1j * phase)-(amp_ref * np.exp(1j * phase_ref)))/(amp_ref * np.exp(1j * phase_ref))
         #U = ((amp * np.exp(1j * phase)) - (amp_ref * np.exp(1j * phase_ref))) 
@@ -156,7 +156,7 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
 
 
     # U must be used or the fit won't work ----> la Lorentziana usata per fittare ha fondo nullo, se non normalizzi riportando il fondo a zero (come si fa nel calcolo di U) la curva non fitta
-    g, mu0  = 1.76e11, 4e-7*np.pi
+    g, mu0  = 1.822e11, 4e-7*np.pi
     conversion = 795.7747  # the field needs to be transformed in A/m before being used
 
     alpha, alpha_raw, FWHMs = np.zeros([n_freq_points,]), np.zeros([n_freq_points,]), np.zeros([n_freq_points,])
@@ -181,16 +181,16 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
 
 
     # Plot U as a function of H for fixed frequencies
-    if show_plots:
+    #if show_plots:
 
-        plt.figure()
-        plt.title("Raw data")
-        for n in range(n_freq_points):
-            plt.plot(fields_no_ref, u_field_sweep[n,:])        
-        plt.legend([ f"{f/10**9:.2f} GHz" for f in freqs ])
-        plt.xlabel("External Field (mT)")
-        plt.ylabel("Suscettivity (arb. u.)")
-        save_plot(measurement_path, "Raw data.png")
+    plt.figure()
+    plt.title("Raw data")
+    for n in range(n_freq_points):
+        plt.plot(fields_no_ref, u_field_sweep[n,:])        
+    plt.legend([ f"{f/10**9:.2f} GHz" for f in freqs ])
+    plt.xlabel("External Field (mT)")
+    plt.ylabel("Suscettivity (arb. u.)")
+    save_plot(measurement_path, "Raw data.png")
 
 
 
@@ -198,7 +198,7 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
     # ===== CODE TO FIT DATA AND REMOVE BACKGROUND =====
     # 
 
-    plt.figure()
+    #plt.figure()
     backgrounds = np.zeros([n_freq_points, n_field_points])
     center = np.zeros(n_freq_points)
     width = np.zeros(n_freq_points)
@@ -224,51 +224,8 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
 
 
         if DEBUG_MODE:
-               
-            center[i], width[i], peak[i], a, b, x1, x2, m = lorentzian_fit(fields_no_ref, u_field_sweep[i,:], [field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:])])
 
             [A[i],f[i],FWHMs[i],H_fmr[i],phi[i]] = suscettivity_fit(fields_no_ref, u_field_sweep[i,:], [0.1, freqs[i], 0.1, field_peaks[i], 0.5])
-
-            x = fields_no_ref
-            background = a*(x < x1) + b*(x > x2) + ((x >= x1) & (x < x2)) * (a +(b-a)* (x-(x1))/(x2-x1)) + m*x
-
-            backgrounds[i,:] = background
-            
-            # # --- DOUBLE FIT (two fits, one for background subtraction and then a new lorentian fit without background)
-            #center, width, peak, center2, width2, peak2,a, b, x1, x2 = multi_lorentzian_fit(fields_no_ref, u_field_sweep[i,:], [field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:]), 1.1*field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:])/2])
-
-
-
-
-
-            #alpha_raw[i] = conversion*(width*g*mu0)/(4*np.pi*freqs[i])
-            #print(f"{freqs[i]/10**9:.2f}) Alpha from raw data: {alpha_raw[i]:.5f}")
-        
-            # center, width, peak, a, b, x1, x2 = lorentzian_fit(fields_no_ref, u_field_sweep[i,:], [field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:])], remove_background=True)
-            # trace_no_background = u_field_sweep[i,:] - getLinearBackground(fields_no_ref, a, b, x1, x2)
-            # center, width, peak = lorentzian_fit(fields_no_ref, trace_no_background, [field_peaks[i], 0.1*field_peaks[i], np.max(trace_no_background)])
-            # # ---
-
-
-            # --- PEAK + SHOULDER FIT
-            # center, width, peak= lorentzian_fit(fields_no_ref, u_field_sweep[i,:], [field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:])])
-            # alpha_raw[i] = conversion*(width*g*mu0)/(4*np.pi*freqs[i])
-            # print(f"{freqs[i]/10**9:.2f}) Alpha from raw data: {alpha_raw[i]:.5f}")
-        
-            # center, width, peak, center2, width2, peak2, a, b, x1, x2 = double_lorentzian_fit(fields_no_ref, u_field_sweep[i,:], [field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:]), 1.1*field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:])/2], remove_background=True)
-            # trace_no_background = u_field_sweep[i,:] - getLinearBackground(fields_no_ref, a, b, x1, x2)
-                
-            # center, width, peak = lorentzian_fit(fields_no_ref, u_field_sweep[i,:], initial_guess = [field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:])])
-            # alpha_raw[i] = conversion*(width*g*mu0)/(4*np.pi*freqs[i])
-            # print(f"{freqs[i]/10**9:.2f}) Alpha from raw data: {alpha_raw[i]:.5f}")
-        
-            # center, width, peak, a, b, x1, x2 = lorentzian_fit(fields_no_ref, u_field_sweep[i,:], [field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:])], remove_background=True)
-            # trace_no_background = u_field_sweep[i,:] - getLinearBackground(fields_no_ref, a, b, x1, x2)
-            # center, width, peak, center2, width2, peak2 = double_lorentzian_fit(fields_no_ref, trace_no_background, [field_peaks[i], 0.1*field_peaks[i], np.max(trace_no_background), 1.1*field_peaks[i], 0.1*field_peaks[i], np.max(trace_no_background)/2])
-            # # center, width, peak, a, b, x1, x2 = lorentzian_fit(fields_no_ref, u_field_sweep[i,:], [field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:])], remove_background=True)
-            # # ---
-
-
 
             
             alpha[i] = conversion*(FWHMs[i]*g*mu0)/(4*np.pi*freqs[i])
@@ -278,23 +235,14 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
             # # PLOTS
             c = next(colors)
             plt.plot(fields_no_ref, u_field_sweep[i,:], marker=MARKER, markersize=MARKER_SIZE, color=c)
-            #plt.plot(fields_no_ref, lorentzian_curve(fields_no_ref, center[i], width[i], peak[i], a, b, x1, x2, m), "-.", color=c)
 
             plt.plot(fields_no_ref, Mixed_suscettivity(fields_no_ref,A[i],f[i],FWHMs[i],H_fmr[i],phi[i]), marker=MARKER, markersize=MARKER_SIZE, color = 'black')
 
-            #plt.plot(fields_no_ref, background, "--", color=c)
-            
-
-            #plt.plot(fields_no_ref, multi_lorentzian_curve(fields_no_ref, center, center2, width, width2, peak, peak2, a, b, x1, x2), "-.", color=c)
-            # plt.plot(fields_no_ref, lorentzian_curve(fields_no_ref, center2, width2, peak2), "--", color=c)
-            # plt.plot(fields_no_ref, lorentzian_curve(fields_no_ref, center, width, peak)+lorentzian_curve(fields_no_ref, center2, width2, peak2), "--", color=c)
-           
-            # da aggiungere la legenda
-            plt.title("Fitted data (with background)")
+            plt.title("Fitted data")
             plt.legend([ f"{f/10**9:.2f} GHz" for f in frequencies_bi ])
             plt.xlabel("External Field (mT)")
             plt.ylabel("Suscettivity (arb. u.)")
-            save_plot(measurement_path, "Fitted data (with background).png")
+            save_plot(measurement_path, "Fitted data.png")
 
 
 
@@ -312,44 +260,30 @@ def analysisDamping(freqs: np.ndarray, fields: np.ndarray, u_freq_sweep: np.ndar
     ])
 
     # New figure with the background subtracted peaks 
-    plt.figure()
+    #plt.figure()
 
     for i in range(n_freq_points):
 
-        # center, width, peak, a, b, x1, x2, x = lorentzian_fit(fields_no_ref, u_field_sweep[i,:], [field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:])])
-        # #center, width, peak, center2, width2, peak2,a, b, x1, x2 = multi_lorentzian_fit(fields_no_ref, u_field_sweep[i,:], [field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:]), 1.1*field_peaks[i], 0.1*field_peaks[i], np.max(u_field_sweep[i,:])/2])
-        # x = fields_no_ref
-        # background = a*(x < x1) + b*(x > x2) + ((x >= x1) & (x < x2)) * (a +(b-a)* (x-(x1))/(x2-x1)) + m*x
-
         c = next(colors)
-        #plt.plot(fields_no_ref, multi_lorentzian_curve(fields_no_ref, center, center2, width, width2, peak, peak2, a, b, x1, x2)-background, "-", color=c)
-        #plt.plot(fields_no_ref, lorentzian_curve(fields_no_ref, center[i], width[i], peak[i], a, b, x1, x2, m)-backgrounds[i,:], "--", color=c)
-        plt.plot(fields_no_ref, u_field_sweep[i,:]-backgrounds[i,:], marker=MARKER, markersize=MARKER_SIZE, color=c)
-        
-        # da aggiungere la legenda
-        plt.title("Fitted data (background removed)")
-        plt.legend([ f"{f/10**9:.2f} GHz" for f in freqs ])
-        plt.xlabel("External Field (mT)")
-        plt.ylabel("Suscettivity (arb. u.)")
-        save_plot(measurement_path, "Fitted data (background removed).png")
 
 
     # Other plots
 
     #Get alpha from linear fit of FWHMs vs f
     #TODO understand if it was implemented properely or not: differs in excess by a factor 2 with respect to the alpha obtained by Lorentzian fit
-    [slope,inhomog] = linear_fit(freqs,FWHMs/2,[0.001,0])
-    alpha_from_slope = slope*g/(2*np.pi*1000)
-    print(f"Alpha from slope: {alpha_from_slope:.5f}) Inhomogeneous broadening (HWHM): {inhomog:.5f}")
+    [slope,inhomog] = linear_fit(freqs,FWHMs,[0.001,0])
+    alpha_from_slope = slope*g/(4*np.pi*1000)
+    print(f"Alpha from slope: {alpha_from_slope:.5f}) Inhomogeneous broadening (FWHM): {inhomog/2:.5f}")
 
 
     plt.figure()
-    plt.title("HWHM vs f")
-    plt.plot(freqs, FWHMs/2)
+    plt.title("FWHM vs f")
+    plt.plot(freqs, FWHMs)
     plt.plot(freqs, line_curve(freqs, slope,inhomog))
     plt.legend(['Experimental data', 'Linear fit'])
     plt.xlabel("frequency (GHz)")
-    plt.ylabel("HWHM (mT)")
+    plt.ylabel("FWHM (mT)")
+    #plt.ylim(4,6.5)
     save_plot(measurement_path, "HWHM vs f.png")
 
 
@@ -559,7 +493,7 @@ def FMR_tang(H0, M):
     Takes as input the external field and the saturation magnetization.
     """
 
-    g, mu0  = 1.76e11, 4e-7*np.pi
+    g, mu0  = 1.822e11, 4e-7*np.pi
     H = H0 * 1e-3 / mu0
     FMR =  ((g * mu0)/(2*np.pi)) * np.sqrt(H * (H + M))
     return FMR
