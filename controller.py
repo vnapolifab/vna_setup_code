@@ -9,7 +9,7 @@ from CONSTANTS import *
 
 print("Power supply 1 > ", end=""); 
 if "ps1" in locals(): ps1.closeConnection()
-ps1 = setupConnectionPS('COM4', 9600)
+ps1 = setupConnectionPS('COM3', 9600)
 #ps1.demag_sweep()
 
 field = -0.44
