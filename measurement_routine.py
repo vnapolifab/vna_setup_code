@@ -72,6 +72,7 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
         freqs_S24, fields_S24, amps_S24, phases_S24, S24 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
         freqs_S42, fields_S42, amps_S42, phases_S42, S42 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
         freqs_S44, fields_S44, amps_S44, phases_S44, S44 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
+        currents = np.array([])
 
         j = 0
 
@@ -96,7 +97,8 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
             # x,y,p = measure_dB(instr,Sparam)
             logger.info("Finished measuring\n")
 
-            
+            currents = np.concatenate((currents,[current]*len(freq)))
+
             freqs_S22  = np.concatenate( (freqs_S22, freq) )    # Concatenation of new data with the already acquired data
             fields_S22 = np.concatenate( (fields_S22, [field]*len(freq)) )
             amps_S22   = np.concatenate( (amps_S22, a1) )
@@ -123,28 +125,28 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
 
 
             logger.info(f'Saving data...')
-            save_data(freqs_S22, fields_S22, amps_S22, phases_S22, S22, user_folder, sample_folder, measurement_name = f"{measurement_name}_S22")
+            save_data(currents, freqs_S22, fields_S22, amps_S22, phases_S22, S22, user_folder, sample_folder, measurement_name = f"{measurement_name}_S22")
             logger.info(f'Saved file "{measurement_name}_S22.csv"')
             settings["measurement_name"] = f"{measurement_name}_S22"
             settings["s_parameter"] = 'S22'
             save_metadata(settings)
 
             logger.info(f'Saving data...')
-            save_data(freqs_S42, fields_S42, amps_S42, phases_S42, S42, user_folder, sample_folder, measurement_name = f"{measurement_name}_S42")
+            save_data(currents, freqs_S42, fields_S42, amps_S42, phases_S42, S42, user_folder, sample_folder, measurement_name = f"{measurement_name}_S42")
             logger.info(f'Saved file "{measurement_name}_S42.csv"')
             settings["measurement_name"] = f"{measurement_name}_S42"
             settings["s_parameter"] = 'S42'
             save_metadata(settings)
 
             logger.info(f'Saving data...')
-            save_data(freqs_S24, fields_S24, amps_S24, phases_S24, S24, user_folder, sample_folder, measurement_name = f"{measurement_name}_S24")
+            save_data(currents, freqs_S24, fields_S24, amps_S24, phases_S24, S24, user_folder, sample_folder, measurement_name = f"{measurement_name}_S24")
             logger.info(f'Saved file "{measurement_name}_S24.csv"')
             settings["measurement_name"] = f"{measurement_name}_S24"
             settings["s_parameter"] = 'S24'
             save_metadata(settings)
 
             logger.info(f'Saving data...')
-            save_data(freqs_S44, fields_S44, amps_S44, phases_S44, S44, user_folder, sample_folder, measurement_name = f"{measurement_name}_S44")
+            save_data(currents, freqs_S44, fields_S44, amps_S44, phases_S44, S44, user_folder, sample_folder, measurement_name = f"{measurement_name}_S44")
             logger.info(f'Saved file "{measurement_name}_S44.csv"')
             settings["measurement_name"] = f"{measurement_name}_S44"
             settings["s_parameter"] = 'S44'
