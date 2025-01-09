@@ -20,43 +20,58 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
 
         #Magnet used: GMW
 
-        if dipole == 1 or dipole == 3 or dipole == 4:
             
-            if (dipole == 1): 
-                ps = ps1
-                #conversion = 55.494 
-                offset =  2.7001 #0 #2.153
-                conversion = 50.027 #5.8 #52.498
+        if (dipole == 1): 
+            ps = ps1
+            #conversion = 55.494 
+            offset =  2.7001 #0 #2.153
+            conversion = 50.027 #5.8 #52.498
 
-            
-            #elif (dipole == 1 and (Sparam == 'S11' or Sparam == 'S14' or Sparam == 'S41' or Sparam == 'S44')):
-                #ps = ps2
-                # conversion = 63.150
-                #conversion = 8.240  #coils gap = 29mm
-                #conversion = 5.620   # coils gap = 55mm
-                # conversion = 6.886  # Coils 
-                # conversion = 9.646 # Coils 
-                #print("Debug please")
+            offset1 =  0
+            conversion1 = 0
 
-            elif (dipole == 3):
-                ps = ps1
-                conversion = 42.421
+            offset2 =  0
+            conversion2 = 0
 
-            elif (dipole == 4):
-                ps = ps1
-                conversion = 45.217
+        
+        #elif (dipole == 1 and (Sparam == 'S11' or Sparam == 'S14' or Sparam == 'S41' or Sparam == 'S44')):
+            #ps = ps2
+            # conversion = 63.150
+            #conversion = 8.240  #coils gap = 29mm
+            #conversion = 5.620   # coils gap = 55mm
+            # conversion = 6.886  # Coils 
+            # conversion = 9.646 # Coils 
+            #print("Debug please")
 
-                # Routine if a quadrupole is used
-            elif dipole == 2: # TODO the code does not support different coonversions for the two power supplies, fix this
-                if ps1 == None or ps2 == None:
-                    raise Exception("Quadrupole selected but one of the power supplies is not properly connected.")
-                ps = TwoPowerSupply(ps1=ps1, ps2=ps2)
-                    
-            else:
-                ps = None
+        #elif (dipole == 3):
+        #    ps = ps1
+        #    conversion = 42.421
+
+        #elif (dipole == 4):
+        #    ps = ps1
+        #    conversion = 45.217
+
+            # Routine if a quadrupole is used
+        elif dipole == 2: # TODO the code does not support different coonversions for the two power supplies, fix this
+            if ps1 == None or ps2 == None:
+                raise Exception("Quadrupole selected but one of the power supplies is not properly connected.")
+            psq1 = ps1  #TwoPowerSupply(ps1=ps1, ps2=ps2)
+            psq2 = ps2
+
+            conversion = 0
+            offset = 0
+
+            offset1 =  2.7001
+            conversion1 = 50.027
+
+            offset2 =  2.001
+            conversion2 = 40.027
                 
-            if conversion == None or ps == None:
-                raise Exception("Invalid dipole_mode parameter")
+        else:
+            ps = None
+            
+        if conversion == None:
+            raise Exception("Invalid dipole_mode parameter")
             
 
         # ============================
@@ -73,6 +88,8 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
         freqs_S42, fields_S42, amps_S42, phases_S42, S42 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
         freqs_S44, fields_S44, amps_S44, phases_S44, S44 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
         currents = np.array([])
+        currents1 = np.array([])
+        currents2 = np.array([])
 
         j = 0
 
@@ -80,11 +97,22 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
             #if i == 1 and second_demag:
                 #ps.demag_sweep()
 
-            current = (field-offset)/conversion
-
-
             logger.info(f"Setting field...")
-            ps.setCurrent(current)
+            if (dipole == 1):
+                current = (field-offset)/conversion
+                current1 = 0
+                current2 = 0
+                ps.setCurrent(current)
+
+            if (dipole == 2):
+                current = 0
+                angle_rad = np.radians(angle)
+                current1 = (field*np.cos(angle_rad)-offset1)/conversion1
+                current2 = (field*np.sin(angle_rad)-offset2)/conversion2
+                print(current)
+                psq1.setCurrent(current1)
+                psq2.setCurrent(current2)
+
             logger.info(f"Field set to {field_sweep[i]} mT")
 
             logger.info(f"Waiting {c.SETTLING_TIME}s...")
@@ -98,6 +126,8 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
             logger.info("Finished measuring\n")
 
             currents = np.concatenate((currents,[current]*len(freq)))
+            currents1 = np.concatenate((currents1,[current1]*len(freq)))
+            currents2 = np.concatenate((currents2,[current2]*len(freq)))
 
             freqs_S22  = np.concatenate( (freqs_S22, freq) )    # Concatenation of new data with the already acquired data
             fields_S22 = np.concatenate( (fields_S22, [field]*len(freq)) )
@@ -125,28 +155,28 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
 
 
             logger.info(f'Saving data...')
-            save_data(currents, freqs_S22, fields_S22, amps_S22, phases_S22, S22, user_folder, sample_folder, measurement_name = f"{measurement_name}_S22")
+            save_data(currents, currents1, currents2, freqs_S22, fields_S22, amps_S22, phases_S22, S22, user_folder, sample_folder, measurement_name = f"{measurement_name}_S22")
             logger.info(f'Saved file "{measurement_name}_S22.csv"')
             settings["measurement_name"] = f"{measurement_name}_S22"
             settings["s_parameter"] = 'S22'
             save_metadata(settings)
 
             logger.info(f'Saving data...')
-            save_data(currents, freqs_S42, fields_S42, amps_S42, phases_S42, S42, user_folder, sample_folder, measurement_name = f"{measurement_name}_S42")
+            save_data(currents, currents1, currents2, freqs_S42, fields_S42, amps_S42, phases_S42, S42, user_folder, sample_folder, measurement_name = f"{measurement_name}_S42")
             logger.info(f'Saved file "{measurement_name}_S42.csv"')
             settings["measurement_name"] = f"{measurement_name}_S42"
             settings["s_parameter"] = 'S42'
             save_metadata(settings)
 
             logger.info(f'Saving data...')
-            save_data(currents, freqs_S24, fields_S24, amps_S24, phases_S24, S24, user_folder, sample_folder, measurement_name = f"{measurement_name}_S24")
+            save_data(currents, currents1, currents2, freqs_S24, fields_S24, amps_S24, phases_S24, S24, user_folder, sample_folder, measurement_name = f"{measurement_name}_S24")
             logger.info(f'Saved file "{measurement_name}_S24.csv"')
             settings["measurement_name"] = f"{measurement_name}_S24"
             settings["s_parameter"] = 'S24'
             save_metadata(settings)
 
             logger.info(f'Saving data...')
-            save_data(currents, freqs_S44, fields_S44, amps_S44, phases_S44, S44, user_folder, sample_folder, measurement_name = f"{measurement_name}_S44")
+            save_data(currents, currents1, currents2, freqs_S44, fields_S44, amps_S44, phases_S44, S44, user_folder, sample_folder, measurement_name = f"{measurement_name}_S44")
             logger.info(f'Saved file "{measurement_name}_S44.csv"')
             settings["measurement_name"] = f"{measurement_name}_S44"
             settings["s_parameter"] = 'S44'
@@ -154,7 +184,12 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
             print("\n\n")
 
 
-        ps.setCurrent(0)  # Set current back to 0 at the end of the routine
+        if (dipole == 1):
+                ps.setCurrent(0)
+
+        if (dipole == 2):
+            psq1.setCurrent(0)
+            psq2.setCurrent(0)  # Set current back to 0 at the end of the routine
         
         return
 
@@ -162,5 +197,10 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
 
 
     except Exception as e:  # If any error occurs, first set the current to 0 then raise the exeption
-        ps.setCurrent(0)
+        if (dipole == 1):
+                ps.setCurrent(0)
+
+        if (dipole == 2):
+            psq1.setCurrent(0)
+            psq2.setCurrent(0)  # Set current back to 0 at the end of the routine
         raise e
