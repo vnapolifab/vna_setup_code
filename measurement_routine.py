@@ -109,7 +109,6 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
                 angle_rad = np.radians(angle)
                 current1 = (field*np.cos(angle_rad)-offset1)/conversion1
                 current2 = (field*np.sin(angle_rad)-offset2)/conversion2
-                print(current)
                 psq1.setCurrent(current1)
                 psq2.setCurrent(current2)
 
