@@ -61,11 +61,11 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
             conversion = 0
             offset = 0
 
-            offset1 =  2.7001
-            conversion1 = 50.027
+            offset1 =  1.7091
+            conversion1 = 43.884
 
-            offset2 =  2.001
-            conversion2 = 40.027
+            offset2 =  1.4364
+            conversion2 = 42.473
                 
         else:
             ps = None
