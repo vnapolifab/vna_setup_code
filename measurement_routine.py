@@ -105,10 +105,15 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
                 ps.setCurrent(current)
 
             if (dipole == 2):
+
+                maxval = 3.5
                 current = 0
                 angle_rad = np.radians(angle)
                 current1 = (field*np.cos(angle_rad)-offset1)/conversion1
                 current2 = (field*np.sin(angle_rad)-offset2)/conversion2
+                psq1.setCurrent(maxval)
+                psq2.setCurrent(maxval)
+                sleep(SETTLING_TIME)
                 psq1.setCurrent(current1)
                 psq2.setCurrent(current2)
 
