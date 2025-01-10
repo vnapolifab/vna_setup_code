@@ -18,7 +18,7 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
         # Based on dipole variable, the program assigns a value to 'ps' which is used to govern the power supply and 'conversion' which holds the A to mT conversion value
         # ============================
 
-        #Magnet used: GMW
+        #Magnet used: DexinMag
 
             
         if (dipole == 1): 
