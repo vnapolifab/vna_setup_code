@@ -93,16 +93,16 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
 
         j = 0
 
-        if (dipole == 1):
-            maxval = 3.5
-            ps.setCurrent(maxval)
-            sleep(SETTLING_TIME)
+        #if (dipole == 1):
+        #    maxval = 3.5
+        #    ps.setCurrent(maxval)
+        #    sleep(SETTLING_TIME)
 
-        if (dipole == 2):
-            maxval = 3.5
-            psq1.setCurrent(maxval)
-            psq2.setCurrent(maxval)
-            sleep(SETTLING_TIME)
+        #if (dipole == 2):
+        #    maxval = 3.5
+        #    psq1.setCurrent(maxval)
+        #    psq2.setCurrent(maxval)
+        #    sleep(SETTLING_TIME)
 
         for i, field in enumerate(field_sweep):  # MAIN FOR LOOP
             #if i == 1 and second_demag:
