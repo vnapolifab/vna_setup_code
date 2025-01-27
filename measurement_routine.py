@@ -83,10 +83,10 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
 
         #second_demag = demag and field_sweep[0]!=0  # If ref field != 0 a second demag field is needed 
 
+        freqs_S11, fields_S11, amps_S11, phases_S11, S11 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
+        freqs_S12, fields_S12, amps_S12, phases_S12, S12 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
+        freqs_S21, fields_S21, amps_S21, phases_S21, S21 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
         freqs_S22, fields_S22, amps_S22, phases_S22, S22 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
-        freqs_S24, fields_S24, amps_S24, phases_S24, S24 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
-        freqs_S42, fields_S42, amps_S42, phases_S42, S42 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
-        freqs_S44, fields_S44, amps_S44, phases_S44, S44 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
         currents = np.array([])
         currents1 = np.array([])
         currents2 = np.array([])
@@ -140,57 +140,57 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
             currents1 = np.concatenate((currents1,[current1]*len(freq)))
             currents2 = np.concatenate((currents2,[current2]*len(freq)))
 
+            freqs_S11  = np.concatenate( (freqs_S11, freq) )    # Concatenation of new data with the already acquired data
+            fields_S11 = np.concatenate( (fields_S11, [field]*len(freq)) )
+            amps_S11   = np.concatenate( (amps_S11, a1) )
+            phases_S11 = np.concatenate( (phases_S11, p1) )
+            S11 = np.concatenate( (S11, S1) )
+        
+            freqs_S21  = np.concatenate( (freqs_S21, freq) )    # Concatenation of new data with the already acquired data
+            fields_S21 = np.concatenate( (fields_S21, [field]*len(freq)) )
+            amps_S21   = np.concatenate( (amps_S21, a2) )
+            phases_S21 = np.concatenate( (phases_S21, p2) )
+            S21 = np.concatenate( (S21, S2) )
+        
+            freqs_S12  = np.concatenate( (freqs_S12, freq) )    # Concatenation of new data with the already acquired data
+            fields_S12 = np.concatenate( (fields_S12, [field]*len(freq)) )
+            amps_S12   = np.concatenate( (amps_S12, a3) )
+            phases_S12 = np.concatenate( (phases_S12, p3) )
+            S12 = np.concatenate( (S12, S3) )
+        
             freqs_S22  = np.concatenate( (freqs_S22, freq) )    # Concatenation of new data with the already acquired data
             fields_S22 = np.concatenate( (fields_S22, [field]*len(freq)) )
-            amps_S22   = np.concatenate( (amps_S22, a1) )
-            phases_S22 = np.concatenate( (phases_S22, p1) )
-            S22 = np.concatenate( (S22, S1) )
-        
-            freqs_S42  = np.concatenate( (freqs_S42, freq) )    # Concatenation of new data with the already acquired data
-            fields_S42 = np.concatenate( (fields_S42, [field]*len(freq)) )
-            amps_S42   = np.concatenate( (amps_S42, a2) )
-            phases_S42 = np.concatenate( (phases_S42, p2) )
-            S42 = np.concatenate( (S42, S2) )
-        
-            freqs_S24  = np.concatenate( (freqs_S24, freq) )    # Concatenation of new data with the already acquired data
-            fields_S24 = np.concatenate( (fields_S24, [field]*len(freq)) )
-            amps_S24   = np.concatenate( (amps_S24, a3) )
-            phases_S24 = np.concatenate( (phases_S24, p3) )
-            S24 = np.concatenate( (S24, S3) )
-        
-            freqs_S44  = np.concatenate( (freqs_S44, freq) )    # Concatenation of new data with the already acquired data
-            fields_S44 = np.concatenate( (fields_S44, [field]*len(freq)) )
-            amps_S44   = np.concatenate( (amps_S44, a4) )
-            phases_S44 = np.concatenate( (phases_S44, p4) )
-            S44 = np.concatenate( (S44, S4) )
+            amps_S22   = np.concatenate( (amps_S22, a4) )
+            phases_S22 = np.concatenate( (phases_S22, p4) )
+            S22 = np.concatenate( (S22, S4) )
 
+
+            logger.info(f'Saving data...')
+            save_data(currents, currents1, currents2, freqs_S11, fields_S11, amps_S11, phases_S11, S11, user_folder, sample_folder, measurement_name = f"{measurement_name}_S11")
+            logger.info(f'Saved file "{measurement_name}_S11.csv"')
+            settings["measurement_name"] = f"{measurement_name}_S11"
+            settings["s_parameter"] = 'S11'
+            save_metadata(settings)
+
+            logger.info(f'Saving data...')
+            save_data(currents, currents1, currents2, freqs_S21, fields_S21, amps_S21, phases_S21, S21, user_folder, sample_folder, measurement_name = f"{measurement_name}_S21")
+            logger.info(f'Saved file "{measurement_name}_S21.csv"')
+            settings["measurement_name"] = f"{measurement_name}_S21"
+            settings["s_parameter"] = 'S21'
+            save_metadata(settings)
+
+            logger.info(f'Saving data...')
+            save_data(currents, currents1, currents2, freqs_S12, fields_S12, amps_S12, phases_S12, S12, user_folder, sample_folder, measurement_name = f"{measurement_name}_S12")
+            logger.info(f'Saved file "{measurement_name}_S12.csv"')
+            settings["measurement_name"] = f"{measurement_name}_S12"
+            settings["s_parameter"] = 'S12'
+            save_metadata(settings)
 
             logger.info(f'Saving data...')
             save_data(currents, currents1, currents2, freqs_S22, fields_S22, amps_S22, phases_S22, S22, user_folder, sample_folder, measurement_name = f"{measurement_name}_S22")
             logger.info(f'Saved file "{measurement_name}_S22.csv"')
             settings["measurement_name"] = f"{measurement_name}_S22"
             settings["s_parameter"] = 'S22'
-            save_metadata(settings)
-
-            logger.info(f'Saving data...')
-            save_data(currents, currents1, currents2, freqs_S42, fields_S42, amps_S42, phases_S42, S42, user_folder, sample_folder, measurement_name = f"{measurement_name}_S42")
-            logger.info(f'Saved file "{measurement_name}_S42.csv"')
-            settings["measurement_name"] = f"{measurement_name}_S42"
-            settings["s_parameter"] = 'S42'
-            save_metadata(settings)
-
-            logger.info(f'Saving data...')
-            save_data(currents, currents1, currents2, freqs_S24, fields_S24, amps_S24, phases_S24, S24, user_folder, sample_folder, measurement_name = f"{measurement_name}_S24")
-            logger.info(f'Saved file "{measurement_name}_S24.csv"')
-            settings["measurement_name"] = f"{measurement_name}_S24"
-            settings["s_parameter"] = 'S24'
-            save_metadata(settings)
-
-            logger.info(f'Saving data...')
-            save_data(currents, currents1, currents2, freqs_S44, fields_S44, amps_S44, phases_S44, S44, user_folder, sample_folder, measurement_name = f"{measurement_name}_S44")
-            logger.info(f'Saved file "{measurement_name}_S44.csv"')
-            settings["measurement_name"] = f"{measurement_name}_S44"
-            settings["s_parameter"] = 'S44'
             save_metadata(settings)
             print("\n\n")
 
