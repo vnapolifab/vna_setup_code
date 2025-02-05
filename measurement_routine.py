@@ -24,8 +24,8 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
         if (dipole == 1): 
             ps = ps1
             #conversion = 55.494 
-            offset =  2.7001 #0 #2.153
-            conversion = 50.027 #5.8 #52.498
+            offset =  1.9831#2.7001 #0 #2.153 #Latest calibration by Alberto and Lorenzo Q in 05/02/2025, pole shoes where moved again after this
+            conversion = 54.747#50.027 #5.8 #52.498
 
             offset1 =  0
             conversion1 = 0
@@ -97,7 +97,7 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
         #    maxval = 3.5
         #    ps.setCurrent(maxval)
         #    sleep(SETTLING_TIME)
-
+#
         #if (dipole == 2):
         #    maxval = 3.5
         #    psq1.setCurrent(maxval)
