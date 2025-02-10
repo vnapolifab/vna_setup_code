@@ -100,17 +100,19 @@ def load_measurement(measurement_path: str, transpose: bool = False) -> tuple[np
 
     df = pd.read_csv(os.path.join(measurement_path, f"{measurement_name}.csv"))
     freqs = (df.loc[ df["Field"] == fields[0] ])["Frequency"]
-    amps, phases = np.zeros((n_field_points, n_freq_points)), np.zeros((n_field_points, n_freq_points))
+    amp1, phases1 = np.zeros((n_field_points, n_freq_points)), np.zeros((n_field_points, n_freq_points))
     
     for i, field in enumerate(fields):
-        amps[i,:] = (df.loc[ df["Field"] == field ])["Amplitude"]
-        phases[i,:] = (df.loc[ df["Field"] == field ])["Phase"]
+
+        
+        amp1[i,:] = np.abs((df.loc[ df["Field"] == field ])["S11"])
+        phases1[i,:] = np.unwrap(np.angle((df.loc[ df["Field"] == field ])["Phase"]))
 
     if transpose:
         amps = np.transpose(amps)
         phases = np.transpose(phases)
 
-    return freqs, fields, amps, phases
+    return freqs, fields, amp1, phases1
 
 
 
