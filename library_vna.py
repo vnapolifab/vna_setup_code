@@ -103,7 +103,7 @@ def measure_dB(instr: RsInstrument, Sparam: str) -> tuple[np.ndarray, np.ndarray
 
 
 
-def measure_amp_and_phase(instr: RsInstrument, Sparam: str, i = 0, avg = 1) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+def measure_amp_and_phase(instr: RsInstrument, Ports: str, i = 0, avg = 1) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Queries the VNA for values.
     Takes as input the vna instrument object and the S parameter that should be measured.
@@ -116,24 +116,123 @@ def measure_amp_and_phase(instr: RsInstrument, Sparam: str, i = 0, avg = 1) -> t
         instr.write("CALC1:PAR:DEL 'Tr3'")
         instr.write("CALC1:PAR:DEL 'Tr4'")
 
-    instr.write("CALC1:PAR:SDEF 'Tr1', 'S11AVG'")
-    instr.write(f'DISP:WIND1:STAT ON') 
-    instr.write(f"DISP:WIND1:TRAC1:FEED 'Tr1'") 
 
-    instr.write("CALC1:PAR:SDEF 'Tr2', 'S21AVG'")
-    instr.write(f'DISP:WIND2:STAT ON') 
-    instr.write(f'DISP:WIND2:TRAC2:FEED "Tr2"') 
+    if (Ports == '12'):
 
-    instr.write("CALC1:PAR:SDEF 'Tr3', 'S12AVG'")
-    instr.write(f'DISP:WIND3:STAT ON') 
-    instr.write(f'DISP:WIND3:TRAC3:FEED "Tr3"') 
+        instr.write("CALC1:PAR:SDEF 'Tr1', 'S11AVG'")
+        instr.write(f'DISP:WIND1:STAT ON') 
+        instr.write(f"DISP:WIND1:TRAC1:FEED 'Tr1'") 
 
-    instr.write("CALC1:PAR:SDEF 'Tr4', 'S22AVG'")
-    instr.write(f'DISP:WIND4:STAT ON') 
-    instr.write(f'DISP:WIND4:TRAC4:FEED "Tr4"') 
+        instr.write("CALC1:PAR:SDEF 'Tr2', 'S21AVG'")
+        instr.write(f'DISP:WIND2:STAT ON') 
+        instr.write(f'DISP:WIND2:TRAC2:FEED "Tr2"') 
+
+        instr.write("CALC1:PAR:SDEF 'Tr3', 'S12AVG'")
+        instr.write(f'DISP:WIND3:STAT ON') 
+        instr.write(f'DISP:WIND3:TRAC3:FEED "Tr3"') 
+
+        instr.write("CALC1:PAR:SDEF 'Tr4', 'S22AVG'")
+        instr.write(f'DISP:WIND4:STAT ON') 
+        instr.write(f'DISP:WIND4:TRAC4:FEED "Tr4"') 
+
+
+    if (Ports == '13'):
+
+        instr.write("CALC1:PAR:SDEF 'Tr1', 'S11AVG'")
+        instr.write(f'DISP:WIND1:STAT ON') 
+        instr.write(f"DISP:WIND1:TRAC1:FEED 'Tr1'") 
+
+        instr.write("CALC1:PAR:SDEF 'Tr2', 'S31AVG'")
+        instr.write(f'DISP:WIND2:STAT ON') 
+        instr.write(f'DISP:WIND2:TRAC2:FEED "Tr2"') 
+
+        instr.write("CALC1:PAR:SDEF 'Tr3', 'S13AVG'")
+        instr.write(f'DISP:WIND3:STAT ON') 
+        instr.write(f'DISP:WIND3:TRAC3:FEED "Tr3"') 
+
+        instr.write("CALC1:PAR:SDEF 'Tr4', 'S33AVG'")
+        instr.write(f'DISP:WIND4:STAT ON') 
+        instr.write(f'DISP:WIND4:TRAC4:FEED "Tr4"') 
+
+
+    if (Ports == '14'):
+
+        instr.write("CALC1:PAR:SDEF 'Tr1', 'S11AVG'")
+        instr.write(f'DISP:WIND1:STAT ON') 
+        instr.write(f"DISP:WIND1:TRAC1:FEED 'Tr1'") 
+
+        instr.write("CALC1:PAR:SDEF 'Tr2', 'S41AVG'")
+        instr.write(f'DISP:WIND2:STAT ON') 
+        instr.write(f'DISP:WIND2:TRAC2:FEED "Tr2"') 
+
+        instr.write("CALC1:PAR:SDEF 'Tr3', 'S14AVG'")
+        instr.write(f'DISP:WIND3:STAT ON') 
+        instr.write(f'DISP:WIND3:TRAC3:FEED "Tr3"') 
+
+        instr.write("CALC1:PAR:SDEF 'Tr4', 'S44AVG'")
+        instr.write(f'DISP:WIND4:STAT ON') 
+        instr.write(f'DISP:WIND4:TRAC4:FEED "Tr4"') 
+
+
+    if (Ports == '23'):
+
+        instr.write("CALC1:PAR:SDEF 'Tr1', 'S22AVG'")
+        instr.write(f'DISP:WIND1:STAT ON') 
+        instr.write(f"DISP:WIND1:TRAC1:FEED 'Tr1'") 
+
+        instr.write("CALC1:PAR:SDEF 'Tr2', 'S32AVG'")
+        instr.write(f'DISP:WIND2:STAT ON') 
+        instr.write(f'DISP:WIND2:TRAC2:FEED "Tr2"') 
+
+        instr.write("CALC1:PAR:SDEF 'Tr3', 'S23AVG'")
+        instr.write(f'DISP:WIND3:STAT ON') 
+        instr.write(f'DISP:WIND3:TRAC3:FEED "Tr3"') 
+
+        instr.write("CALC1:PAR:SDEF 'Tr4', 'S33AVG'")
+        instr.write(f'DISP:WIND4:STAT ON') 
+        instr.write(f'DISP:WIND4:TRAC4:FEED "Tr4"') 
+
+
+    if (Ports == '24'):
+
+        instr.write("CALC1:PAR:SDEF 'Tr1', 'S22AVG'")
+        instr.write(f'DISP:WIND1:STAT ON') 
+        instr.write(f"DISP:WIND1:TRAC1:FEED 'Tr1'") 
+
+        instr.write("CALC1:PAR:SDEF 'Tr2', 'S42AVG'")
+        instr.write(f'DISP:WIND2:STAT ON') 
+        instr.write(f'DISP:WIND2:TRAC2:FEED "Tr2"') 
+
+        instr.write("CALC1:PAR:SDEF 'Tr3', 'S24AVG'")
+        instr.write(f'DISP:WIND3:STAT ON') 
+        instr.write(f'DISP:WIND3:TRAC3:FEED "Tr3"') 
+
+        instr.write("CALC1:PAR:SDEF 'Tr4', 'S44AVG'")
+        instr.write(f'DISP:WIND4:STAT ON') 
+        instr.write(f'DISP:WIND4:TRAC4:FEED "Tr4"') 
+
+
+    if (Ports == '34'):
+
+        instr.write("CALC1:PAR:SDEF 'Tr1', 'S33AVG'")
+        instr.write(f'DISP:WIND1:STAT ON') 
+        instr.write(f"DISP:WIND1:TRAC1:FEED 'Tr1'") 
+
+        instr.write("CALC1:PAR:SDEF 'Tr2', 'S43AVG'")
+        instr.write(f'DISP:WIND2:STAT ON') 
+        instr.write(f'DISP:WIND2:TRAC2:FEED "Tr2"') 
+
+        instr.write("CALC1:PAR:SDEF 'Tr3', 'S34AVG'")
+        instr.write(f'DISP:WIND3:STAT ON') 
+        instr.write(f'DISP:WIND3:TRAC3:FEED "Tr3"') 
+
+        instr.write("CALC1:PAR:SDEF 'Tr4', 'S44AVG'")
+        instr.write(f'DISP:WIND4:STAT ON') 
+        instr.write(f'DISP:WIND4:TRAC4:FEED "Tr4"') 
+
 
     instr.write(":INITiate1:CONTinuous:ALL OFF")
-    instr.write(":SENSE1:AVER:COUN 5; :AVER ON")
+    instr.write(f":SENSE1:AVER:COUN {avg}; :AVER ON")
 
     for i in range(avg):
         instr.query_with_opc(":INITiate1:IMMediate:ALL; *OPC?", 2000000)
