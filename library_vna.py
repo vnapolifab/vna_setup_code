@@ -133,7 +133,7 @@ def measure_amp_and_phase(instr: RsInstrument, Sparam: str, i = 0, avg = 1) -> t
     instr.write(f'DISP:WIND4:TRAC4:FEED "Tr4"') 
 
     instr.write(":INITiate1:CONTinuous:ALL OFF")
-    instr.write(":SENSE1:AVER:COUN 5; :AVER ON")
+    instr.write(f":SENSE1:AVER:COUN {avg}; :AVER ON")
 
     for i in range(avg):
         instr.query_with_opc(":INITiate1:IMMediate:ALL; *OPC?", 2000000)
