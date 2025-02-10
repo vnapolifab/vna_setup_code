@@ -247,9 +247,7 @@ def measure_amp_and_phase(instr: RsInstrument, Ports: str, i = 0, avg = 1) -> tu
 
     tracelist = list(map(str, tracedata.split(',')))  # Convert the received string into a list 
     tracelist = np.array(tracelist, dtype='float32')
-    #print(len(tracelist))
-    #print(len(tracelist)/4)
-    #print(int(len(tracelist)/4))
+
 
     re1 = []
     im1 = []
@@ -330,4 +328,4 @@ def measure_amp_and_phase(instr: RsInstrument, Ports: str, i = 0, avg = 1) -> tu
     freq = np.array(freqlist, dtype='float32')
 
 
-    return freq, amp1, phase1, amp2, phase2, amp3, phase3, amp4, phase4, S1, S2, S3, S4
+    return freq, S1, S2, S3, S4
