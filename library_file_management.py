@@ -13,7 +13,7 @@ def create_measurement_path(settings):
 
     
 
-def save_data(currents: list[float], currents1: list[float], currents2: list[float], freqs: list[float], fields: list[float], amps: list[float], phases: list[float], S, user_folder: str, sample_folder: str, measurement_name: str):
+def save_data(Ports: str, currents: list[float], currents1: list[float], currents2: list[float], freqs: list[float], fields: list[float], S1, S2, S3, S4, user_folder: str, sample_folder: str, measurement_name: str):
     """
     Saves data in as {root_folder}/{user_folder}/{sample_folder}/{measurement_name} {suffix}", checks if existing measurements exist already and adds a suffix
     """
@@ -24,9 +24,42 @@ def save_data(currents: list[float], currents1: list[float], currents2: list[flo
     df["Current (dipole mode)"] = currents
     df["Current1 (quadrupole mode)"] = currents1
     df["Current2 (quadrupole mode)"] = currents2
-    df["Amplitude"] = amps
-    df["Phase"] = phases
-    df["S_param"] = S
+
+    if (Ports == '12'):
+        df["S11"] = S1
+        df["S21"] = S2
+        df["S12"] = S3
+        df["S22"] = S4
+
+    if (Ports == '13'):
+        df["S11"] = S1
+        df["S31"] = S2
+        df["S13"] = S3
+        df["S33"] = S4
+
+    if (Ports == '14'):
+        df["S11"] = S1
+        df["S41"] = S2
+        df["S14"] = S3
+        df["S44"] = S4
+
+    if (Ports == '23'):
+        df["S22"] = S1
+        df["S32"] = S2
+        df["S23"] = S3
+        df["S33"] = S4
+
+    if (Ports == '24'):
+        df["S22"] = S1
+        df["S42"] = S2
+        df["S24"] = S3
+        df["S44"] = S4
+
+    if (Ports == '34'):
+        df["S33"] = S1
+        df["S43"] = S2
+        df["S34"] = S3
+        df["S44"] = S4
 
     root_folder = f"{c.DATA_FOLDER_NAME}/"
     initialname = measurement_name
