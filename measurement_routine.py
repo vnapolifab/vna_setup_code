@@ -124,8 +124,8 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
             currents1 = np.concatenate((currents1,[current1]*len(freq)))
             currents2 = np.concatenate((currents2,[current2]*len(freq)))
 
-            freqs_m  = np.concatenate( (freqs_S11, freq) )    # Concatenation of new data with the already acquired data
-            fields_m = np.concatenate( (fields_S11, [field]*len(freq)) )
+            freqs_m  = np.concatenate( (freqs_m, freq) )    # Concatenation of new data with the already acquired data
+            fields_m = np.concatenate( (fields_m, [field]*len(freq)) )
             S11 = np.concatenate( (S11, S1) )
             S21 = np.concatenate( (S21, S2) )
             S12 = np.concatenate( (S12, S3) )
