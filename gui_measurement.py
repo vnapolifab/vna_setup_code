@@ -53,38 +53,4 @@ measurement_routine(
     demag=False
 )
 
-# Save metadata:
-old_name = settings["measurement_name"]
-
-if (settings["ports"] == '12'):
-    for sparam in ["S11", "S21", "S12", "S22"]: 
-        settings["measurement_name"] = f"{old_name}_{sparam}"
-        settings["s_parameter"] = sparam
-
-if (settings["ports"] == '13'):
-    for sparam in ["S11", "S31", "S13", "S33"]: 
-        settings["measurement_name"] = f"{old_name}_{sparam}"
-        settings["s_parameter"] = sparam
-
-if (settings["ports"] == '14'):
-    for sparam in ["S11", "S41", "S14", "S44"]: 
-        settings["measurement_name"] = f"{old_name}_{sparam}"
-        settings["s_parameter"] = sparam
-
-if (settings["ports"] == '23'):
-    for sparam in ["S22", "S32", "S23", "S33"]: 
-        settings["measurement_name"] = f"{old_name}_{sparam}"
-        settings["s_parameter"] = sparam
-
-if (settings["ports"] == '24'):
-    for sparam in ["S22", "S42", "S24", "S44"]: 
-        settings["measurement_name"] = f"{old_name}_{sparam}"
-        settings["s_parameter"] = sparam
-
-if (settings["ports"] == '34'):
-    for sparam in ["S33", "S43", "S34", "S44"]: 
-        settings["measurement_name"] = f"{old_name}_{sparam}"
-        settings["s_parameter"] = sparam
-
-
 update_log(settings)
