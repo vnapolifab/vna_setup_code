@@ -15,11 +15,9 @@ from library_power_supply import *
 
 def analysis(measurement_path: str) -> None:
     settings = load_metadata(measurement_path)
-    freq, fields, amplitudes, phases = load_measurement(measurement_path)
+    freq, fields, amplitudes1, phases1, amplitudes2, phases2, amplitudes3, phases3, amplitudes4, phases4 = load_measurement(measurement_path, Ports = settings["ports"])
 
-    [traces, Us] = analysisSW(freq, fields, amplitudes, phases, measurement_path, s_parameter=settings["s_parameter"], show_plots=True)  # Plots imag(U), real(U), trasmission
-    # [peak_freq, Ms_fit] = analysisKittel(freq, traces, fields)  # Plots Kittel function and fit
-    # # The conversion factor between current and field was measured to be 53.2, yet its uniformity might play a role (ranges between 51-57)
+    analysisSW(freq, fields, amplitudes1, phases1, amplitudes2, phases2, amplitudes3, phases3, amplitudes4, phases4, measurement_path, Ports = settings["ports"], show_plots=True)  # Plots imag(U), real(U), trasmission
     
     plt.show()
 
