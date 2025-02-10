@@ -5,7 +5,7 @@ from library_vna import *
 from library_file_management import *
 import CONSTANTS as c
 
-def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument, field_sweep: list[float], angle: float, user_folder: str, sample_folder: str, measurement_name: str, dipole: int, Sparam: str, avg:int = 1, demag: bool = False) -> str:
+def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsInstrument, field_sweep: list[float], angle: float, user_folder: str, sample_folder: str, measurement_name: str, dipole: int, Ports: str, avg:int = 1, demag: bool = False) -> str:
     """
     Main function that is called by other files. 
     Goes through the whole routine for initializing, measuring and saving.
@@ -83,6 +83,8 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
 
         #second_demag = demag and field_sweep[0]!=0  # If ref field != 0 a second demag field is needed 
 
+        
+
         freqs_S11, fields_S11, amps_S11, phases_S11, S11 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
         freqs_S12, fields_S12, amps_S12, phases_S12, S12 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
         freqs_S21, fields_S21, amps_S21, phases_S21, S21 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
@@ -131,10 +133,10 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
             logger.info("Settling time over")
 
             logger.info("Measuring...") 
-            freq,a1,p1,a2,p2,a3,p3,a4,p4,S1,S2,S3,S4 = measure_amp_and_phase(instr, Sparam, j, int(avg))
+            freq,a1,p1,a2,p2,a3,p3,a4,p4,S1,S2,S3,S4 = measure_amp_and_phase(instr, Ports, j, int(avg))
             j = j+1
             # x,y,p = measure_dB(instr,Sparam)
-            logger.info("Finished measuring\n")
+            logger.info("Finished measuring")
 
             currents = np.concatenate((currents,[current]*len(freq)))
             currents1 = np.concatenate((currents1,[current1]*len(freq)))
@@ -165,34 +167,184 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
             S22 = np.concatenate( (S22, S4) )
 
 
-            logger.info(f'Saving data...')
-            save_data(currents, currents1, currents2, freqs_S11, fields_S11, amps_S11, phases_S11, S11, user_folder, sample_folder, measurement_name = f"{measurement_name}_S11")
-            logger.info(f'Saved file "{measurement_name}_S11.csv"')
-            settings["measurement_name"] = f"{measurement_name}_S11"
-            settings["s_parameter"] = 'S11'
-            save_metadata(settings)
+            if (Ports == '12'):
+                logger.info(f'Saving data...')
+                save_data(currents, currents1, currents2, freqs_S11, fields_S11, amps_S11, phases_S11, S11, user_folder, sample_folder, measurement_name = f"{measurement_name}_S11")
+                logger.info(f'Saved file "{measurement_name}_S11.csv"')
+                settings["measurement_name"] = f"{measurement_name}_S11"
+                settings["s_parameter"] = 'S11'
+                save_metadata(settings)
 
-            logger.info(f'Saving data...')
-            save_data(currents, currents1, currents2, freqs_S21, fields_S21, amps_S21, phases_S21, S21, user_folder, sample_folder, measurement_name = f"{measurement_name}_S21")
-            logger.info(f'Saved file "{measurement_name}_S21.csv"')
-            settings["measurement_name"] = f"{measurement_name}_S21"
-            settings["s_parameter"] = 'S21'
-            save_metadata(settings)
+                logger.info(f'Saving data...')
+                save_data(currents, currents1, currents2, freqs_S21, fields_S21, amps_S21, phases_S21, S21, user_folder, sample_folder, measurement_name = f"{measurement_name}_S21")
+                logger.info(f'Saved file "{measurement_name}_S21.csv"')
+                settings["measurement_name"] = f"{measurement_name}_S21"
+                settings["s_parameter"] = 'S21'
+                save_metadata(settings)
 
-            logger.info(f'Saving data...')
-            save_data(currents, currents1, currents2, freqs_S12, fields_S12, amps_S12, phases_S12, S12, user_folder, sample_folder, measurement_name = f"{measurement_name}_S12")
-            logger.info(f'Saved file "{measurement_name}_S12.csv"')
-            settings["measurement_name"] = f"{measurement_name}_S12"
-            settings["s_parameter"] = 'S12'
-            save_metadata(settings)
+                logger.info(f'Saving data...')
+                save_data(currents, currents1, currents2, freqs_S12, fields_S12, amps_S12, phases_S12, S12, user_folder, sample_folder, measurement_name = f"{measurement_name}_S12")
+                logger.info(f'Saved file "{measurement_name}_S12.csv"')
+                settings["measurement_name"] = f"{measurement_name}_S12"
+                settings["s_parameter"] = 'S12'
+                save_metadata(settings)
 
-            logger.info(f'Saving data...')
-            save_data(currents, currents1, currents2, freqs_S22, fields_S22, amps_S22, phases_S22, S22, user_folder, sample_folder, measurement_name = f"{measurement_name}_S22")
-            logger.info(f'Saved file "{measurement_name}_S22.csv"')
-            settings["measurement_name"] = f"{measurement_name}_S22"
-            settings["s_parameter"] = 'S22'
-            save_metadata(settings)
-            print("\n\n")
+                logger.info(f'Saving data...')
+                save_data(currents, currents1, currents2, freqs_S22, fields_S22, amps_S22, phases_S22, S22, user_folder, sample_folder, measurement_name = f"{measurement_name}_S22")
+                logger.info(f'Saved file "{measurement_name}_S22.csv"')
+                settings["measurement_name"] = f"{measurement_name}_S22"
+                settings["s_parameter"] = 'S22'
+                save_metadata(settings)
+
+
+            if (Ports == '13'):
+                logger.info(f'Saving data...')
+                save_data(currents, currents1, currents2, freqs_S11, fields_S11, amps_S11, phases_S11, S11, user_folder, sample_folder, measurement_name = f"{measurement_name}_S11")
+                logger.info(f'Saved file "{measurement_name}_S11.csv"')
+                settings["measurement_name"] = f"{measurement_name}_S11"
+                settings["s_parameter"] = 'S11'
+                save_metadata(settings)
+
+                logger.info(f'Saving data...')
+                save_data(currents, currents1, currents2, freqs_S21, fields_S21, amps_S21, phases_S21, S21, user_folder, sample_folder, measurement_name = f"{measurement_name}_S31")
+                logger.info(f'Saved file "{measurement_name}_S31.csv"')
+                settings["measurement_name"] = f"{measurement_name}_S31"
+                settings["s_parameter"] = 'S31'
+                save_metadata(settings)
+
+                logger.info(f'Saving data...')
+                save_data(currents, currents1, currents2, freqs_S12, fields_S12, amps_S12, phases_S12, S12, user_folder, sample_folder, measurement_name = f"{measurement_name}_S13")
+                logger.info(f'Saved file "{measurement_name}_S13.csv"')
+                settings["measurement_name"] = f"{measurement_name}_S13"
+                settings["s_parameter"] = 'S13'
+                save_metadata(settings)
+
+                logger.info(f'Saving data...')
+                save_data(currents, currents1, currents2, freqs_S22, fields_S22, amps_S22, phases_S22, S22, user_folder, sample_folder, measurement_name = f"{measurement_name}_S33")
+                logger.info(f'Saved file "{measurement_name}_S33.csv"')
+                settings["measurement_name"] = f"{measurement_name}_S33"
+                settings["s_parameter"] = 'S33'
+                save_metadata(settings)
+
+
+            if (Ports == '14'):
+                logger.info(f'Saving data...')
+                save_data(currents, currents1, currents2, freqs_S11, fields_S11, amps_S11, phases_S11, S11, user_folder, sample_folder, measurement_name = f"{measurement_name}_S11")
+                logger.info(f'Saved file "{measurement_name}_S11.csv"')
+                settings["measurement_name"] = f"{measurement_name}_S11"
+                settings["s_parameter"] = 'S11'
+                save_metadata(settings)
+
+                logger.info(f'Saving data...')
+                save_data(currents, currents1, currents2, freqs_S21, fields_S21, amps_S21, phases_S21, S21, user_folder, sample_folder, measurement_name = f"{measurement_name}_S41")
+                logger.info(f'Saved file "{measurement_name}_S41.csv"')
+                settings["measurement_name"] = f"{measurement_name}_S41"
+                settings["s_parameter"] = 'S41'
+                save_metadata(settings)
+
+                logger.info(f'Saving data...')
+                save_data(currents, currents1, currents2, freqs_S12, fields_S12, amps_S12, phases_S12, S12, user_folder, sample_folder, measurement_name = f"{measurement_name}_S14")
+                logger.info(f'Saved file "{measurement_name}_S14.csv"')
+                settings["measurement_name"] = f"{measurement_name}_S14"
+                settings["s_parameter"] = 'S14'
+                save_metadata(settings)
+
+                logger.info(f'Saving data...')
+                save_data(currents, currents1, currents2, freqs_S22, fields_S22, amps_S22, phases_S22, S22, user_folder, sample_folder, measurement_name = f"{measurement_name}_S44")
+                logger.info(f'Saved file "{measurement_name}_S44.csv"')
+                settings["measurement_name"] = f"{measurement_name}_S44"
+                settings["s_parameter"] = 'S44'
+                save_metadata(settings)
+
+
+            if (Ports == '23'):
+                logger.info(f'Saving data...')
+                save_data(currents, currents1, currents2, freqs_S11, fields_S11, amps_S11, phases_S11, S11, user_folder, sample_folder, measurement_name = f"{measurement_name}_S22")
+                logger.info(f'Saved file "{measurement_name}_S22.csv"')
+                settings["measurement_name"] = f"{measurement_name}_S22"
+                settings["s_parameter"] = 'S22'
+                save_metadata(settings)
+
+                logger.info(f'Saving data...')
+                save_data(currents, currents1, currents2, freqs_S21, fields_S21, amps_S21, phases_S21, S21, user_folder, sample_folder, measurement_name = f"{measurement_name}_S32")
+                logger.info(f'Saved file "{measurement_name}_S32.csv"')
+                settings["measurement_name"] = f"{measurement_name}_S32"
+                settings["s_parameter"] = 'S32'
+                save_metadata(settings)
+
+                logger.info(f'Saving data...')
+                save_data(currents, currents1, currents2, freqs_S12, fields_S12, amps_S12, phases_S12, S12, user_folder, sample_folder, measurement_name = f"{measurement_name}_S23")
+                logger.info(f'Saved file "{measurement_name}_S23.csv"')
+                settings["measurement_name"] = f"{measurement_name}_S23"
+                settings["s_parameter"] = 'S23'
+                save_metadata(settings)
+
+                logger.info(f'Saving data...')
+                save_data(currents, currents1, currents2, freqs_S22, fields_S22, amps_S22, phases_S22, S22, user_folder, sample_folder, measurement_name = f"{measurement_name}_S33")
+                logger.info(f'Saved file "{measurement_name}_S33.csv"')
+                settings["measurement_name"] = f"{measurement_name}_S33"
+                settings["s_parameter"] = 'S33'
+                save_metadata(settings)
+
+
+            if (Ports == '24'):
+                logger.info(f'Saving data...')
+                save_data(currents, currents1, currents2, freqs_S11, fields_S11, amps_S11, phases_S11, S11, user_folder, sample_folder, measurement_name = f"{measurement_name}_S22")
+                logger.info(f'Saved file "{measurement_name}_S22.csv"')
+                settings["measurement_name"] = f"{measurement_name}_S22"
+                settings["s_parameter"] = 'S22'
+                save_metadata(settings)
+
+                logger.info(f'Saving data...')
+                save_data(currents, currents1, currents2, freqs_S21, fields_S21, amps_S21, phases_S21, S21, user_folder, sample_folder, measurement_name = f"{measurement_name}_S42")
+                logger.info(f'Saved file "{measurement_name}_S42.csv"')
+                settings["measurement_name"] = f"{measurement_name}_S42"
+                settings["s_parameter"] = 'S42'
+                save_metadata(settings)
+
+                logger.info(f'Saving data...')
+                save_data(currents, currents1, currents2, freqs_S12, fields_S12, amps_S12, phases_S12, S12, user_folder, sample_folder, measurement_name = f"{measurement_name}_S24")
+                logger.info(f'Saved file "{measurement_name}_S24.csv"')
+                settings["measurement_name"] = f"{measurement_name}_S24"
+                settings["s_parameter"] = 'S24'
+                save_metadata(settings)
+
+                logger.info(f'Saving data...')
+                save_data(currents, currents1, currents2, freqs_S22, fields_S22, amps_S22, phases_S22, S22, user_folder, sample_folder, measurement_name = f"{measurement_name}_S44")
+                logger.info(f'Saved file "{measurement_name}_S44.csv"')
+                settings["measurement_name"] = f"{measurement_name}_S44"
+                settings["s_parameter"] = 'S44'
+                save_metadata(settings)
+
+
+            if (Ports == '34'):
+                logger.info(f'Saving data...')
+                save_data(currents, currents1, currents2, freqs_S11, fields_S11, amps_S11, phases_S11, S11, user_folder, sample_folder, measurement_name = f"{measurement_name}_S33")
+                logger.info(f'Saved file "{measurement_name}_S33.csv"')
+                settings["measurement_name"] = f"{measurement_name}_S33"
+                settings["s_parameter"] = 'S33'
+                save_metadata(settings)
+
+                logger.info(f'Saving data...')
+                save_data(currents, currents1, currents2, freqs_S21, fields_S21, amps_S21, phases_S21, S21, user_folder, sample_folder, measurement_name = f"{measurement_name}_S43")
+                logger.info(f'Saved file "{measurement_name}_S43.csv"')
+                settings["measurement_name"] = f"{measurement_name}_S43"
+                settings["s_parameter"] = 'S43'
+                save_metadata(settings)
+
+                logger.info(f'Saving data...')
+                save_data(currents, currents1, currents2, freqs_S12, fields_S12, amps_S12, phases_S12, S12, user_folder, sample_folder, measurement_name = f"{measurement_name}_S34")
+                logger.info(f'Saved file "{measurement_name}_S34.csv"')
+                settings["measurement_name"] = f"{measurement_name}_S34"
+                settings["s_parameter"] = 'S34'
+                save_metadata(settings)
+
+                logger.info(f'Saving data...')
+                save_data(currents, currents1, currents2, freqs_S22, fields_S22, amps_S22, phases_S22, S22, user_folder, sample_folder, measurement_name = f"{measurement_name}_S44")
+                logger.info(f'Saved file "{measurement_name}_S44.csv"')
+                settings["measurement_name"] = f"{measurement_name}_S44"
+                settings["s_parameter"] = 'S44'
+                save_metadata(settings)
 
 
         if (dipole == 1):
