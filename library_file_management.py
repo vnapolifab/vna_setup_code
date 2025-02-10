@@ -83,7 +83,7 @@ def save_data(Ports: str, currents: list[float], currents1: list[float], current
 
 
 
-def load_measurement(measurement_path: str, transpose: bool = False) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def load_measurement(measurement_path: str, Ports: str) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Reads data from txt file assuming 3 columns: frequency, amplitude, phase.
     Takes filename as input and returns relevant data.
@@ -100,19 +100,86 @@ def load_measurement(measurement_path: str, transpose: bool = False) -> tuple[np
 
     df = pd.read_csv(os.path.join(measurement_path, f"{measurement_name}.csv"))
     freqs = (df.loc[ df["Field"] == fields[0] ])["Frequency"]
-    amp1, phases1 = np.zeros((n_field_points, n_freq_points)), np.zeros((n_field_points, n_freq_points))
+
+    S1 = np.zeros((n_field_points, n_freq_points), dtype = 'complex_')
+    amp1 = np.zeros((n_field_points, n_freq_points))
+    phases1 = np.zeros((n_field_points, n_freq_points))
+
+    S2 = np.zeros((n_field_points, n_freq_points), dtype = 'complex_')
+    amp2 = np.zeros((n_field_points, n_freq_points))
+    phases2 = np.zeros((n_field_points, n_freq_points))
+
+    S3 = np.zeros((n_field_points, n_freq_points), dtype = 'complex_')
+    amp3 = np.zeros((n_field_points, n_freq_points))
+    phases3 = np.zeros((n_field_points, n_freq_points))
+
+    S4 = np.zeros((n_field_points, n_freq_points), dtype = 'complex_')
+    amp4 = np.zeros((n_field_points, n_freq_points))
+    phases4 = np.zeros((n_field_points, n_freq_points))
     
     for i, field in enumerate(fields):
+        if (Ports == '12'):
+            a = (df.loc[ df["Field"] == field ])["S11"]
+            b = (df.loc[ df["Field"] == field ])["S21"]
+            c = (df.loc[ df["Field"] == field ])["S12"]
+            d = (df.loc[ df["Field"] == field ])["S22"]
 
-        
-        amp1[i,:] = np.abs((df.loc[ df["Field"] == field ])["S11"])
-        phases1[i,:] = np.unwrap(np.angle((df.loc[ df["Field"] == field ])["Phase"]))
+        if (Ports == '13'):
+            a = (df.loc[ df["Field"] == field ])["S11"]
+            b = (df.loc[ df["Field"] == field ])["S31"]
+            c = (df.loc[ df["Field"] == field ])["S13"]
+            d = (df.loc[ df["Field"] == field ])["S33"]
 
-    if transpose:
-        amps = np.transpose(amps)
-        phases = np.transpose(phases)
+        if (Ports == '14'):
+            a = (df.loc[ df["Field"] == field ])["S11"]
+            b = (df.loc[ df["Field"] == field ])["S41"]
+            c = (df.loc[ df["Field"] == field ])["S14"]
+            d = (df.loc[ df["Field"] == field ])["S44"]
 
-    return freqs, fields, amp1, phases1
+        if (Ports == '23'):
+            a = (df.loc[ df["Field"] == field ])["S22"]
+            b = (df.loc[ df["Field"] == field ])["S32"]
+            c = (df.loc[ df["Field"] == field ])["S23"]
+            d = (df.loc[ df["Field"] == field ])["S33"]
+
+        if (Ports == '24'):
+            a = (df.loc[ df["Field"] == field ])["S22"]
+            b = (df.loc[ df["Field"] == field ])["S42"]
+            c = (df.loc[ df["Field"] == field ])["S24"]
+            d = (df.loc[ df["Field"] == field ])["S44"]
+
+        if (Ports == '34'):
+            a = (df.loc[ df["Field"] == field ])["S33"]
+            b = (df.loc[ df["Field"] == field ])["S43"]
+            c = (df.loc[ df["Field"] == field ])["S34"]
+            d = (df.loc[ df["Field"] == field ])["S44"]
+
+
+        # Convert the Series of complex number strings into actual complex numbers
+        complex_series = a.apply(lambda x: complex(x.strip()))
+        complex_series = b.apply(lambda x: complex(x.strip()))
+        complex_series = c.apply(lambda x: complex(x.strip()))
+        complex_series = d.apply(lambda x: complex(x.strip()))
+
+        # Convert the Pandas Series into a NumPy array
+        S1[i,:] = np.array(complex_series, dtype = 'complex_')
+        amp1[i,:] = np.abs(S1[i,:])
+        phases1[i,:] = np.angle(S1[i,:])
+
+        S2[i,:] = np.array(complex_series, dtype = 'complex_')
+        amp2[i,:] = np.abs(S2[i,:])
+        phases2[i,:] = np.angle(S2[i,:])
+
+        S3[i,:] = np.array(complex_series, dtype = 'complex_')
+        amp3[i,:] = np.abs(S3[i,:])
+        phases3[i,:] = np.angle(S3[i,:])
+
+        S4[i,:] = np.array(complex_series, dtype = 'complex_')
+        amp4[i,:] = np.abs(S4[i,:])
+        phases4[i,:] = np.angle(S4[i,:])
+
+
+    return freqs, fields, amp1, phases1, amp2, phases2, amp3, phases3, amp4, phases4
 
 
 
