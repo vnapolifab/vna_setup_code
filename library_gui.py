@@ -212,7 +212,7 @@ class GUI_input_text_field_sweep(GUI_input_text):
         
     def write(self, content):
         self.clear()
-        self.entry_var.insert(0, str(list(np.array(content)[1:])))
+        self.entry_var.insert(0, str(list((content)[1:])))
     
         
 class GUI_input_text_to_freq(GUI_input_text):

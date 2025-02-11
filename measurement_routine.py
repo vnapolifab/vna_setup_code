@@ -83,10 +83,10 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
 
         #second_demag = demag and field_sweep[0]!=0  # If ref field != 0 a second demag field is needed 
 
-        freqs_S11, fields_S11, amps_S11, phases_S11, S11 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
-        freqs_S12, fields_S12, amps_S12, phases_S12, S12 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
-        freqs_S21, fields_S21, amps_S21, phases_S21, S21 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
-        freqs_S22, fields_S22, amps_S22, phases_S22, S22 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex_')
+        freqs_S11, fields_S11, amps_S11, phases_S11, S11 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex')
+        freqs_S12, fields_S12, amps_S12, phases_S12, S12 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex')
+        freqs_S21, fields_S21, amps_S21, phases_S21, S21 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex')
+        freqs_S22, fields_S22, amps_S22, phases_S22, S22 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([], dtype = 'complex')
         currents = np.array([])
         currents1 = np.array([])
         currents2 = np.array([])

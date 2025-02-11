@@ -325,7 +325,7 @@ def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes: np.ndarray, pha
     # init
     traces_no_background_real = np.zeros((n_traces, n_points))
     traces_no_background_imag = np.zeros((n_traces, n_points))
-    traces_no_background_complex = np.zeros((n_traces, n_points), dtype = 'complex_')
+    traces_no_background_complex = np.zeros((n_traces, n_points), dtype = 'complex')
     amplitudes_no_background = np.zeros((n_traces, n_points))
     phase_sub = np.zeros((n_traces, n_points))
     
