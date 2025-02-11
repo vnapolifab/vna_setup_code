@@ -12,6 +12,7 @@ import tkinter.font as tkFont
 from library_misc import *
 import CONSTANTS as c
 
+
 class EntryNotFound(Exception):
     pass
 
@@ -88,12 +89,11 @@ class GUI:
 
 
     def load(self, filename):
+
         with open(filename, "r") as f:
             json_obj = json.load(f)
         for entry in self.entries:
             entry.write(json_obj.get(entry.param_name, ""))
-
-
 
 
 class GUI_input(ABC):
@@ -212,7 +212,7 @@ class GUI_input_text_field_sweep(GUI_input_text):
         
     def write(self, content):
         self.clear()
-        self.entry_var.insert(0, str(list(np.array(content)[1:])))
+        self.entry_var.insert(0, str(list((content)[1:])))
     
         
 class GUI_input_text_to_freq(GUI_input_text):
