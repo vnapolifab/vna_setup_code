@@ -23,10 +23,10 @@ settings["datetime"] = str(datetime.now()).rstrip("0123456789").rstrip(".")
 
 
 print("Power supply 1 > ", end=""); 
-ps1 = setupConnectionPS('COM3', 9600)
+ps1 = setupConnectionPS('COM4', 9600)
 
 print("Power supply 2 > ", end=""); 
-ps2 = setupConnectionPS('COM4', 9600)
+ps2 = setupConnectionPS('COM3', 9600)
 
 print("VNA            > ", end=""); 
 instr = setupConnectionVNA()
