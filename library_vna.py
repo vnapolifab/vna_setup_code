@@ -240,10 +240,10 @@ def measure_amp_and_phase(instr: RsInstrument, Ports: str, i = 0, avg = 1) -> tu
 
     tracedata = instr.query_str('CALCulate1:DATA:ALL? SDAT')  # Get measurement values for complete trace
     chan_list = instr.query_str('CONF:CHAN:CATalog?')
-    print(chan_list)
+    #print(chan_list)
 
     trace_list = instr.query_str('CONF:CHAN:TRAC:CATalog?')
-    print(trace_list)
+    #print(trace_list)
 
     tracelist = list(map(str, tracedata.split(',')))  # Convert the received string into a list 
     tracelist = np.array(tracelist, dtype='float32')

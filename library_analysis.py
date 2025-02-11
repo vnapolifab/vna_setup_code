@@ -26,25 +26,25 @@ def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes1: np.ndarray, ph
     # init
     traces_no_background_real1 = np.zeros((n_traces, n_points))
     traces_no_background_imag1 = np.zeros((n_traces, n_points))
-    traces_no_background_complex1 = np.zeros((n_traces, n_points), dtype = 'complex_')
+    traces_no_background_complex1 = np.zeros((n_traces, n_points), dtype = 'complex')
     amplitudes_no_background1 = np.zeros((n_traces, n_points))
     phase_sub1 = np.zeros((n_traces, n_points))
 
     traces_no_background_real2 = np.zeros((n_traces, n_points))
     traces_no_background_imag2 = np.zeros((n_traces, n_points))
-    traces_no_background_complex2 = np.zeros((n_traces, n_points), dtype = 'complex_')
+    traces_no_background_complex2 = np.zeros((n_traces, n_points), dtype = 'complex')
     amplitudes_no_background2 = np.zeros((n_traces, n_points))
     phase_sub2 = np.zeros((n_traces, n_points))
 
     traces_no_background_real3 = np.zeros((n_traces, n_points))
     traces_no_background_imag3 = np.zeros((n_traces, n_points))
-    traces_no_background_complex3 = np.zeros((n_traces, n_points), dtype = 'complex_')
+    traces_no_background_complex3 = np.zeros((n_traces, n_points), dtype = 'complex')
     amplitudes_no_background3 = np.zeros((n_traces, n_points))
     phase_sub3 = np.zeros((n_traces, n_points))
 
     traces_no_background_real4 = np.zeros((n_traces, n_points))
     traces_no_background_imag4 = np.zeros((n_traces, n_points))
-    traces_no_background_complex4 = np.zeros((n_traces, n_points), dtype = 'complex_')
+    traces_no_background_complex4 = np.zeros((n_traces, n_points), dtype = 'complex')
     amplitudes_no_background4 = np.zeros((n_traces, n_points))
     phase_sub4 = np.zeros((n_traces, n_points))
     

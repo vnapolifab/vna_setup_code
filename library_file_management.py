@@ -101,19 +101,19 @@ def load_measurement(measurement_path: str, Ports: str) -> tuple[np.ndarray, np.
     df = pd.read_csv(os.path.join(measurement_path, f"{measurement_name}.csv"))
     freqs = (df.loc[ df["Field"] == fields[0] ])["Frequency"]
 
-    S1 = np.zeros((n_field_points, n_freq_points), dtype = 'complex_')
+    S1 = np.zeros((n_field_points, n_freq_points), dtype = 'complex')
     amp1 = np.zeros((n_field_points, n_freq_points))
     phases1 = np.zeros((n_field_points, n_freq_points))
 
-    S2 = np.zeros((n_field_points, n_freq_points), dtype = 'complex_')
+    S2 = np.zeros((n_field_points, n_freq_points), dtype = 'complex')
     amp2 = np.zeros((n_field_points, n_freq_points))
     phases2 = np.zeros((n_field_points, n_freq_points))
 
-    S3 = np.zeros((n_field_points, n_freq_points), dtype = 'complex_')
+    S3 = np.zeros((n_field_points, n_freq_points), dtype = 'complex')
     amp3 = np.zeros((n_field_points, n_freq_points))
     phases3 = np.zeros((n_field_points, n_freq_points))
 
-    S4 = np.zeros((n_field_points, n_freq_points), dtype = 'complex_')
+    S4 = np.zeros((n_field_points, n_freq_points), dtype = 'complex')
     amp4 = np.zeros((n_field_points, n_freq_points))
     phases4 = np.zeros((n_field_points, n_freq_points))
     
@@ -162,19 +162,19 @@ def load_measurement(measurement_path: str, Ports: str) -> tuple[np.ndarray, np.
         complex_series = d.apply(lambda x: complex(x.strip()))
 
         # Convert the Pandas Series into a NumPy array
-        S1[i,:] = np.array(complex_series, dtype = 'complex_')
+        S1[i,:] = np.array(complex_series, dtype = 'complex')
         amp1[i,:] = np.abs(S1[i,:])
         phases1[i,:] = np.angle(S1[i,:])
 
-        S2[i,:] = np.array(complex_series, dtype = 'complex_')
+        S2[i,:] = np.array(complex_series, dtype = 'complex')
         amp2[i,:] = np.abs(S2[i,:])
         phases2[i,:] = np.angle(S2[i,:])
 
-        S3[i,:] = np.array(complex_series, dtype = 'complex_')
+        S3[i,:] = np.array(complex_series, dtype = 'complex')
         amp3[i,:] = np.abs(S3[i,:])
         phases3[i,:] = np.angle(S3[i,:])
 
-        S4[i,:] = np.array(complex_series, dtype = 'complex_')
+        S4[i,:] = np.array(complex_series, dtype = 'complex')
         amp4[i,:] = np.abs(S4[i,:])
         phases4[i,:] = np.angle(S4[i,:])
 
@@ -224,36 +224,6 @@ def save_plot(path: str, name: str):
     if not(os.path.exists(folder_path)):
         os.mkdir(folder_path)
     plt.savefig(os.path.join(folder_path, name))
-
-
-
-if __name__ == "__main__":
-
-    # =========================
-    # TESTS FOR TESTING THE LIBRARY
-    # =========================
-
-    # =========================
-    # Save metadata tests:
-    # =========================
-
-    test_path = r"local\DATA_test\newtestuser\testsample\testmeasure"
-
-    save_metadata({
-        "user_name" : "newtestuser",
-        "field_sweep" : [1,2,5],
-        "sample_name" : "testsample",
-        "measurement_name" : "testmeasure",
-        "number_of_points" : 3
-    })
-
-    # =========================
-    # Load measurement tests:
-    # =========================
-
-    test_path = r"local\DATA_test\newtestuser\testsample\testmeasure"
-
-    freqs, fields, amps, phases = load_measurement(test_path, transpose=True)
 
 
 
