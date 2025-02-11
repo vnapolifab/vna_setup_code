@@ -11,6 +11,9 @@ print("Power supply 1 > ", end="");
 if "ps1" in locals(): ps1.closeConnection()
 ps1 = setupConnectionPS('COM4', 9600)
 ps2 = setupConnectionPS('COM3', 9600)
+
+print("VNA            > ", end=""); 
+instr = setupConnectionVNA()
 #ps1.demag_sweep()
 
 field = 50
