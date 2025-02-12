@@ -17,7 +17,7 @@ def analysis(measurement_path: str) -> None:
     settings = load_metadata(measurement_path)
     freq, fields, amplitudes1, phases1, amplitudes2, phases2, amplitudes3, phases3, amplitudes4, phases4 = load_measurement(measurement_path, Ports = settings["ports"])
 
-    analysisSW(freq, fields, amplitudes1, phases1, amplitudes2, phases2, amplitudes3, phases3, amplitudes4, phases4, measurement_path, Ports = settings["ports"], show_plots=True)  # Plots imag(U), real(U), trasmission
+    analysisSW(freq, fields, amplitudes1, phases1, amplitudes2, phases2, amplitudes3, phases3, amplitudes4, phases4, measurement_path, Ports = settings["ports"], show_plots=False)  # Plots imag(U), real(U), trasmission
     
     plt.show()
 
