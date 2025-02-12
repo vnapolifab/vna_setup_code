@@ -14,7 +14,7 @@ This library containsfunctions used for the analysis of measurement results.
 In this file functions are modified to be compatible with the gui.
 """
 
-def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes1: np.ndarray, phases1: np.ndarray, amplitudes2: np.ndarray, phases2: np.ndarray, amplitudes3: np.ndarray, phases3: np.ndarray, amplitudes4: np.ndarray, phases4: np.ndarray, measurement_path: str, Ports: str, ref_n = 0, show_plots=False) -> tuple[np.ndarray, np.ndarray]:
+def analysisSW(freq: np.ndarray, fields: np.ndarray, amplitudes1: np.ndarray, phases1: np.ndarray, amplitudes2: np.ndarray, phases2: np.ndarray, amplitudes3: np.ndarray, phases3: np.ndarray, amplitudes4: np.ndarray, phases4: np.ndarray, measurement_path: str, Ports: str, ref_n = 0, show_plots=True) -> tuple[np.ndarray, np.ndarray]:
     """
     This function takes as input the frequencies, fields, amplitudes and phases and plots relevant data for FMR resonance.
     ref_n is the index number for the reference measurement, default is zero.
