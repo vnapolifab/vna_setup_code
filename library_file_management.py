@@ -13,7 +13,7 @@ def create_measurement_path(settings):
 
     
 
-def save_data(Ports: str, currents: list[float], currents1: list[float], currents2: list[float], freqs: list[float], fields: list[float], S1, S2, S3, S4, user_folder: str, sample_folder: str, measurement_name: str):
+def save_data(Ports: str, currents: list[float], currents1: list[float], currents2: list[float], freqs: list[float], fields: list[float], re1, im1, re2, im2, re3, im3, re4, im4, user_folder: str, sample_folder: str, measurement_name: str):
     """
     Saves data in as {root_folder}/{user_folder}/{sample_folder}/{measurement_name} {suffix}", checks if existing measurements exist already and adds a suffix
     """
@@ -26,40 +26,64 @@ def save_data(Ports: str, currents: list[float], currents1: list[float], current
     df["Current2 (quadrupole mode)"] = currents2
 
     if (Ports == '12'):
-        df["S11"] = S1
-        df["S21"] = S2
-        df["S12"] = S3
-        df["S22"] = S4
+        df["Re(S11)"] = re1
+        df["Im(S11)"] = im1
+        df["Re(S21)"] = re2
+        df["Im(S21)"] = im2
+        df["Re(S12)"] = re3
+        df["Im(S12)"] = im3
+        df["Re(S22)"] = re4
+        df["Im(S22)"] = im4
 
     if (Ports == '13'):
-        df["S11"] = S1
-        df["S31"] = S2
-        df["S13"] = S3
-        df["S33"] = S4
+        df["Re(S11)"] = re1
+        df["Im(S11)"] = im1
+        df["Re(S31)"] = re2
+        df["Im(S31)"] = im2
+        df["Re(S13)"] = re3
+        df["Im(S13)"] = im3
+        df["Re(S33)"] = re4
+        df["Im(S33)"] = im4
 
     if (Ports == '14'):
-        df["S11"] = S1
-        df["S41"] = S2
-        df["S14"] = S3
-        df["S44"] = S4
+        df["Re(S11)"] = re1
+        df["Im(S11)"] = im1
+        df["Re(S41)"] = re2
+        df["Im(S41)"] = im2
+        df["Re(S14)"] = re3
+        df["Im(S14)"] = im3
+        df["Re(S44)"] = re4
+        df["Im(S44)"] = im4
 
     if (Ports == '23'):
-        df["S22"] = S1
-        df["S32"] = S2
-        df["S23"] = S3
-        df["S33"] = S4
+        df["Re(S22)"] = re1
+        df["Im(S22)"] = im1
+        df["Re(S32)"] = re2
+        df["Im(S32)"] = im2
+        df["Re(S23)"] = re3
+        df["Im(S23)"] = im3
+        df["Re(S33)"] = re4
+        df["Im(S33)"] = im4
 
     if (Ports == '24'):
-        df["S22"] = S1
-        df["S42"] = S2
-        df["S24"] = S3
-        df["S44"] = S4
+        df["Re(S22)"] = re1
+        df["Im(S22)"] = im1
+        df["Re(S42)"] = re2
+        df["Im(S42)"] = im2
+        df["Re(S24)"] = re3
+        df["Im(S24)"] = im3
+        df["Re(S44)"] = re4
+        df["Im(S44)"] = im4
 
     if (Ports == '34'):
-        df["S33"] = S1
-        df["S43"] = S2
-        df["S34"] = S3
-        df["S44"] = S4
+        df["Re(S33)"] = re1
+        df["Im(S33)"] = im1
+        df["Re(S43)"] = re2
+        df["Im(S43)"] = im2
+        df["Re(S34)"] = re3
+        df["Im(S34)"] = im3
+        df["Re(S44)"] = re4
+        df["Im(S44)"] = im4
 
     root_folder = f"{c.DATA_FOLDER_NAME}/"
     initialname = measurement_name
@@ -83,7 +107,7 @@ def save_data(Ports: str, currents: list[float], currents1: list[float], current
 
 
 
-def load_measurement(measurement_path: str, Ports: str) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def load_measurement(measurement_path: str, Ports: str) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Reads data from txt file assuming 3 columns: frequency, amplitude, phase.
     Takes filename as input and returns relevant data.
@@ -119,62 +143,80 @@ def load_measurement(measurement_path: str, Ports: str) -> tuple[np.ndarray, np.
     
     for i, field in enumerate(fields):
         if (Ports == '12'):
-            a = (df.loc[ df["Field"] == field ])["S11"]
-            b = (df.loc[ df["Field"] == field ])["S21"]
-            c = (df.loc[ df["Field"] == field ])["S12"]
-            d = (df.loc[ df["Field"] == field ])["S22"]
+            re_a = (df.loc[ df["Field"] == field ])["Re(S11)"]
+            im_a = (df.loc[ df["Field"] == field ])["Im(S11)"]
+            re_b = (df.loc[ df["Field"] == field ])["Re(S21)"]
+            im_b = (df.loc[ df["Field"] == field ])["Im(S21)"]
+            re_c = (df.loc[ df["Field"] == field ])["Re(S12)"]
+            im_c = (df.loc[ df["Field"] == field ])["Im(S12)"]
+            re_d = (df.loc[ df["Field"] == field ])["Re(S22)"]
+            im_d = (df.loc[ df["Field"] == field ])["Im(S22)"]
 
         if (Ports == '13'):
-            a = (df.loc[ df["Field"] == field ])["S11"]
-            b = (df.loc[ df["Field"] == field ])["S31"]
-            c = (df.loc[ df["Field"] == field ])["S13"]
-            d = (df.loc[ df["Field"] == field ])["S33"]
+            re_a = (df.loc[ df["Field"] == field ])["Re(S11)"]
+            im_a = (df.loc[ df["Field"] == field ])["Im(S11)"]
+            re_b = (df.loc[ df["Field"] == field ])["Re(S31)"]
+            im_b = (df.loc[ df["Field"] == field ])["Im(S31)"]
+            re_c = (df.loc[ df["Field"] == field ])["Re(S13)"]
+            im_c = (df.loc[ df["Field"] == field ])["Im(S13)"]
+            re_d = (df.loc[ df["Field"] == field ])["Re(S33)"]
+            im_d = (df.loc[ df["Field"] == field ])["Im(S33)"]
 
         if (Ports == '14'):
-            a = (df.loc[ df["Field"] == field ])["S11"]
-            b = (df.loc[ df["Field"] == field ])["S41"]
-            c = (df.loc[ df["Field"] == field ])["S14"]
-            d = (df.loc[ df["Field"] == field ])["S44"]
+            re_a = (df.loc[ df["Field"] == field ])["Re(S11)"]
+            im_a = (df.loc[ df["Field"] == field ])["Im(S11)"]
+            re_b = (df.loc[ df["Field"] == field ])["Re(S41)"]
+            im_b = (df.loc[ df["Field"] == field ])["Im(S41)"]
+            re_c = (df.loc[ df["Field"] == field ])["Re(S14)"]
+            im_c = (df.loc[ df["Field"] == field ])["Im(S14)"]
+            re_d = (df.loc[ df["Field"] == field ])["Re(S44)"]
+            im_d = (df.loc[ df["Field"] == field ])["Im(S44)"]
 
         if (Ports == '23'):
-            a = (df.loc[ df["Field"] == field ])["S22"]
-            b = (df.loc[ df["Field"] == field ])["S32"]
-            c = (df.loc[ df["Field"] == field ])["S23"]
-            d = (df.loc[ df["Field"] == field ])["S33"]
+            re_a = (df.loc[ df["Field"] == field ])["Re(S22)"]
+            im_a = (df.loc[ df["Field"] == field ])["Im(S22)"]
+            re_b = (df.loc[ df["Field"] == field ])["Re(S32)"]
+            im_b = (df.loc[ df["Field"] == field ])["Im(S32)"]
+            re_c = (df.loc[ df["Field"] == field ])["Re(S23)"]
+            im_c = (df.loc[ df["Field"] == field ])["Im(S23)"]
+            re_d = (df.loc[ df["Field"] == field ])["Re(S33)"]
+            im_d = (df.loc[ df["Field"] == field ])["Im(S33)"]
 
         if (Ports == '24'):
-            a = (df.loc[ df["Field"] == field ])["S22"]
-            b = (df.loc[ df["Field"] == field ])["S42"]
-            c = (df.loc[ df["Field"] == field ])["S24"]
-            d = (df.loc[ df["Field"] == field ])["S44"]
+            re_a = (df.loc[ df["Field"] == field ])["Re(S22)"]
+            im_a = (df.loc[ df["Field"] == field ])["Im(S22)"]
+            re_b = (df.loc[ df["Field"] == field ])["Re(S42)"]
+            im_b = (df.loc[ df["Field"] == field ])["Im(S42)"]
+            re_c = (df.loc[ df["Field"] == field ])["Re(S24)"]
+            im_c = (df.loc[ df["Field"] == field ])["Im(S24)"]
+            re_d = (df.loc[ df["Field"] == field ])["Re(S44)"]
+            im_d = (df.loc[ df["Field"] == field ])["Im(S44)"]
 
         if (Ports == '34'):
-            a = (df.loc[ df["Field"] == field ])["S33"]
-            b = (df.loc[ df["Field"] == field ])["S43"]
-            c = (df.loc[ df["Field"] == field ])["S34"]
-            d = (df.loc[ df["Field"] == field ])["S44"]
+            re_a = (df.loc[ df["Field"] == field ])["Re(S33)"]
+            im_a = (df.loc[ df["Field"] == field ])["Im(S33)"]
+            re_b = (df.loc[ df["Field"] == field ])["Re(S43)"]
+            im_b = (df.loc[ df["Field"] == field ])["Im(S43)"]
+            re_c = (df.loc[ df["Field"] == field ])["Re(S34)"]
+            im_c = (df.loc[ df["Field"] == field ])["Im(S34)"]
+            re_d = (df.loc[ df["Field"] == field ])["Re(S44)"]
+            im_d = (df.loc[ df["Field"] == field ])["Im(S44)"]
 
-
-        # Convert the Series of complex number strings into actual complex numbers
-        complex_series = a.apply(lambda x: complex(x.strip()))
-        complex_series = b.apply(lambda x: complex(x.strip()))
-        complex_series = c.apply(lambda x: complex(x.strip()))
-        complex_series = d.apply(lambda x: complex(x.strip()))
 
         # Convert the Pandas Series into a NumPy array
-        S1[i,:] = np.array(complex_series, dtype = 'complex')
+        S1[i,:] = np.array(re_a+1j*im_a, dtype = 'complex')
         amp1[i,:] = np.abs(S1[i,:])
         phases1[i,:] = np.angle(S1[i,:])
 
-        S2[i,:] = np.array(complex_series, dtype = 'complex')
+        S2[i,:] = np.array(re_b+1j*im_b, dtype = 'complex')
         amp2[i,:] = np.abs(S2[i,:])
         phases2[i,:] = np.angle(S2[i,:])
 
-        S3[i,:] = np.array(complex_series, dtype = 'complex')
+        S3[i,:] = np.array(re_c+1j*im_c, dtype = 'complex')
         amp3[i,:] = np.abs(S3[i,:])
         phases3[i,:] = np.angle(S3[i,:])
 
-        S4[i,:] = np.array(complex_series, dtype = 'complex')
+        S4[i,:] = np.array(re_d+1j*im_d, dtype = 'complex')
         amp4[i,:] = np.abs(S4[i,:])
         phases4[i,:] = np.angle(S4[i,:])
 

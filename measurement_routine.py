@@ -67,10 +67,14 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
 
         freqs_m = np.array([])
         fields_m = np.array([])
-        S11 = np.array([], dtype = 'complex')
-        S21 = np.array([], dtype = 'complex')
-        S12 = np.array([], dtype = 'complex')
-        S22 = np.array([], dtype = 'complex')
+        re_S11 = np.array([])
+        im_S11 = np.array([])
+        re_S21 = np.array([])
+        im_S21 = np.array([])
+        re_S12 = np.array([])
+        im_S12 = np.array([])
+        re_S22 = np.array([])
+        im_S22 = np.array([])
         currents = np.array([])
         currents1 = np.array([])
         currents2 = np.array([])
@@ -115,7 +119,7 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
             logger.info("Settling time over")
 
             logger.info("Measuring...") 
-            freq,S1,S2,S3,S4 = measure_amp_and_phase(instr, Ports, j, int(avg))
+            freq,re_S1,im_S1,re_S2,im_S2,re_S3,im_S3,re_S4,im_S4 = measure_amp_and_phase(instr, Ports, j, int(avg))
             j = j+1
             # x,y,p = measure_dB(instr,Sparam)
             logger.info("Finished measuring")
@@ -126,14 +130,18 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
 
             freqs_m  = np.concatenate( (freqs_m, freq) )    # Concatenation of new data with the already acquired data
             fields_m = np.concatenate( (fields_m, [field]*len(freq)) )
-            S11 = np.concatenate( (S11, S1) )
-            S21 = np.concatenate( (S21, S2) )
-            S12 = np.concatenate( (S12, S3) )
-            S22 = np.concatenate( (S22, S4) )
+            re_S11 = np.concatenate( (re_S11, re_S1) )
+            im_S11 = np.concatenate( (im_S11, im_S1) )
+            re_S21 = np.concatenate( (re_S21, re_S2) )
+            im_S21 = np.concatenate( (im_S21, im_S2) )
+            re_S12 = np.concatenate( (re_S12, re_S3) )
+            im_S12 = np.concatenate( (im_S12, im_S3) )
+            re_S22 = np.concatenate( (re_S22, re_S4) )
+            im_S22 = np.concatenate( (im_S22, im_S4) )
 
 
             logger.info(f'Saving data...')
-            save_data(Ports, currents, currents1, currents2, freqs_m, fields_m, S11, S21, S12, S22, user_folder, sample_folder, measurement_name = f"{measurement_name}")
+            save_data(Ports, currents, currents1, currents2, freqs_m, fields_m, re_S11, im_S11, re_S21, im_S21, re_S12, im_S12, re_S22, im_S22, user_folder, sample_folder, measurement_name = f"{measurement_name}")
             logger.info(f'Saved file "{measurement_name}.csv"')
             settings["measurement_name"] = f"{measurement_name}"
             save_metadata(settings)

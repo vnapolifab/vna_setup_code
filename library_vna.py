@@ -251,27 +251,15 @@ def measure_amp_and_phase(instr: RsInstrument, Ports: str, i = 0, avg = 1) -> tu
 
     re1 = []
     im1 = []
-    S1 = []
-    amp1 = []
-    phase1 = []
 
     re2 = []
     im2 = []
-    S2 = []
-    amp2 = []
-    phase2 = []
 
     re3 = []
     im3 = []
-    S3 = []
-    amp3 = []
-    phase3 = []
 
     re4 = []
     im4 = []
-    S4 = []
-    amp4 = []
-    phase4 = []
 
     i = 0
     for i in range(int(len(tracelist)/4)):
@@ -280,22 +268,12 @@ def measure_amp_and_phase(instr: RsInstrument, Ports: str, i = 0, avg = 1) -> tu
         else:
             im1.append(tracelist[i])
 
-    for i in range(len(re1)):
-        S1.append(re1[i]+1j*im1[i]) 
-        amp1.append(np.abs(S1[i]))
-        phase1.append(np.angle(S1[i])) 
-
 
     for i in range(int(len(tracelist)/4),int(len(tracelist)/2),1):
         if (i%2)==0:
             re2.append(tracelist[i])
         else:
             im2.append(tracelist[i])
-
-    for i in range(len(re2)):
-        S2.append(re2[i]+1j*im2[i]) 
-        amp2.append(np.abs(S2[i]))
-        phase2.append(np.angle(S2[i])) 
 
 
     for i in range(int(len(tracelist)/2),int(3*len(tracelist)/4),1):
@@ -304,22 +282,12 @@ def measure_amp_and_phase(instr: RsInstrument, Ports: str, i = 0, avg = 1) -> tu
         else:
             im3.append(tracelist[i])
 
-    for i in range(len(re3)):
-        S3.append(re3[i]+1j*im3[i]) 
-        amp3.append(np.abs(S3[i]))
-        phase3.append(np.angle(S3[i])) 
-
 
     for i in range(3*int(len(tracelist)/4),int(len(tracelist)),1):
         if (i%2)==0:
             re4.append(tracelist[i])
         else:
             im4.append(tracelist[i])
-
-    for i in range(len(re4)):
-        S4.append(re4[i]+1j*im4[i]) 
-        amp4.append(np.abs(S4[i]))
-        phase4.append(np.angle(S4[i])) 
 
 
 
@@ -328,4 +296,4 @@ def measure_amp_and_phase(instr: RsInstrument, Ports: str, i = 0, avg = 1) -> tu
     freq = np.array(freqlist, dtype='float32')
 
 
-    return freq, S1, S2, S3, S4
+    return freq, re1, im1, re2, im2, re3, im3, re4, im4 
