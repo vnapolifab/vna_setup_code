@@ -23,8 +23,8 @@ def measurement_routine(settings, ps1: PowerSupply, ps2: PowerSupply, instr: RsI
         if (dipole == 1): 
             ps = ps1
             #conversion = 55.494 
-            offset =  1.9831#2.7001 #0 #2.153 #Latest calibration by Alberto and Lorenzo Q in 05/02/2025, pole shoes where moved again after this
-            conversion = 54.747#50.027 #5.8 #52.498
+            offset =  2.1192#2.4#0.225#1.9831#2.7001 #0 #2.153 #Latest calibration by Alberto and Lorenzo Q in 05/02/2025, pole shoes where moved again after this
+            conversion = 46.236#53.418# 54.747#50.027 #5.8 #52.498
 
             offset1 =  0
             conversion1 = 0
