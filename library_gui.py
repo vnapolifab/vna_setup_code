@@ -320,6 +320,37 @@ class GUI_input_combobox_sample_name(GUI_input_combobox):
             self.entry_var_text.grid_remove()
 
 
+class GUI_input_combobox_measurement_type(GUI_input_combobox):
+    rows_occupied = 2
+
+    def setup(self, *args, **kwargs):
+        self.entry_var_text = ttk.Entry(self.gui.root, width=50)
+        super().setup(*args, **kwargs)
+
+    def get(self):
+        combobox_input = super().get()
+        return combobox_input 
+
+    def on_change(self, event):
+        self.entry_var_text.grid_remove()
+
+
+class GUI_input_combobox_probes_type(GUI_input_combobox):
+    rows_occupied = 2
+
+    def setup(self, *args, **kwargs):
+        self.entry_var_text = ttk.Entry(self.gui.root, width=50)
+        super().setup(*args, **kwargs)
+
+    def get(self):
+        combobox_input = super().get()
+        return combobox_input 
+
+    def on_change(self, event):
+        self.entry_var_text.grid_remove()
+
+
+
 
 class GUI_input_combobox_dipole_mode(GUI_input_combobox):
     rows_occupied = 2
@@ -385,33 +416,35 @@ def find_subfolder(folder_path):
 
 
 def gui_measurement_startup():
-    gui = GUI(root=tk.Tk(), size="500x800", title="Parameter Input GUI")
+    gui = GUI(root=tk.Tk(), size="500x950", title="Parameter Input GUI")
 
     entries = [
-        GUI_input_combobox_user_name(   gui=gui,    param_name="user_name",            param_desc="User",                  values=[GUI_input_combobox_user_name.NEW_USER] + find_subfolder(c.DATA_FOLDER_NAME)),
-        GUI_input_combobox_sample_name( gui=gui,    param_name="sample_name",          param_desc="Sample",                values=[]),
-        GUI_input_text_measurement_name(gui=gui,    param_name="measurement_name",     param_desc="Measurement name"       ),
-        GUI_input_text(                 gui=gui,    param_name="description",          param_desc="Description",           mandatory=False),
-        GUI_input_combobox_dipole_mode( gui=gui,    param_name="dipole_mode",          param_desc="Dipole mode",           values=[1, 2]),
-        GUI_input_combobox(             gui=gui,    param_name="ports",                param_desc="Ports",                 values=["12", "13", "14", "23", "24", "34"]),
-        GUI_input_text_field_sweep(     gui=gui,    param_name="field_sweep",          param_desc="Field sweep [mT]"       ),
-        GUI_input_text_to_number(       gui=gui,    param_name="angle",                param_desc="Angle [deg]",           ), # TODO chagne it so it si not mandatory only in dipole mode, but it is in quadrypole
-        GUI_input_text_to_freq(         gui=gui,    param_name="start_frequency",      param_desc="Start frequency [GHz]"  ),
-        GUI_input_text_to_freq(         gui=gui,    param_name="stop_frequency",       param_desc="Stop frequency [GHz]"   ),
-        GUI_input_text_to_number(       gui=gui,    param_name="number_of_points",     param_desc="Number of points",      func=lambda x : int(x)),
-        GUI_input_text_to_number(       gui=gui,    param_name="bandwidth",            param_desc="Bandwidth [Hz]"         ),
-        GUI_input_text_to_number(       gui=gui,    param_name="power",                param_desc="Power [dBm]"            ),
-        GUI_input_text_to_number(       gui=gui,    param_name="ref_field",            param_desc="Ref field [mT]"         ),
-        GUI_input_text(                 gui=gui,    param_name="cal_name",             param_desc="Calibration file",      mandatory=False),
-        GUI_input_text_to_number(       gui=gui,    param_name="avg_factor",           param_desc="Averaging factor",      func=lambda x : int(x)),
-    ]
+        GUI_input_combobox_user_name(        gui=gui,    param_name="user_name",            param_desc="User",                  values=[GUI_input_combobox_user_name.NEW_USER] + find_subfolder(c.DATA_FOLDER_NAME)),
+        GUI_input_combobox_sample_name(      gui=gui,    param_name="sample_name",          param_desc="Sample",                values=[]),
+        GUI_input_text_measurement_name(     gui=gui,    param_name="measurement_name",     param_desc="Measurement name"       ),
+        GUI_input_text(                      gui=gui,    param_name="description",          param_desc="Description",           mandatory=False),
+        GUI_input_combobox_measurement_type( gui=gui,    param_name="measurement_type",     param_desc="Measurement type",      values = ["spin waves spectroscopy", "ferromagnetic resonance"]),
+        GUI_input_combobox_probes_type(      gui=gui,    param_name="probes_type",          param_desc="Probes type",           values = ["TITAN 150", "GGB 150", "ACP 150", "No probes (BNC only)"]),
+        GUI_input_combobox_dipole_mode(      gui=gui,    param_name="dipole_mode",          param_desc="Dipole mode",           values=[1, 2]),
+        GUI_input_combobox(                  gui=gui,    param_name="ports",                param_desc="Ports",                 values=["12", "13", "14", "23", "24", "34"]),
+        GUI_input_text_field_sweep(          gui=gui,    param_name="field_sweep",          param_desc="Field sweep [mT]"       ),
+        GUI_input_text_to_number(            gui=gui,    param_name="angle",                param_desc="Angle [deg]",           ), # TODO chagne it so it si not mandatory only in dipole mode, but it is in quadrypole
+        GUI_input_text_to_freq(              gui=gui,    param_name="start_frequency",      param_desc="Start frequency [GHz]"  ),
+        GUI_input_text_to_freq(              gui=gui,    param_name="stop_frequency",       param_desc="Stop frequency [GHz]"   ),
+        GUI_input_text_to_number(            gui=gui,    param_name="number_of_points",     param_desc="Number of points",      func=lambda x : int(x)),
+        GUI_input_text_to_number(            gui=gui,    param_name="bandwidth",            param_desc="Bandwidth [Hz]"         ),
+        GUI_input_text_to_number(            gui=gui,    param_name="power",                param_desc="Power [dBm]"            ),
+        GUI_input_text_to_number(            gui=gui,    param_name="ref_field",            param_desc="Ref field [mT]"         ),
+        GUI_input_text(                      gui=gui,    param_name="cal_name",             param_desc="Calibration file",      mandatory=False),
+        GUI_input_text_to_number(            gui=gui,    param_name="avg_factor",           param_desc="Averaging factor",      func=lambda x : int(x)),
+    ]     
 
 
 
     buttons = [
-        GUI_button_submit(              gui=gui,    button_name="Submit"            ),
-        GUI_button_clear(               gui=gui,    button_name="Clear"             ),
-        GUI_button_load_last_settings(  gui=gui,    button_name="Load last settings")
+        GUI_button_submit(                   gui=gui,    button_name="Submit"            ),
+        GUI_button_clear(                    gui=gui,    button_name="Clear"             ),
+        GUI_button_load_last_settings(       gui=gui,    button_name="Load last settings")
     ]
 
 
