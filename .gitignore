@@ -5,8 +5,3 @@
 last_settings.json
 log_file.log
 log.txt
-controller.py
-.run_gui_kittel_analysis.bat
-.run_gui_spin_waves_analysis.bat
-.run_gui_measurement.bat
-.run_gui_damping_analysis.bat
